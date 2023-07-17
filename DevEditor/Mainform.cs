@@ -21,7 +21,7 @@ namespace DevEditor
 
         private void Mainform_Paint(object? sender, PaintEventArgs e)
         {
-            Engine.RenderGraphics(e.Graphics);
+            Engine.Render(e.Graphics);
         }
 
         private void Engine_Invalidate(object sender, EventArgs e)
@@ -39,8 +39,10 @@ namespace DevEditor
         {
             var camera = Camera.CreateTopDownCamera();
             var viewport1 = new Viewport(0, 0, ClientRectangle, camera);
+            var viewport2 = new Viewport(ClientRectangle.Right, 0, ClientRectangle, camera);
 
             Engine.Viewports.Add(viewport1);
+            Engine.Viewports.Add(viewport2);
             Engine.Run();
         }
     }

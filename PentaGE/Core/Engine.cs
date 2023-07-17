@@ -1,4 +1,5 @@
 ﻿using PentaGE.GameLoop;
+using PentaGE.Rendering;
 using PentaGE.Viewports;
 using System.Drawing;
 using System.Numerics;
@@ -8,6 +9,8 @@ namespace PentaGE.Core
     public class Engine
     {
         private readonly Timing _timing = new();
+        private readonly Renderer _renderer = new();
+
         private bool isRunning = false;
         private bool isPaused = false;
         private List<Viewport> _viewports = new();
@@ -17,6 +20,8 @@ namespace PentaGE.Core
         public event InvalidateHandler Invalidate;
 
         internal Timing Timing => _timing;
+
+        internal Renderer Renderer => _renderer;
 
         public List<Viewport> Viewports => _viewports;
 
@@ -56,25 +61,11 @@ namespace PentaGE.Core
         private double x4 = 0;
         private double x5 = 0;
 
-        public void RenderGraphics(Graphics g)
+        public void Render(Graphics g)
         {
             foreach (var viewport in Viewports)
             {
-                if (viewport.ActiveCamera is null) return;
-
-                // Set up the viewport
-                g.SetClip(new Rectangle(viewport.Left, viewport.Top, viewport.Width, viewport.Height));
-                g.TranslateTransform(viewport.Left, viewport.Top);
-
-                // Clear the viewport
-                g.Clear(Color.Black);
-
-                // Render using the active camera
-                RenderScene(g, viewport);
-
-                // Reset transformations
-                g.ResetTransform();
-                g.ResetClip();
+                Renderer.RenderViewport(viewport, g);
             }
 
             g.DrawString(Timing.Frame.ToString() + $"\nFPS: {Timing.CurrentFps}\nClock: {Timing.Clock}", new Font("Segoe UI", 11, FontStyle.Bold), Brushes.White, new Point(10, 10));
@@ -110,20 +101,6 @@ namespace PentaGE.Core
             ////g.DrawLine(Pens.Yellow, x, 0, x, Form.ClientRectangle.Height);
 
             //g.DrawString(Timing.Frame.ToString() + $"\nFPS: {Timing.CurrentFps}\nClock: {Timing.Clock}", new Font("Segoe UI", 11, FontStyle.Bold), Brushes.White, new Point(10, 10));
-        }
-
-        private static void RenderScene(Graphics g, Viewport viewport)
-        {
-            if (viewport.ActiveCamera is null) return;
-
-            // Retrieve the frustum planes for culling objects
-            Plane[] frustumPlanes = viewport.ActiveCamera.GetFrustumPlanes();
-
-            // Perform your rendering logic here
-            // Iterate through your scene objects and render them based on the frustum culling
-            // You can use the Graphics object to draw shapes, lines, text, etc.
-            // For example:
-            g.DrawLine(Pens.Red, 0, 0, viewport.Width, viewport.Height);
         }
 
     }

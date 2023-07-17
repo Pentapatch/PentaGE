@@ -5,4 +5,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>", Scope = "member", Target = "~M:PentaGE.Core.Engine.RenderGraphics(System.Drawing.Graphics)")]
+[assembly: SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>", Scope = "member", Target = "~M:PentaGE.Core.Engine.Render(System.Drawing.Graphics)")]
+[assembly: SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>", Scope = "member", Target = "~M:PentaGE.Rendering.Renderer.RenderViewport(PentaGE.Viewports.Viewport,System.Drawing.Graphics)")]
+[assembly: SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>", Scope = "member", Target = "~M:PentaGE.Rendering.Renderer.RenderScene(System.Drawing.Graphics,PentaGE.Viewports.Viewport)")]
