@@ -16,6 +16,8 @@ namespace PentaGE.Structs
             Roll = roll;
         }
 
+        #region Vectors
+
         public Vector3 GetForwardVector()
         {
             // Convert the yaw and pitch angles to radians
@@ -57,5 +59,8 @@ namespace PentaGE.Structs
         public Vector3 GetBottomVector() => -GetUpVector();
 
         public Vector3 GetBackwardVector() => -GetForwardVector();
+
+        #endregion
+
     }
 }

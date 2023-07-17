@@ -4,13 +4,13 @@ using System.Numerics;
 
 namespace PentaGE.Camera
 {
-    public class Camera : ITransformable, IPositionable, IOrientable
+    public class Camera : IPositionable, IOrientable
     {
-        public Transform Transform { get; set; } = new();
+        public Placement Placement { get; set; } = new();
 
-        public Vector3 Position => Transform.Position;
+        public Vector3 Position => Placement.Position;
 
-        public EulerAngles Orientation => Transform.Orientation;
+        public EulerAngles Orientation => Placement.Orientation;
 
         public float FieldOfView { get; set; } = 60;
 
