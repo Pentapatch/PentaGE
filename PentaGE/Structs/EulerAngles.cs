@@ -51,5 +51,11 @@ namespace PentaGE.Structs
 
             return Vector3.Cross(up, forward);
         }
+
+        public Vector3 GetLeftVector() => -GetRightVector();
+
+        public Vector3 GetBottomVector() => -GetUpVector();
+
+        public Vector3 GetBackwardVector() => -GetForwardVector();
     }
 }
