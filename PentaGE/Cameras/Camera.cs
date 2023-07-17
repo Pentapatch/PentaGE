@@ -1,16 +1,19 @@
 ﻿using PentaGE.MathExtensions;
 using PentaGE.Structs;
+using PentaGE.WorldGrid;
 using System.Numerics;
 
-namespace PentaGE.Camera
+namespace PentaGE.Cameras
 {
-    public class Camera : IPositionable, IOrientable
+    public class Camera : IPlacable, IPositionable, IOrientable
     {
-        public Placement Placement { get; set; } = new();
+        private Placement _placement = new();
 
-        public Vector3 Position => Placement.Position;
+        public Placement Placement { get => _placement; set => _placement = value; }
+        
+        public Vector3 Position { get => _placement.Position; set => _placement.Position = value; }
 
-        public EulerAngles Orientation => Placement.Orientation;
+        public EulerAngles Orientation { get => _placement.Orientation; set => _placement.Orientation = value; }
 
         public float FieldOfView { get; set; } = 60;
 
@@ -55,6 +58,27 @@ namespace PentaGE.Camera
                 (float)FarClipPlane
             );
         }
+
+        #region Factory methods
+
+        public static Camera CreateCamera(Vector3 orientationVector, Vector3? position = null, float? fieldOfView = null, float? aspectRatio = null)
+        {
+            var camera = new Camera() { Orientation = EulerAngles.FromVector3(orientationVector) };
+
+            if (position is not null) camera.Position = position.Value;
+            if (fieldOfView is not null) camera.FieldOfView = fieldOfView.Value;
+            if (aspectRatio is not null) camera.AspectRatio = aspectRatio.Value;
+
+            return camera;
+        }
+
+        public static Camera CreateTopDownCamera(Vector3? position = null, float? fieldOfView = null, float? aspectRatio = null) =>
+            CreateCamera(World.DownVector, position, fieldOfView, aspectRatio);
+
+        public static Camera CreateSideScrollerCamera(Vector3? position = null, float? fieldOfView = null, float? aspectRatio = null) => 
+            CreateCamera(World.ForwardVector, position, fieldOfView, aspectRatio);
+
+        #endregion
 
     }
 }

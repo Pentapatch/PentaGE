@@ -4,6 +4,6 @@ namespace PentaGE.Structs
 {
     public interface IPositionable
     {
-        Vector3 Position { get; }
+        Vector3 Position { get; set; }
     }
 }

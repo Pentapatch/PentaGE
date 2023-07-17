@@ -1,4 +1,6 @@
+using PentaGE.Cameras;
 using PentaGE.Core;
+using PentaGE.Viewports;
 
 namespace DevEditor
 {
@@ -14,7 +16,7 @@ namespace DevEditor
             Shown += Mainform_Shown;
             FormClosing += Mainform_FormClosing;
             Paint += Mainform_Paint;
-            Engine.Render += Engine_Render;
+            Engine.Invalidate += Engine_Invalidate;
         }
 
         private void Mainform_Paint(object? sender, PaintEventArgs e)
@@ -22,10 +24,10 @@ namespace DevEditor
             Engine.RenderGraphics(e.Graphics);
         }
 
-        private void Engine_Render(object sender, EventArgs e)
+        private void Engine_Invalidate(object sender, EventArgs e)
         {
             Invalidate();
-            Application.DoEvents();
+            Application.DoEvents(); // Important
         }
 
         private void Mainform_FormClosing(object? sender, FormClosingEventArgs e)
@@ -35,6 +37,10 @@ namespace DevEditor
 
         private void Mainform_Shown(object? sender, EventArgs e)
         {
+            var camera = Camera.CreateTopDownCamera();
+            var viewport1 = new Viewport(0, 0, ClientRectangle, camera);
+
+            Engine.Viewports.Add(viewport1);
             Engine.Run();
         }
     }

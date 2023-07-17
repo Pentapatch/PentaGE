@@ -62,5 +62,20 @@ namespace PentaGE.Structs
 
         #endregion
 
+        #region Factory methods
+
+        public static EulerAngles FromVector3(Vector3 vector)
+        {
+            // Calculate the yaw angle
+            float yaw = MathHelper.RadiansToDegrees(MathF.Atan2(vector.X, vector.Z));
+
+            // Calculate the pitch angle
+            float pitch = MathHelper.RadiansToDegrees(MathF.Asin(vector.Y));
+
+            return new EulerAngles(yaw, pitch, 0f);
+        }
+
+        #endregion
+
     }
 }

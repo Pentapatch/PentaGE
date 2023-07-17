@@ -2,6 +2,6 @@
 {
     public interface IOrientable
     {
-        EulerAngles Orientation { get; }
+        EulerAngles Orientation { get; set; }
     }
 }
