@@ -42,13 +42,13 @@ namespace PentaGE.Cameras
             return frustumPlanes;
         }
 
-        private Matrix4x4 CalculateViewMatrix()
+        internal Matrix4x4 CalculateViewMatrix()
         {
             // Calculate the view matrix based on the camera's position, target, and up vector
             return Matrix4x4.CreateLookAt(Position, Position + Orientation.GetForwardVector(), Orientation.GetUpVector());
         }
 
-        private Matrix4x4 CalculateProjectionMatrix()
+        internal Matrix4x4 CalculateProjectionMatrix()
         {
             // Calculate the projection matrix based on the camera's field of view, aspect ratio, near and far clip planes
             return Matrix4x4.CreatePerspectiveFieldOfView(

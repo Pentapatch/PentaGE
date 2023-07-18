@@ -5,9 +5,9 @@ namespace PentaGE.Structs
 {
     public struct EulerAngles
     {
-        public float Yaw;
-        public float Pitch;
-        public float Roll;
+        public float Yaw { get; set; }
+        public float Pitch { get; set; }
+        public float Roll { get; set; }
 
         public EulerAngles(float yaw, float pitch, float roll)
         {
@@ -25,9 +25,9 @@ namespace PentaGE.Structs
             float pitchRad = MathHelper.DegreesToRadians(Pitch);
 
             // Calculate the forward vector using spherical coordinate conversions
-            float x = MathF.Cos(yawRad) * MathF.Cos(pitchRad);
-            float y = MathF.Sin(pitchRad);
-            float z = MathF.Sin(yawRad) * MathF.Cos(pitchRad);
+            float x = MathF.Sin(pitchRad) * MathF.Cos(yawRad);
+            float y = MathF.Cos(pitchRad);
+            float z = MathF.Sin(pitchRad) * MathF.Sin(yawRad);
 
             return new Vector3(x, y, z);
         }
@@ -64,18 +64,20 @@ namespace PentaGE.Structs
 
         #region Factory methods
 
-        public static EulerAngles FromVector3(Vector3 vector)
+        public static EulerAngles FromVector3(Vector3 vector, float roll = 0f)
         {
-            // Calculate the yaw angle
-            float yaw = MathHelper.RadiansToDegrees(MathF.Atan2(vector.X, vector.Z));
-
             // Calculate the pitch angle
-            float pitch = MathHelper.RadiansToDegrees(MathF.Asin(vector.Y));
+            float pitch = MathHelper.RadiansToDegrees(MathF.Asin(vector.Z));
 
-            return new EulerAngles(yaw, pitch, 0f);
+            // Calculate the yaw angle
+            float yaw = MathHelper.RadiansToDegrees(MathF.Atan2(vector.X, vector.Y));
+
+            return new EulerAngles(yaw, pitch, roll);
         }
 
         #endregion
+
+        public override string ToString() => $"Y {Yaw} P {Pitch} R {Roll}";
 
     }
 }
