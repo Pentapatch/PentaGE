@@ -152,6 +152,38 @@ namespace PentaGE.Common
         }
 
         /// <summary>
+        /// Interpolates between two rotations using the specified interpolation factor and curve type.
+        /// </summary>
+        /// <param name="rotationA">The starting rotation.</param>
+        /// <param name="rotationB">The target rotation to interpolate towards.</param>
+        /// <param name="t">The interpolation factor in the range (0 - 1).</param>
+        /// <param name="curvePower">The power/exponent to apply to the interpolation factor (for custom curves).</param>
+        /// <param name="curveType">The type of interpolation curve to use.</param>
+        /// <returns>A new <see cref="Rotation"/> instance representing the interpolated rotation.</returns>
+        public static Rotation Interpolate(
+            Rotation rotationA,
+            Rotation rotationB,
+            float t,
+            float curvePower,
+            InterpolationCurve curveType) =>
+            Lerp(rotationA, rotationB, MathHelper.TransformInterpolationFactor(t, curvePower, curveType));
+
+        /// <summary>
+        /// Interpolates between this rotation and a target rotation using the specified interpolation factor and curve type.
+        /// </summary>
+        /// <param name="rotation">The target rotation to interpolate towards.</param>
+        /// <param name="t">The interpolation factor in the range (0 - 1).</param>
+        /// <param name="curvePower">The power/exponent to apply to the interpolation factor (for custom curves).</param>
+        /// <param name="curveType">The type of interpolation curve to use.</param>
+        /// <returns>A new <see cref="Rotation"/> instance representing the interpolated rotation.</returns>
+        public Rotation Interpolate(
+            Rotation rotation,
+            float t,
+            float curvePower,
+            InterpolationCurve curveType) =>
+            Interpolate(this, rotation, t, curvePower, curveType);
+
+        /// <summary>
         /// Normalizes the rotation angles to be within the range (0 - 360) degrees.
         /// </summary>
         /// <returns>A new <see cref="Rotation"/> instance with normalized angles.</returns>
