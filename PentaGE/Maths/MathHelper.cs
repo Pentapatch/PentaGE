@@ -56,22 +56,22 @@
         public static float TransformInterpolationFactor(
             float originalFactor,
             float curvePower,
-            InterpolationCurve curveType = InterpolationCurve.Linear) => 
+            InterpolationCurve curveType = InterpolationCurve.Linear) =>
             curveType switch
-        {
-            InterpolationCurve.EaseIn => CalculateEaseInFactor(originalFactor, curvePower),
-            InterpolationCurve.EaseOut => CalculateEaseOutFactor(originalFactor, curvePower),
-            InterpolationCurve.EaseInOut => CalculateEaseInOutFactor(originalFactor, curvePower),
-            InterpolationCurve.EaseOutIn => CalculateEaseOutInFactor(originalFactor, curvePower),
-            _ => originalFactor, // Linear or unsupported curves remain unchanged
-        };
+            {
+                InterpolationCurve.EaseIn => CalculateEaseInFactor(originalFactor, curvePower),
+                InterpolationCurve.EaseOut => CalculateEaseOutFactor(originalFactor, curvePower),
+                InterpolationCurve.EaseInOut => CalculateEaseInOutFactor(originalFactor, curvePower),
+                InterpolationCurve.EaseOutIn => CalculateEaseOutInFactor(originalFactor, curvePower),
+                _ => originalFactor, // Linear or unsupported curves remain unchanged
+            };
 
         /// <summary>
         /// Clamps the interpolation factor to ensure it is within the valid range (0 - 1).
         /// </summary>
         /// <param name="t">The original interpolation factor.</param>
         /// <returns>The clamped interpolation factor within the range (0 - 1).</returns>
-        private static float ClampFactor(float t) => 
+        private static float ClampFactor(float t) =>
             Math.Clamp(t, 0f, 1f);
 
         /// <summary>
@@ -80,7 +80,7 @@
         /// <param name="t">The original interpolation factor in the range (0 - 1).</param>
         /// <param name="power">The power value that affects the ease-in curve.</param>
         /// <returns>The transformed interpolation factor with the ease-in curve applied.</returns>
-        private static float CalculateEaseInFactor(float t, float power) => 
+        private static float CalculateEaseInFactor(float t, float power) =>
             MathF.Pow(ClampFactor(t), power);
 
         /// <summary>

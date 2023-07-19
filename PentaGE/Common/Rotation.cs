@@ -96,10 +96,10 @@ namespace PentaGE.Common
         public Vector3 GetLeftVector() => -GetRightVector();
 
         /// <summary>
-        /// Calculates the bottom vector of the rotation by negating its up vector.
+        /// Calculates the down vector of the rotation by negating its up vector.
         /// </summary>
-        /// <returns>The normalized bottom vector as a <see cref="Vector3"/> object.</returns>
-        public Vector3 GetBottomVector() => -GetUpVector();
+        /// <returns>The normalized down vector as a <see cref="Vector3"/> object.</returns>
+        public Vector3 GetDownVector() => -GetUpVector();
 
         /// <summary>
         /// Calculates the backward vector of the rotation by negating its forward vector.
@@ -197,12 +197,63 @@ namespace PentaGE.Common
         /// <returns>A new <see cref="Rotation"/> instance with normalized angles.</returns>
         public static Rotation Normalize(Rotation rotation)
         {
-            float normalizedYaw = NormalizeAngle(rotation.Yaw);
-            float normalizedPitch = NormalizeAngle(rotation.Pitch);
-            float normalizedRoll = NormalizeAngle(rotation.Roll);
+            float yawNormalized = NormalizeAngle(rotation.Yaw);
+            float pitchNormalized = NormalizeAngle(rotation.Pitch);
+            float rollNormalized = NormalizeAngle(rotation.Roll);
 
-            return new Rotation(normalizedYaw, normalizedPitch, normalizedRoll);
+            return new Rotation(yawNormalized, pitchNormalized, rollNormalized);
         }
+
+        /// <summary>
+        /// Sets the rotation to face a target position.
+        /// </summary>
+        /// <param name="targetPosition">The position of the target to look at.</param>
+        /// <remarks>
+        /// The rotation will be adjusted to face the <paramref name="targetPosition"/> in the X-Z plane,
+        /// and the pitch angle will be adjusted to look at the <paramref name="targetPosition"/> in the Y direction.
+        /// </remarks>
+        public void LookAt(Vector3 targetPosition)
+        {
+            Vector3 direction = Vector3.Normalize(targetPosition - Vector3.Zero);
+
+            // Calculate and set the rotation angles
+            Yaw = MathHelper.RadiansToDegrees(MathF.Atan2(direction.X, direction.Z));
+            Pitch = MathHelper.RadiansToDegrees(MathF.Asin(-direction.Y));
+        }
+
+        /// <summary>
+        /// Calculates the rotation needed to face a target position.
+        /// </summary>
+        /// <param name="targetPosition">The position of the target to look at.</param>
+        /// <returns>A new <see cref="Rotation"/> instance representing the rotation needed to face the target position.</returns>
+        /// <remarks>
+        /// The rotation will be adjusted to face the <paramref name="targetPosition"/> in the X-Z plane,
+        /// and the pitch angle will be adjusted to look at the <paramref name="targetPosition"/> in the Y direction.
+        /// </remarks>
+        public static Rotation GetLookAt(Vector3 targetPosition)
+        {
+            Vector3 direction = Vector3.Normalize(targetPosition - Vector3.Zero);
+
+            // Calculate the rotation angles
+            float yaw = MathHelper.RadiansToDegrees(MathF.Atan2(direction.X, direction.Z));
+            float pitch = MathHelper.RadiansToDegrees(MathF.Asin(-direction.Y));
+
+            return new Rotation(yaw, pitch, 0f);
+        }
+
+        /// <summary>
+        /// Inverts the rotation angles in a rotation.
+        /// </summary>
+        /// <param name="rotation">The rotation to invert.</param>
+        /// <returns>A new <see cref="Rotation"/> instance representing the inverted rotation.</returns>
+        public static Rotation Invert(Rotation rotation) =>
+            new(-rotation.Yaw, -rotation.Pitch, -rotation.Roll);
+
+        /// <summary>
+        /// Inverts the rotation angles in this rotation.
+        /// </summary>
+        /// <returns>A new <see cref="Rotation"/> instance representing the inverted rotation.</returns>
+        public Rotation Invert() => Invert(this);
 
         #endregion
 
@@ -222,6 +273,11 @@ namespace PentaGE.Common
 
             return new Rotation(yaw, pitch, roll);
         }
+
+        /// <summary>
+        /// Gets a <see cref="Rotation"/> instance representing zero rotation (0 degrees in all axes).
+        /// </summary>
+        public static Rotation Zero => new(0, 0, 0);
 
         #endregion
 
@@ -244,6 +300,13 @@ namespace PentaGE.Common
         /// <returns>A new <see cref="Rotation"/> representing the difference between the two input rotations.</returns>
         public static Rotation operator -(Rotation a, Rotation b) =>
             new(a.Yaw - b.Yaw, a.Pitch - b.Pitch, a.Roll - b.Roll);
+
+        /// <summary>
+        /// Negates the rotation by inverting the yaw, pitch, and roll angles.
+        /// </summary>
+        /// <param name="rotation">The rotation to negate.</param>
+        /// <returns>A new <see cref="Rotation"/> instance representing the negated rotation.</returns>
+        public static Rotation operator -(Rotation rotation) => rotation.Invert();
 
         /// <summary>
         /// Multiplies a <see cref="Rotation"/> by a scalar value.
@@ -272,14 +335,6 @@ namespace PentaGE.Common
         public static Rotation operator /(Rotation rotation, float scalar) =>
             new(rotation.Yaw / scalar, rotation.Pitch / scalar, rotation.Roll / scalar);
 
-        /// <summary>
-        /// Divides a scalar value by a <see cref="Rotation"/>.
-        /// </summary>
-        /// <param name="scalar">The scalar value to divide.</param>
-        /// <param name="rotation">The <see cref="Rotation"/> to divide into.</param>
-        /// <returns>A new <see cref="Rotation"/> representing the result of the division.</returns>
-        public static Rotation operator /(float scalar, Rotation rotation) =>
-            new(scalar / rotation.Yaw, scalar / rotation.Pitch, scalar / rotation.Roll);
 
         #endregion
 
