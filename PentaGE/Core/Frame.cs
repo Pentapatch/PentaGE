@@ -1,4 +1,4 @@
-﻿namespace PentaGE.GameLoop
+﻿namespace PentaGE.Core
 {
     internal record Frame
     {

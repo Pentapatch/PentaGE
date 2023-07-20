@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace PentaGE.GameLoop
+namespace PentaGE.Core
 {
     internal class Timing
     {

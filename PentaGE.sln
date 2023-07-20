@@ -5,7 +5,7 @@ VisualStudioVersion = 17.6.33801.468
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PentaGE", "PentaGE\PentaGE.csproj", "{A6D9F56D-11B9-48A4-A9A9-4EFE633DB782}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevEditor", "DevEditor\DevEditor.csproj", "{EC983EE2-746E-4D45-862D-58DB9E83D76C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandbox", "Sandbox\Sandbox.csproj", "{29F6EA95-D696-4A48-B119-7A4D2AEA21F2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{A6D9F56D-11B9-48A4-A9A9-4EFE633DB782}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A6D9F56D-11B9-48A4-A9A9-4EFE633DB782}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A6D9F56D-11B9-48A4-A9A9-4EFE633DB782}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EC983EE2-746E-4D45-862D-58DB9E83D76C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EC983EE2-746E-4D45-862D-58DB9E83D76C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EC983EE2-746E-4D45-862D-58DB9E83D76C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EC983EE2-746E-4D45-862D-58DB9E83D76C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29F6EA95-D696-4A48-B119-7A4D2AEA21F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29F6EA95-D696-4A48-B119-7A4D2AEA21F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29F6EA95-D696-4A48-B119-7A4D2AEA21F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29F6EA95-D696-4A48-B119-7A4D2AEA21F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
