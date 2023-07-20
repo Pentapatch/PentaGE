@@ -1,42 +1,60 @@
 ﻿using GLFW;
 using PentaGE.Rendering;
-using Monitor = GLFW.Monitor;
 
 namespace PentaGE.Core
 {
-    public abstract class Application
+    public abstract class PentaGameEngine
     {
         private readonly Timing _timing = new();
-        private readonly Renderer _renderer = new();
+        private readonly Renderer _renderer;
+        private readonly WindowManager _windowManager = new();
         private GameState _state = GameState.Initializing;
 
         internal Timing Timing => _timing;
 
         internal Renderer Renderer => _renderer;
 
+        public WindowManager Windows => _windowManager;
+
         public GameState State => _state;
 
-        public abstract void Initialize();
+        protected abstract void Initialize();
 
-        public abstract void Shutdown();
+        protected abstract void Shutdown();
 
-        public abstract void Update();
+        protected abstract void Update();
 
-        public void Start()
+        public PentaGameEngine()
         {
-            // Initialize GLFW (OpenGL Framework)
-            InitializeGLFW();
+            _renderer = new(this);
+        }
 
+        public bool Start()
+        {
             // Allow the concrete implementation of the engine to initialize
             Initialize();
 
+            // Initialize GLFW (OpenGL Framework)
+            // Must come after Initialize so the concrete implementation of the engine can add windows
+            if (!Renderer.InitializeGLFW())
+            {
+                // TODO: Log failure
+                return false;
+            }
+
             // Start the game loop
             Run();
+
+            return true;
         }
 
         public void Stop()
         {
+            // Update the game state
             _state = GameState.Terminating;
+
+            // Terminate Glfw
+            Glfw.Terminate();
 
             // Allow the concrete implementation of the engine to unload resources
             Shutdown();
@@ -59,32 +77,6 @@ namespace PentaGE.Core
                 // Get the next frame
                 Timing.NextFrame();
             }
-        }
-
-        private void InitializeGLFW()
-        {
-            if (!Glfw.Init())
-            {
-                Console.WriteLine("Failed to initialize GLFW.");
-                return;
-            }
-
-            // Create a window
-            var window = Glfw.CreateWindow(800, 600, "Hello GLFW", Monitor.None, Window.None);
-            if (window == Window.None)
-            {
-                Console.WriteLine("Failed to create GLFW window.");
-                Glfw.Terminate();
-                
-                return;
-            }
-
-            Glfw.MakeContextCurrent(window);
-
-            // Continue with the rest of your code (e.g., render loop, input handling, etc.)
-
-            // Terminate GLFW when done
-            Glfw.Terminate();
         }
 
     }

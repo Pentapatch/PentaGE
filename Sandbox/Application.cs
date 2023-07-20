@@ -2,19 +2,19 @@
 
 namespace Sandbox
 {
-    internal class PentaEngine : Application
+    internal class Application : PentaGameEngine
     {
-        public override void Initialize()
+        protected override void Initialize()
         {
             // Do initialization work
         }
 
-        public override void Shutdown()
+        protected override void Shutdown()
         {
             // Unload resources
         }
 
-        public override void Update()
+        protected override void Update()
         {
             // Update game state
         }

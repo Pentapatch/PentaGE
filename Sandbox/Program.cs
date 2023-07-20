@@ -1,6 +1,8 @@
 ﻿
+using Sandbox;
+
 Console.WriteLine("Starting engine..");
-PentaEngine engine = new();
+Application engine = new();
 engine.Start();
 
 //using GLFW;
