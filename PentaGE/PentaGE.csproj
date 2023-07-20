@@ -11,8 +11,4 @@
     <ProjectReference Include="..\GLFW\GLFW.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Core\Timing\" />
-  </ItemGroup>
-
 </Project>

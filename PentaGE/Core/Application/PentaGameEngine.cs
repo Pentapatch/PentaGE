@@ -10,11 +10,11 @@ namespace PentaGE.Core
         private readonly WindowManager _windowManager = new();
         private GameState _state = GameState.Initializing;
 
-        internal Timing Timing => _timing;
-
-        internal Renderer Renderer => _renderer;
+        public Timing Timing => _timing;
 
         public WindowManager Windows => _windowManager;
+
+        internal Renderer Renderer => _renderer;
 
         public GameState State => _state;
 
@@ -63,6 +63,7 @@ namespace PentaGE.Core
         private void Run()
         {
             _state = GameState.Running;
+
             while (State == GameState.Running && !Windows.NoActiveWindows())
             {
                 // Handle input events
