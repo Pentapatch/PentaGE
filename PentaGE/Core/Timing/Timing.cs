@@ -7,6 +7,7 @@ namespace PentaGE.Core
     /// </summary>
     public sealed class Timing
     {
+        private readonly TimingManager _timingManager = new();
         private double _gameSpeedFactor = 1d;
         private double previousTime = 0d;
         private double lastFPSTime = 0d;
@@ -31,6 +32,8 @@ namespace PentaGE.Core
         /// Gets the total elapsed time since the start of the game engine, measured in seconds.
         /// </summary>
         public double TotalElapsedTime { get; private set; } = 0d;
+
+        public TimingManager CustomTimings => _timingManager;
 
         /// <summary>
         /// Gets or sets the factor to scale the game speed. Default is 1.0 (normal speed).
@@ -82,6 +85,8 @@ namespace PentaGE.Core
                     Thread.Sleep((int)sleepTime);
                 }
             }
+
+            _timingManager.UpdateTimings(Glfw.Time);
 
             CurrentFrame = new Frame(CurrentFrame + 1, deltaTime);
             TotalElapsedTime += deltaTime;
