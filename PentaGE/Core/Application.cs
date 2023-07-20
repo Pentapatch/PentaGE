@@ -1,5 +1,5 @@
-﻿using PentaGE.Rendering;
-using GLFW;
+﻿using GLFW;
+using PentaGE.Rendering;
 using Monitor = GLFW.Monitor;
 
 namespace PentaGE.Core
@@ -75,6 +75,7 @@ namespace PentaGE.Core
             {
                 Console.WriteLine("Failed to create GLFW window.");
                 Glfw.Terminate();
+                
                 return;
             }
 

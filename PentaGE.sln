@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33801.468
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PentaGE", "PentaGE\PentaGE.csproj", "{A6D9F56D-11B9-48A4-A9A9-4EFE633DB782}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PentaGE", "PentaGE\PentaGE.csproj", "{A6D9F56D-11B9-48A4-A9A9-4EFE633DB782}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandbox", "Sandbox\Sandbox.csproj", "{29F6EA95-D696-4A48-B119-7A4D2AEA21F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sandbox", "Sandbox\Sandbox.csproj", "{29F6EA95-D696-4A48-B119-7A4D2AEA21F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GLFW", "GLFW\GLFW.csproj", "{B02D8394-56D7-4884-86C1-F9F54685E2C3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{29F6EA95-D696-4A48-B119-7A4D2AEA21F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29F6EA95-D696-4A48-B119-7A4D2AEA21F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29F6EA95-D696-4A48-B119-7A4D2AEA21F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B02D8394-56D7-4884-86C1-F9F54685E2C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B02D8394-56D7-4884-86C1-F9F54685E2C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B02D8394-56D7-4884-86C1-F9F54685E2C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B02D8394-56D7-4884-86C1-F9F54685E2C3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

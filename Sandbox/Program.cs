@@ -1,13 +1,11 @@
-﻿using Sandbox;
-
+﻿
 Console.WriteLine("Starting engine..");
 PentaEngine engine = new();
 engine.Start();
 
-//using System;
 //using GLFW;
-//using static OpenGL.GL;
 //using Monitor = GLFW.Monitor;
+//using static OpenGL.GL;
 
 //class Program
 //{
