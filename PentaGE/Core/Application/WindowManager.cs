@@ -1,4 +1,6 @@
-﻿namespace PentaGE.Core
+﻿using GLFW;
+
+namespace PentaGE.Core
 {
     public sealed class WindowManager
     {
@@ -45,6 +47,19 @@
 
             isInitialized = true;
             return true;
+        }
+
+        internal bool NoActiveWindows()
+        {
+            if (!isInitialized) return true;
+
+            int activeWindowCount = 0;
+            foreach (var window in _windows)
+            {
+                if (!Glfw.WindowShouldClose(window.WindowHandle)) activeWindowCount++;
+            }
+
+            return activeWindowCount == 0;
         }
 
         private void CreateDefaultWindow()

@@ -63,7 +63,7 @@ namespace PentaGE.Core
         private void Run()
         {
             _state = GameState.Running;
-            while (State == GameState.Running)
+            while (State == GameState.Running && !Windows.NoActiveWindows())
             {
                 // Handle input events
                 // TODO: Create input handling system
@@ -71,12 +71,16 @@ namespace PentaGE.Core
                 // Update game state
                 Update();
 
+                Glfw.PollEvents();
+
                 // Render graphics
                 Renderer.Render();
 
                 // Get the next frame
                 Timing.NextFrame();
             }
+
+            if (State != GameState.Terminating) Stop();
         }
 
     }
