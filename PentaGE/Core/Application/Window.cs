@@ -4,6 +4,9 @@ using System.Drawing;
 
 namespace PentaGE.Core
 {
+    /// <summary>
+    /// Represents a window in the application.
+    /// </summary>
     public class Window
     {
         private const int DEFAULT_WIDTH = 1920;
@@ -22,11 +25,30 @@ namespace PentaGE.Core
         private bool _focused;
         private bool _vSync;
 
+        /// <summary>
+        /// Gets the handle of the GLFW window associated with this <see cref="Window"/> instance.
+        /// </summary>
+        /// <remarks>
+        /// The window handle is a unique identifier that represents the window in the GLFW library.
+        /// </remarks>
         internal GLFW.Window WindowHandle => _windowHandle;
 
+        /// <summary>
+        /// Gets the handle of the GLFW window associated with the shared window, if available.
+        /// </summary>
+        /// <remarks>
+        /// The shared window handle is a unique identifier that represents the shared window's GLFW window handle.
+        /// If no shared window is set, the handle will be GLFW.Window.None.
+        /// </remarks>
         internal GLFW.Window SharedWindowHandle =>
             SharedWindow is Window window ? window.WindowHandle : GLFW.Window.None;
 
+        /// <summary>
+        /// Gets or sets a window that will share its OpenGL context with this window.
+        /// </summary>
+        /// <remarks>
+        /// If a window is already created and a new shared window is set, the existing window will be recreated with the updated shared context.
+        /// </remarks>
         public Window? SharedWindow
         {
             get => _sharedWindow;
@@ -43,6 +65,9 @@ namespace PentaGE.Core
             }
         }
 
+        /// <summary>
+        /// Gets or sets the location of the window on the screen.
+        /// </summary>
         public Point Location
         {
             get => _location;
@@ -55,6 +80,9 @@ namespace PentaGE.Core
             }
         }
 
+        /// <summary>
+        /// Gets or sets the size of the window.
+        /// </summary>
         public Size Size
         {
             get => _size;
@@ -67,6 +95,9 @@ namespace PentaGE.Core
             }
         }
 
+        /// <summary>
+        /// Gets or sets the title of the window.
+        /// </summary>
         public string Title
         {
             get => _title;
@@ -79,6 +110,9 @@ namespace PentaGE.Core
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the window can be resized by the user.
+        /// </summary>
         public bool Resizable
         {
             get => _resizable;
@@ -91,6 +125,9 @@ namespace PentaGE.Core
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the window has focus.
+        /// </summary>
         public bool Focused
         {
             get => _focused;
@@ -103,6 +140,9 @@ namespace PentaGE.Core
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether vertical synchronization (VSync) is enabled.
+        /// </summary>
         public bool VSync
         {
             get => _vSync;
@@ -116,6 +156,9 @@ namespace PentaGE.Core
             }
         }
 
+        /// <summary>
+        /// Creates a new instance of the <see cref="Window"/> class with default settings.
+        /// </summary>
         public Window()
         {
             _title = DEFAULT_TITLE;
@@ -131,6 +174,13 @@ namespace PentaGE.Core
             _focused = true;
         }
 
+        /// <summary>
+        /// Creates the GLFW window with the specified settings.
+        /// </summary>
+        /// <remarks>
+        /// If a window already exists, the existing window will be destroyed before creating a new one.
+        /// </remarks>
+        /// <returns><c>true</c> if the window is successfully created; otherwise, <c>false</c>.</returns>
         internal bool Create()
         {
             // Destroy the existing window if it's already created
@@ -171,9 +221,18 @@ namespace PentaGE.Core
             _windowHandle = GLFW.Window.None;
         }
 
+        /// <summary>
+        /// Creates a new <see cref="Window"/> instance with default settings and an optional window title.
+        /// </summary>
+        /// <param name="title">The title of the window (optional).</param>
+        /// <returns>A new instance of the <see cref="Window"/> class with default settings.</returns>
         public static Window CreateDefault(string title = "") =>
             new() { Title = title != "" ? title : DEFAULT_TITLE };
 
+        /// <summary>
+        /// Checks if the window is created and valid.
+        /// </summary>
+        /// <returns><c>true</c> if the window is created; otherwise, <c>false</c>.</returns>
         private bool IsCreated() =>
             _windowHandle != GLFW.Window.None;
 
