@@ -55,9 +55,8 @@ namespace PentaGE.Core
         /// </summary>
         internal void NextFrame()
         {
-            // Calculate the target frame time based on the TargetFps
-            double targetFrameTime = 1.0 / TargetFps;
-
+            _timingManager.UpdateTimings(Glfw.Time);
+            
             // Get the current time using Glfw.Time
             double currentTime = Glfw.Time;
             double fpsDeltaTime = currentTime - lastFPSTime;
@@ -73,10 +72,8 @@ namespace PentaGE.Core
             // Calculate the delta time between the current and previous frame
             double deltaTime = currentTime - previousTime;
 
-            // Apply game speed to deltaTime
-            deltaTime *= GameSpeedFactor;
-
             // Limit the frame rate if necessary
+            double targetFrameTime = 1.0 / TargetFps;
             if (TargetFps > 0 && deltaTime < targetFrameTime)
             {
                 double sleepTime = (targetFrameTime - deltaTime) * 1000d; // Convert to milliseconds
@@ -84,9 +81,24 @@ namespace PentaGE.Core
                 {
                     Thread.Sleep((int)sleepTime);
                 }
+
+                // Note: Thread.Sleep is not accurate.
+                //       Perform a busy wait until the target is reached
+                targetFrameTime = 1.0 / TargetFps * 2;
+                double expectedTime = previousTime + targetFrameTime;
+                if (currentTime < expectedTime)
+                {
+                    while (Glfw.Time < expectedTime)
+                    {
+                        // Do nothing, just wait
+                    }
+                }
+
+                deltaTime = Glfw.Time - previousTime;
             }
 
-            _timingManager.UpdateTimings(Glfw.Time);
+            // Apply game speed to deltaTime
+            deltaTime *= GameSpeedFactor;
 
             CurrentFrame = new Frame(CurrentFrame + 1, deltaTime);
             TotalElapsedTime += deltaTime;
