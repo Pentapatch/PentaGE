@@ -26,7 +26,7 @@ namespace PentaGE.Core
         /// <summary>
         /// Gets or sets the target frames per second (FPS) for the game engine.
         /// </summary>
-        public int TargetFps { get; set; } = 60;
+        public int TargetFps { get; set; } = 120;
 
         /// <summary>
         /// Gets the total elapsed time since the start of the game engine, measured in seconds.

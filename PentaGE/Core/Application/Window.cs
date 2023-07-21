@@ -31,7 +31,7 @@ namespace PentaGE.Core
         /// <remarks>
         /// The window handle is a unique identifier that represents the window in the GLFW library.
         /// </remarks>
-        internal GLFW.Window WindowHandle => _windowHandle;
+        internal GLFW.Window Handle => _windowHandle;
 
         /// <summary>
         /// Gets the handle of the GLFW window associated with the shared window, if available.
@@ -41,7 +41,7 @@ namespace PentaGE.Core
         /// If no shared window is set, the handle will be GLFW.Window.None.
         /// </remarks>
         internal GLFW.Window SharedWindowHandle =>
-            SharedWindow is Window window ? window.WindowHandle : GLFW.Window.None;
+            SharedWindow is Window window ? window.Handle : GLFW.Window.None;
 
         /// <summary>
         /// Gets or sets a window that will share its OpenGL context with this window.

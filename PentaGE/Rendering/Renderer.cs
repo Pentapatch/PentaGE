@@ -1,4 +1,5 @@
 ﻿using GLFW;
+using static OpenGL.GL;
 using PentaGE.Core;
 
 namespace PentaGE.Rendering
@@ -51,7 +52,9 @@ namespace PentaGE.Rendering
         /// </summary>
         internal void Render()
         {
-
+            glClearColor(MathF.Sin((float)_engine.Timing.TotalElapsedTime), MathF.Cos((float)_engine.Timing.TotalElapsedTime), 0, 1);
+            glClear(GL_COLOR_BUFFER_BIT);
+            Glfw.SwapBuffers(_engine.Windows[0].Handle);
         }
     }
 }

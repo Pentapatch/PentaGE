@@ -86,7 +86,7 @@ namespace PentaGE.Core
             int activeWindowCount = 0;
             foreach (var window in _windows)
             {
-                if (!Glfw.WindowShouldClose(window.WindowHandle)) activeWindowCount++;
+                if (!Glfw.WindowShouldClose(window.Handle)) activeWindowCount++;
             }
 
             return activeWindowCount == 0;
