@@ -212,6 +212,9 @@ namespace PentaGE.Core
             return true;
         }
 
+        /// <summary>
+        /// Terminates the GLFW window associated with this instance and cleans up any resources.
+        /// </summary>
         internal void Terminate()
         {
             if (_windowHandle == GLFW.Window.None) return;
