@@ -1,6 +1,4 @@
-﻿// TODO: Create Hint component
-
-namespace GLFW
+﻿namespace GLFW
 {
     /// <summary>
     ///     Strongly-typed values for setting window hints.

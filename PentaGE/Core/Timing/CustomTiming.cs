@@ -5,7 +5,7 @@
     /// </summary>
     public sealed class CustomTiming
     {
-        private double totalElapsed = 0d;
+        private double totalElapsedSeconds = 0d;
 
         /// <summary>
         /// Occurs when the custom timing interval has elapsed.
@@ -48,23 +48,22 @@
         /// <param name="elapsedTime">The time elapsed since the last update in seconds.</param>
         public void Update(double elapsedTime)
         {
-            totalElapsed += elapsedTime;
+            totalElapsedSeconds += elapsedTime;
 
-            if (totalElapsed >= Interval)
+            if (totalElapsedSeconds >= Interval)
             {
-                OnTick(totalElapsed);
-                totalElapsed = 0d;
+                OnTick();
+                totalElapsedSeconds = 0d;
             }
         }
 
         /// <summary>
         /// Triggers the Tick event or executes the associated action when the custom timing interval has elapsed.
         /// </summary>
-        /// <param name="totalElapsedTime">The total elapsed time in seconds since the custom timing started.</param>
-        private void OnTick(double totalElapsedTime)
+        private void OnTick()
         {
-            if (Action is not null) Action(totalElapsedTime);
-            var eventArgs = new CustomTimingTickEventArgs(Interval, totalElapsedTime);
+            if (Action is not null) Action(totalElapsedSeconds);
+            var eventArgs = new CustomTimingTickEventArgs(Interval, totalElapsedSeconds);
             Tick?.Invoke(this, eventArgs);
         }
     }

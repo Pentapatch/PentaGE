@@ -2,8 +2,6 @@
 
 namespace GLFW
 {
-    // TODO:  Make custom marshaller instead of this
-
     /// <summary>
     ///     Used internally for marshalling
     /// </summary>

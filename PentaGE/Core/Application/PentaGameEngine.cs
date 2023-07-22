@@ -1,5 +1,7 @@
 ﻿using GLFW;
+using PentaGE.Core.Logging;
 using PentaGE.Rendering;
+using Serilog;
 
 namespace PentaGE.Core
 {
@@ -37,8 +39,10 @@ namespace PentaGE.Core
         /// <summary>
         /// Called during game engine initialization to allow concrete implementations to set up the game.
         /// Implement this method to initialize the game, create resources, set up the scene, etc.
+        /// If the implementation returns <c>false</c>, the engine startup will be canceled.
         /// </summary>
-        protected abstract void Initialize();
+        /// <returns><c>true</c> if the game engine is successfully initialized; otherwise, <c>false</c>.</returns>
+        protected abstract bool Initialize();
 
         /// <summary>
         /// Called during game engine termination to allow concrete implementations to clean up resources.
@@ -66,19 +70,37 @@ namespace PentaGE.Core
         /// <returns><c>true</c> if the engine starts successfully; otherwise, <c>false</c>.</returns>
         public bool Start()
         {
+            // Initialize Serilog
+            Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .CreateLogger();
+
             // Allow the concrete implementation of the engine to initialize
-            Initialize();
+            using (Log.Logger.BeginPerfLogger("Concrete implementation is initializing"))
+            {
+                if (!Initialize())
+                {
+                    Log.Fatal("Failed to initialize the game engine.");
+                    return false;
+                }
+            }
 
             // Initialize GLFW (OpenGL Framework)
             // Must come after Initialize so the concrete implementation of the engine can add windows
-            if (!Renderer.InitializeGLFW())
+            using (Log.Logger.BeginPerfLogger("Initializing GLFW"))
             {
-                // TODO: Log failure
-                return false;
+                if (!Renderer.InitializeGLFW())
+                {
+                    Log.Fatal("Failed to initialize GLFW.");
+                    return false;
+                }
             }
 
             // Start the game loop
-            Run();
+            using (Log.Logger.BeginPerfLogger("Entering game loop"))
+            {
+                Run();
+            }
 
             return true;
         }

@@ -1,6 +1,7 @@
 ﻿using GLFW;
 using static OpenGL.GL;
 using PentaGE.Core;
+using Serilog;
 
 namespace PentaGE.Rendering
 {
@@ -28,7 +29,7 @@ namespace PentaGE.Rendering
         {
             if (!Glfw.Init())
             {
-                Console.WriteLine("Failed to initialize GLFW."); // TODO: Log
+                Log.Fatal("Failed to initialize GLFW");
                 return false;
             }
 
@@ -40,7 +41,7 @@ namespace PentaGE.Rendering
             // Initialize and create all windows
             if (!_engine.Windows.Initialize())
             {
-                Console.WriteLine("Failed to create all GLFW windows."); // TODO: Log
+                Log.Fatal("Failed to create all GLFW windows.");
                 return false;
             }
 
