@@ -31,7 +31,7 @@ namespace PentaGE.Core.Logging
         public void Dispose()
         {
             var elapsedMilliseconds = (DateTimeOffset.UtcNow - _startTime).TotalMilliseconds;
-            _logger.Information($"{_message} done [{elapsedMilliseconds}ms].");
+            _logger.Information($"Done {_message} [in {elapsedMilliseconds}ms].");
         }
     }
 }
