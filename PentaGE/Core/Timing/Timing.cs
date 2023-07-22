@@ -7,11 +7,20 @@ namespace PentaGE.Core
     /// </summary>
     public sealed class Timing
     {
-        private readonly TimingManager _timingManager = new();
-        private double _gameSpeedFactor = 1d;
+        private readonly TimingManager _timingManager;
+        private double _gameSpeedFactor;
         private double previousTime = 0d;
         private double lastFPSTime = 0d;
         private int fpsFrameCount = 0;
+
+        public const double NORMAL_GAME_SPEED = 1d;
+        public const double DOUBLE_GAME_SPEED = 2d;
+        public const double HALF_GAME_SPEED = 0.5d;
+
+        /// <summary>
+        /// Gets the total elapsed run time as a TimeSpan.
+        /// </summary>
+        public TimeSpan RunTime => TimeSpan.FromSeconds(TotalElapsedTime);
 
         /// <summary>
         /// Gets the current frame information such as the frame number and delta time.
@@ -21,17 +30,17 @@ namespace PentaGE.Core
         /// <summary>
         /// Gets the current frames per second (FPS) value.
         /// </summary>
-        public int CurrentFps { get; private set; } = 0;
+        public int CurrentFps { get; private set; }
 
         /// <summary>
         /// Gets or sets the target frames per second (FPS) for the game engine.
         /// </summary>
-        public int TargetFps { get; set; } = 120;
+        public int TargetFps { get; set; }
 
         /// <summary>
         /// Gets the total elapsed time since the start of the game engine, measured in seconds.
         /// </summary>
-        public double TotalElapsedTime { get; private set; } = 0d;
+        public double TotalElapsedTime { get; private set; }
 
         public TimingManager CustomTimings => _timingManager;
 
@@ -51,12 +60,24 @@ namespace PentaGE.Core
         }
 
         /// <summary>
+        /// Initializes a new instance of the Timing class with default settings.
+        /// The default target frames per second (FPS) is 120, and the game speed factor is set to 1.0 (normal speed).
+        /// </summary>
+        public Timing()
+        {
+            _timingManager = new();
+            TargetFps = 120;
+            _gameSpeedFactor = NORMAL_GAME_SPEED;
+        }
+
+        /// <summary>
         /// Advances to the next frame, updating the timing and FPS information.
         /// </summary>
         internal void NextFrame()
         {
+            // Update the timing manager
             _timingManager.UpdateTimings(Glfw.Time);
-            
+
             // Get the current time using Glfw.Time
             double currentTime = Glfw.Time;
             double fpsDeltaTime = currentTime - lastFPSTime;
@@ -69,33 +90,20 @@ namespace PentaGE.Core
                 lastFPSTime = currentTime;
             }
 
-            // Calculate the delta time between the current and previous frame
-            double deltaTime = currentTime - previousTime;
-
-            // Limit the frame rate if necessary
-            double targetFrameTime = 1.0 / TargetFps;
-            if (TargetFps > 0 && deltaTime < targetFrameTime)
+            // Optional FPS limiting
+            if (TargetFps > 0)
             {
-                double sleepTime = (targetFrameTime - deltaTime) * 1000d; // Convert to milliseconds
-                if (sleepTime > 0)
+                double targetTime = previousTime + (1.0 / TargetFps);
+                while (Glfw.Time < targetTime)
                 {
-                    Thread.Sleep((int)sleepTime);
+                    // Do nothing or process unimportant pipelines here
+                    _timingManager.UpdateTimings(Glfw.Time);
                 }
-
-                // Note: Thread.Sleep is not accurate.
-                //       Perform a busy wait until the target is reached
-                targetFrameTime = 1.0 / TargetFps * 2;
-                double expectedTime = previousTime + targetFrameTime;
-                if (currentTime < expectedTime)
-                {
-                    while (Glfw.Time < expectedTime)
-                    {
-                        // Do nothing, just wait
-                    }
-                }
-
-                deltaTime = Glfw.Time - previousTime;
+                currentTime = Glfw.Time;
             }
+
+            // Calculate the delta time between the current and previous frame
+            double deltaTime = currentTime - previousTime; // In seconds
 
             // Apply game speed to deltaTime
             deltaTime *= GameSpeedFactor;
