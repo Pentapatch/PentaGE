@@ -36,6 +36,5 @@ namespace GLFW
             Pixels = pixels;
         }
 
-        // TODO: Implement manual load of bmp
     }
 }

@@ -4,10 +4,12 @@ namespace Sandbox
 {
     internal class Application : PentaGameEngine
     {
-        protected override void Initialize()
+        protected override bool Initialize()
         {
             // Do initialization work
             Timing.CustomTimings[1].Tick += Application_Tick;
+
+            return true;
         }
 
         private void Application_Tick(object? sender, CustomTimingTickEventArgs e)

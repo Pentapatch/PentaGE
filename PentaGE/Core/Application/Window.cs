@@ -1,6 +1,7 @@
 ﻿using GLFW;
 using static OpenGL.GL;
 using System.Drawing;
+using Serilog;
 
 namespace PentaGE.Core
 {
@@ -60,7 +61,7 @@ namespace PentaGE.Core
                 // Re-create the window with the updated shared context
                 if (!Create())
                 {
-                    // TODO: Log failure
+                    Log.Fatal($"Failed to recreate window '{Handle}' with shared context with '{SharedWindowHandle}'.");
                 }
             }
         }
@@ -197,7 +198,7 @@ namespace PentaGE.Core
             _windowHandle = Glfw.CreateWindow(Size.Width, Size.Height, Title, GLFW.Monitor.None, SharedWindowHandle);
             if (_windowHandle == GLFW.Window.None)
             {
-                // TODO: Log failure
+                Log.Fatal("Failed to create a handle for a window.");
                 return false;
             }
 

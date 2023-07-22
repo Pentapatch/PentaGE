@@ -1,9 +1,9 @@
 ﻿
 using Sandbox;
 
-Console.WriteLine("Starting engine..");
 Application engine = new();
 engine.Start();
+Console.ReadKey(true);
 
 //using GLFW;
 //using Monitor = GLFW.Monitor;

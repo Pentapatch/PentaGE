@@ -1,4 +1,5 @@
 ﻿using GLFW;
+using Serilog;
 
 namespace PentaGE.Core
 {
@@ -32,8 +33,8 @@ namespace PentaGE.Core
             _windows.Add(window);
             if (isInitialized && !window.Create())
             {
+                Log.Fatal($"Failed to add window '{window.Handle}'.");
                 return false;
-                // TODO: Log failure
             }
 
             return true;
@@ -60,14 +61,14 @@ namespace PentaGE.Core
         /// <returns><c>true</c> if the window manager is successfully initialized; otherwise, <c>false</c>.</returns>
         internal bool Initialize()
         {
-            CreateDefaultWindow();
+            AddDefaultWindow();
 
             foreach (var window in _windows)
             {
                 if (!window.Create())
                 {
+                    Log.Fatal($"Failed to create window '{window.Handle}'.");
                     return false;
-                    // TODO: Log failure
                 };
             }
 
@@ -93,9 +94,9 @@ namespace PentaGE.Core
         }
 
         /// <summary>
-        /// Creates a default window if no windows are currently added to the window manager.
+        /// Adds a default window if no windows are currently added to the window manager.
         /// </summary>
-        private void CreateDefaultWindow()
+        private void AddDefaultWindow()
         {
             if (_windows.Count != 0) return;
             AddWindow(Window.CreateDefault());
