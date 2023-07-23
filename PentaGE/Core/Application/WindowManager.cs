@@ -1,15 +1,17 @@
 ﻿using GLFW;
 using Serilog;
+using System.Collections;
 
 namespace PentaGE.Core
 {
     /// <summary>
     /// Represents a manager class for handling windows in the game engine.
     /// </summary>
-    public sealed class WindowManager
+    public sealed class WindowManager : IEnumerable<Window>
     {
         private readonly List<Window> _windows = new();
-        private bool isInitialized = false;
+        private readonly PentaGameEngine _engine;
+        private bool _isInitialized = false;
 
         /// <summary>
         /// Gets a read-only list of windows managed by the window manager.
@@ -23,6 +25,11 @@ namespace PentaGE.Core
         /// <returns>The <see cref="Window"/> at the specified index.</returns>
         public Window this[int index] => _windows[index];
 
+        public WindowManager(PentaGameEngine engine)
+        {
+            _engine = engine;
+        }
+
         /// <summary>
         /// Adds a new window to the window manager and initializes it if the manager is already initialized.
         /// </summary>
@@ -30,8 +37,13 @@ namespace PentaGE.Core
         /// <returns><c>true</c> if the window is successfully added; otherwise, <c>false</c>.</returns>
         public bool AddWindow(Window window)
         {
+            // Important note: Set the instance reference to the engine
+            // This is so that Window factory methods can be used without having to specify the engine instance
+            window._engine = _engine;
+
             _windows.Add(window);
-            if (isInitialized && !window.Create())
+            
+            if (_isInitialized && !window.Create())
             {
                 Log.Fatal($"Failed to add window '{window.Handle}'.");
                 return false;
@@ -72,7 +84,7 @@ namespace PentaGE.Core
                 };
             }
 
-            isInitialized = true;
+            _isInitialized = true;
             return true;
         }
 
@@ -82,7 +94,7 @@ namespace PentaGE.Core
         /// <returns><c>true</c> if there are no active windows; otherwise, <c>false</c>.</returns>
         internal bool NoActiveWindows()
         {
-            if (!isInitialized) return true;
+            if (!_isInitialized) return true;
 
             int activeWindowCount = 0;
             foreach (var window in _windows)
@@ -101,6 +113,20 @@ namespace PentaGE.Core
             if (_windows.Count != 0) return;
             AddWindow(Window.CreateDefault());
         }
+
+        /// <summary>
+        /// Returns an enumerator that iterates through the collection of windows.
+        /// </summary>
+        /// <returns>An enumerator that can be used to iterate through the collection of windows.</returns>
+        public IEnumerator<Window> GetEnumerator() => 
+            _windows.GetEnumerator();
+
+        /// <summary>
+        /// Returns an enumerator that iterates through the collection of windows.
+        /// </summary>
+        /// <returns>An enumerator that can be used to iterate through the collection of windows.</returns>
+        IEnumerator IEnumerable.GetEnumerator() =>
+            _windows.GetEnumerator();
 
     }
 }
