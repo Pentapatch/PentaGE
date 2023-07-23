@@ -51,11 +51,31 @@ namespace PentaGE.Rendering
         /// <summary>
         /// Handles graphics rendering.
         /// </summary>
-        internal void Render()
+        internal unsafe void Render()
         {
             glClearColor(MathF.Sin((float)_engine.Timing.TotalElapsedTime), MathF.Cos((float)_engine.Timing.TotalElapsedTime), 0, 1);
             glClear(GL_COLOR_BUFFER_BIT);
             Glfw.SwapBuffers(_engine.Windows[0].Handle);
+
+            // Test drawing triangles
+
+
+
+            // Log OpenGL errors
+            LogGlErrors();
+        }
+
+        private static void ClearGLErrors()
+        {
+            while (Glfw.GetError(out string _) != ErrorCode.None) ;
+        }
+
+        private static void LogGlErrors()
+        {
+            while (Glfw.GetError(out string description) != ErrorCode.None)
+            {
+                Log.Error(description);
+            }
         }
     }
 }
