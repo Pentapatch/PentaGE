@@ -120,7 +120,7 @@ namespace PentaGE.Rendering.Shaders
         /// <returns><c>true</c> if the shader program was successfully used; otherwise, <c>false</c>.</returns>
         public bool Use()
         {
-            if (ProgramId != 0)
+            if (ProgramId == 0)
             {
                 Log.Error("Attempting to use a program that is not initialized.");
                 return false;
