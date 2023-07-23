@@ -2,6 +2,9 @@
 
 namespace PentaGE.Common
 {
+    /// <summary>
+    /// Provides extension methods for working with <see cref="Vector3"/> objects.
+    /// </summary>
     public static class VectorExtensions
     {
         /// <summary>
