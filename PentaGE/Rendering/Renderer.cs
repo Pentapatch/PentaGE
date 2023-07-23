@@ -94,7 +94,8 @@ namespace PentaGE.Rendering
             }
 
             // Specify how the vertex attributes should be interpreted.
-            // In this case, attribute 0 represents the position (x, y) and has two components (GL_FLOAT), and attribute 1 represents the color (r, g, b) and has three components.
+            // In this case, attribute 0 represents the position (x, y) and has two components (GL_FLOAT), 
+            // and attribute 1 represents the color (r, g, b) and has three components.
             // The stride is the byte offset between consecutive vertex attribute data.
             // The last argument is the offset of the attribute within the vertex data.
             glVertexAttribPointer(0, 2, GL_FLOAT, false, 5 * sizeof(float), (void*)0);

@@ -78,7 +78,7 @@ namespace PentaGE.Core
             // Log entry and exit
             Log.Information("Starting PentaGE.");
             var state = InitializeGameEngine();
-            Log.Information("Exiting PentaGE.");
+            Log.Information("Terminated PentaGE.");
 
             return state;
         }
@@ -88,14 +88,20 @@ namespace PentaGE.Core
         /// </summary>
         public void Stop()
         {
+            Log.Information("Stopping the engine.");
+
             // Update the game state
             _state = GameState.Terminating;
 
             // Terminate Glfw
+            Log.Information("Terminating GLFW.");
             Glfw.Terminate();
 
             // Allow the concrete implementation of the engine to unload resources
-            Shutdown();
+            using (var logger = Log.Logger.BeginPerfLogger("Terminating concrete implementation"))
+            {
+                Shutdown();
+            }
         }
 
         /// <summary>
