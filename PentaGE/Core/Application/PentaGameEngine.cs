@@ -1,8 +1,8 @@
 ﻿using GLFW;
+using PentaGE.Core.Events;
 using PentaGE.Core.Logging;
 using PentaGE.Rendering;
 using Serilog;
-using EventHandler = PentaGE.Core.Events.EventHandler;
 
 namespace PentaGE.Core
 {
@@ -15,7 +15,7 @@ namespace PentaGE.Core
         private readonly Timing _timing = new();
         private readonly Renderer _renderer;
         private readonly WindowManager _windowManager;
-        private readonly EventHandler _eventHandler;
+        private readonly EventManager _eventHandler = new();
         private GameState _state = GameState.Initializing;
 
         /// <summary>
@@ -34,9 +34,9 @@ namespace PentaGE.Core
         internal Renderer Renderer => _renderer;
 
         /// <summary>
-        /// Gets the EventHandler responsible for handling input and window events in the game engine.
+        /// Gets the EventManager responsible for handling input and window events in the game engine.
         /// </summary>
-        internal EventHandler EventHandler => _eventHandler;
+        public EventManager EventHandler => _eventHandler;
 
         /// <summary>
         /// Gets the current state of the game engine.
@@ -69,7 +69,6 @@ namespace PentaGE.Core
         public PentaGameEngine()
         {
             _renderer = new(this);
-            _eventHandler = new(this);
             _windowManager = new(this);
         }
 

@@ -5,6 +5,8 @@
     /// </summary>
     public abstract class EngineEvent : EventArgs
     {
+        private readonly Action<EngineEvent> _onEvent;
+
         #region Enums
 
         /// <summary>
@@ -136,13 +138,19 @@
         public Window Window { get; protected set; }
 
         /// <summary>
+        /// Raises the event, invoking the associated event handler if subscribed.
+        /// </summary>
+        internal void RaiseEvent() => _onEvent?.Invoke(this);
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="EngineEvent"/> class with the associated window.
         /// </summary>
+        /// <param name="onEvent">The event handler to be invoked when the event is raised.</param>
         /// <param name="window">The window associated with the event.</param>
-        internal EngineEvent(Window window)
+        internal EngineEvent(Action<EngineEvent> onEvent, Window window)
         {
+            _onEvent = onEvent;
             Window = window;
         }
-
     }
 }
