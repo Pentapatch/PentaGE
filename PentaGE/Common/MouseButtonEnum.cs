@@ -1,7 +1,7 @@
 ﻿namespace PentaGE.Common
 {
     // These values comes from Glfw.MouseButton and will be directly converted
-    
+
     /// <summary>
     /// Represents mouse buttons.
     /// </summary>

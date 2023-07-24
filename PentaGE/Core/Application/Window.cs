@@ -1,7 +1,7 @@
 ﻿using GLFW;
-using static OpenGL.GL;
-using System.Drawing;
 using Serilog;
+using System.Drawing;
+using static OpenGL.GL;
 
 namespace PentaGE.Core
 {

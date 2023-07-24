@@ -1,7 +1,4 @@
-﻿using GLFW;
-using PentaGE.Common;
-
-namespace PentaGE.Core.Events
+﻿namespace PentaGE.Core.Events
 {
     /// <summary>
     /// Event arguments for a mouse entered event.
@@ -11,13 +8,13 @@ namespace PentaGE.Core.Events
         /// <summary>
         /// Gets the category of the event.
         /// </summary>
-        internal override EventCategory Category => 
+        internal override EventCategory Category =>
             EventCategory.Input | EventCategory.Mouse | EventCategory.Hover;
 
         /// <summary>
         /// Gets the type of the event.
         /// </summary>
-        internal override EventType Type => 
+        internal override EventType Type =>
             EventType.MouseEntered;
 
         /// <summary>

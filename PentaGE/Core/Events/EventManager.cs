@@ -110,7 +110,7 @@ namespace PentaGE.Core.Events
         private void LogEvent(EngineEvent currentEvent)
         {
             if (CategoriesToLog == EventCategory.None) return;
-            
+
             if (currentEvent.BelongsToCategory(CategoriesToLog))
             {
                 Log.Information($"Event [{currentEvent.Type}]: {currentEvent}");
@@ -123,7 +123,7 @@ namespace PentaGE.Core.Events
             if (e is T eventArgs) eventHandler?.Invoke(this, eventArgs);
         }
 
-        private Window GetWindow(GLFW.Window windowHandle) => 
+        private Window GetWindow(GLFW.Window windowHandle) =>
             _registeredWindows[windowHandle];
 
         #endregion

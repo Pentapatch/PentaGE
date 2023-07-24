@@ -1,7 +1,4 @@
-﻿using GLFW;
-using PentaGE.Common;
-
-namespace PentaGE.Core.Events
+﻿namespace PentaGE.Core.Events
 {
     /// <summary>
     /// Event arguments for mouse left event.

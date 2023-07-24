@@ -42,7 +42,7 @@ namespace PentaGE.Core
             window._engine = _engine;
 
             _windows.Add(window);
-            
+
             if (_isInitialized && !window.Create())
             {
                 Log.Fatal($"Failed to add window '{window.Handle}'.");
@@ -118,7 +118,7 @@ namespace PentaGE.Core
         /// Returns an enumerator that iterates through the collection of windows.
         /// </summary>
         /// <returns>An enumerator that can be used to iterate through the collection of windows.</returns>
-        public IEnumerator<Window> GetEnumerator() => 
+        public IEnumerator<Window> GetEnumerator() =>
             _windows.GetEnumerator();
 
         /// <summary>

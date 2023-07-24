@@ -182,7 +182,7 @@
         NumpadAdd = 334,
         NumpadEnter = 335,
         NumpadEqual = 336,
-        
+
         /// <summary>
         /// The left shift key.
         /// </summary>

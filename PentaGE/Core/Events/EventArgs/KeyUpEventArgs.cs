@@ -3,14 +3,19 @@
 namespace PentaGE.Core.Events
 {
     /// <summary>
-    /// Event arguments for a mouse down event.
+    /// Event arguments for a key up event.
     /// </summary>
-    public abstract class MouseButtonEventArgs : EngineEvent
+    public sealed class KeyUpEventArgs : EngineEvent
     {
+        internal override EventCategory Category =>
+            EventCategory.Input | EventCategory.Keyboard | EventCategory.Button;
+
+        internal override EventType Type => EventType.KeyUp;
+
         /// <summary>
-        /// Gets the mouse button associated with the event.
+        /// Gets the key associated with the event.
         /// </summary>
-        public MouseButton Button { get; init; }
+        public Key Key { get; init; }
 
         /// <summary>
         /// Gets the modifier keys that were pressed in combination with the key event.
@@ -18,16 +23,16 @@ namespace PentaGE.Core.Events
         public ModifierKey ModifierKeys { get; init; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MouseButtonEventArgs"/> class with the associated window.
+        /// Initializes a new instance of the <see cref="KeyDownEventArgs"/> class with the associated window.
         /// </summary>
         /// <param name="onEvent">The event handler to be invoked when the event is raised.</param>
         /// <param name="window">The window associated with the event.</param>
-        /// <param name="button">The mouse button associated with the event.</param>
+        /// <param name="key">The key associated with the event.</param>
         /// <param name="modifierKeys">The modifier keys that were pressed in combination with the key event.</param>
-        internal MouseButtonEventArgs(Action<EngineEvent> onEvent, Window window, MouseButton button, ModifierKey modifierKeys) : 
+        internal KeyUpEventArgs(Action<EngineEvent> onEvent, Window window, Key key, ModifierKey modifierKeys) :
             base(onEvent, window)
         {
-            Button = button;
+            Key = key;
             ModifierKeys = modifierKeys;
         }
 
@@ -44,6 +49,6 @@ namespace PentaGE.Core.Events
         /// </summary>
         /// <returns></returns>
         public override string ToString() =>
-            $"{{Button={Button}, ModifierKeys={ModifierKeys}}}";
+            $"{{Key={Key}, ModifierKeys={ModifierKeys}}}";
     }
 }

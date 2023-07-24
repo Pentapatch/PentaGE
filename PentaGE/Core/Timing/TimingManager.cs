@@ -13,7 +13,7 @@
         /// If the timing doesn't exist, a new one is created.
         /// </summary>
         /// <param name="interval">The interval at which the custom timing should occur in seconds.</param>
-        public CustomTiming this[double interval] => 
+        public CustomTiming this[double interval] =>
             CreateOrReturnEntry(interval);
 
         /// <summary>
