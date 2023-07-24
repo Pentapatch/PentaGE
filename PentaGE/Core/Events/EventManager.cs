@@ -1,5 +1,6 @@
 ﻿using GLFW;
 using Serilog;
+using System.Drawing;
 using System.Numerics;
 
 namespace PentaGE.Core.Events
@@ -28,6 +29,8 @@ namespace PentaGE.Core.Events
             Glfw.SetCloseCallback(window.Handle, WindowClosingCallback);
             Glfw.SetWindowFocusCallback(window.Handle, WindowFocusCallback);
             Glfw.SetWindowIconifyCallback(window.Handle, WindowIconifyCallback);
+            Glfw.SetWindowMaximizeCallback(window.Handle, WindowMaximizeCallback);
+            Glfw.SetWindowSizeCallback(window.Handle, WindowSizeCallback);
 
             _registeredWindows.Add(window.Handle, window);
         }
@@ -44,6 +47,8 @@ namespace PentaGE.Core.Events
             Glfw.SetCloseCallback(window.Handle, null!);
             Glfw.SetWindowFocusCallback(window.Handle, null!);
             Glfw.SetWindowIconifyCallback(window.Handle, null!);
+            Glfw.SetWindowMaximizeCallback(window.Handle, null!);
+            Glfw.SetWindowSizeCallback(window.Handle, null!);
 
             _registeredWindows.Remove(window.Handle);
         }
@@ -86,7 +91,11 @@ namespace PentaGE.Core.Events
 
         public event EventHandler<EmptyEventArgs>? WindowMinimized;
 
+        public event EventHandler<EmptyEventArgs>? WindowMaximized;
+
         public event EventHandler<EmptyEventArgs>? WindowRestored;
+
+        public event EventHandler<WindowResizedEventArgs>? WindowResized;
 
         #endregion
 
@@ -118,7 +127,11 @@ namespace PentaGE.Core.Events
 
         private void OnWindowMinimized(EngineEventArgs e) => InvokeEvent(e, WindowMinimized);
 
+        private void OnWindowMaximized(EngineEventArgs e) => InvokeEvent(e, WindowMaximized);
+
         private void OnWindowRestored(EngineEventArgs e) => InvokeEvent(e, WindowRestored);
+
+        private void OnWindowResized(EngineEventArgs e) => InvokeEvent(e, WindowResized);
 
         #endregion
 
@@ -260,6 +273,34 @@ namespace PentaGE.Core.Events
                     EventCategory.Window | EventCategory.Iconify,
                     EventType.WindowRestored));
             }
+        }
+
+        private void WindowMaximizeCallback(GLFW.Window windowHandle, bool maximizing)
+        {
+            if (maximizing)
+            {
+                _eventBuffer.Add(new EmptyEventArgs(
+                    OnWindowMaximized,
+                    GetWindow(windowHandle),
+                    EventCategory.Window | EventCategory.Maximize,
+                    EventType.WindowMaximized));
+            }
+            else
+            {
+                _eventBuffer.Add(new EmptyEventArgs(
+                    OnWindowRestored,
+                    GetWindow(windowHandle),
+                    EventCategory.Window | EventCategory.Maximize,
+                    EventType.WindowRestored));
+            }
+        }
+
+        private void WindowSizeCallback(GLFW.Window windowHandle, int width, int height)
+        {
+            _eventBuffer.Add(new WindowResizedEventArgs(
+                OnWindowResized,
+                GetWindow(windowHandle),
+                new Point(width, height)));
         }
 
         #endregion

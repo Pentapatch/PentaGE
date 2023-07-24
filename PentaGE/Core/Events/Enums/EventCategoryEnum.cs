@@ -65,5 +65,15 @@
         /// Events related to iconifying (minimizing or restoring).
         /// </summary>
         Iconify = 1 << 10,
+
+        /// <summary>
+        /// Events related to maximizing or restoring from maximized.
+        /// </summary>
+        Maximize = 1 << 11,
+
+        /// <summary>
+        /// Events related to resizing.
+        /// </summary>
+        Resize = 1 << 12,
     }
 }

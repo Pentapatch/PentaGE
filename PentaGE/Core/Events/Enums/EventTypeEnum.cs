@@ -33,12 +33,17 @@
         /// <summary>
         /// The window is resized.
         /// </summary>
-        WindowResize,
+        WindowResized,
 
         /// <summary>
         /// The window is minimized.
         /// </summary>
         WindowMinimized,
+
+        /// <summary>
+        /// The window is maximized.
+        /// </summary>
+        WindowMaximized,
 
         /// <summary>
         /// The window is restored.

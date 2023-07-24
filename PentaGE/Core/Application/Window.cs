@@ -13,6 +13,7 @@ namespace PentaGE.Core
         private const int DEFAULT_WIDTH = 1920;
         private const int DEFAULT_HEIGHT = 1080;
         private const string DEFAULT_TITLE = "Penta Game Engine";
+        private const bool DEFAULT_RESIZABLE = false;
 
         private const int VSYNC_ON = 1;
         private const int VSYNC_OFF = 0;
@@ -174,7 +175,7 @@ namespace PentaGE.Core
             var y = (screenSize.Height - Size.Height) / 2;
             _location = new Point(x, y);
 
-            _resizable = false;
+            _resizable = DEFAULT_RESIZABLE;
             _focused = true;
         }
 
