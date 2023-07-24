@@ -25,8 +25,13 @@ namespace GLFW
     /// <param name="window">The window handle.</param>
     /// <param name="x">The new cursor x-coordinate, relative to the left edge of the client area.</param>
     /// <param name="y">The new cursor y-coordinate, relative to the left edge of the client area.</param>
+    // NOTE: I have corrected a bug here. x and y always returned 0.
+    // The original source code is:
+    // public delegate void PositionCallback(Window window, double x, double y);
+    // The correct signature is:
+    // public delegate void PositionCallback(Window window, int x, int y); /Pentapatch
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate void PositionCallback(Window window, double x, double y);
+    public delegate void PositionCallback(Window window, int x, int y);
 
     /// <summary>
     ///     This is the function signature for window focus callback functions.

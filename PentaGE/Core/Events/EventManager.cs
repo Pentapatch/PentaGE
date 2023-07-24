@@ -31,6 +31,7 @@ namespace PentaGE.Core.Events
             Glfw.SetWindowIconifyCallback(window.Handle, WindowIconifyCallback);
             Glfw.SetWindowMaximizeCallback(window.Handle, WindowMaximizeCallback);
             Glfw.SetWindowSizeCallback(window.Handle, WindowSizeCallback);
+            Glfw.SetWindowPositionCallback(window.Handle, WindowPositionCallback);
 
             _registeredWindows.Add(window.Handle, window);
         }
@@ -49,6 +50,7 @@ namespace PentaGE.Core.Events
             Glfw.SetWindowIconifyCallback(window.Handle, null!);
             Glfw.SetWindowMaximizeCallback(window.Handle, null!);
             Glfw.SetWindowSizeCallback(window.Handle, null!);
+            Glfw.SetWindowPositionCallback(window.Handle, null!);
 
             _registeredWindows.Remove(window.Handle);
         }
@@ -97,6 +99,8 @@ namespace PentaGE.Core.Events
 
         public event EventHandler<WindowResizedEventArgs>? WindowResized;
 
+        public event EventHandler<WindowMovedEventArgs>? WindowMoved;
+
         #endregion
 
         #region Event handlers
@@ -132,6 +136,8 @@ namespace PentaGE.Core.Events
         private void OnWindowRestored(EngineEventArgs e) => InvokeEvent(e, WindowRestored);
 
         private void OnWindowResized(EngineEventArgs e) => InvokeEvent(e, WindowResized);
+
+        private void OnWindowMoved(EngineEventArgs e) => InvokeEvent(e, WindowMoved);
 
         #endregion
 
@@ -301,6 +307,14 @@ namespace PentaGE.Core.Events
                 OnWindowResized,
                 GetWindow(windowHandle),
                 new Point(width, height)));
+        }
+
+        private void WindowPositionCallback(GLFW.Window windowHandle, int xPos, int yPos)
+        {
+            _eventBuffer.Add(new WindowMovedEventArgs(
+                OnWindowMoved,
+                GetWindow(windowHandle),
+                new Point(xPos, yPos)));
         }
 
         #endregion
