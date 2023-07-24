@@ -15,7 +15,7 @@ namespace PentaGE.Core
         private readonly Timing _timing = new();
         private readonly Renderer _renderer;
         private readonly WindowManager _windowManager;
-        private readonly EventManager _eventHandler = new();
+        private readonly EventManager _eventManager = new();
         private GameState _state = GameState.Initializing;
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace PentaGE.Core
         /// <summary>
         /// Gets the EventManager responsible for handling input and window events in the game engine.
         /// </summary>
-        public EventManager EventHandler => _eventHandler;
+        public EventManager Events => _eventManager;
 
         /// <summary>
         /// Gets the current state of the game engine.
@@ -159,7 +159,7 @@ namespace PentaGE.Core
             while (State == GameState.Running && !Windows.NoActiveWindows())
             {
                 // Handle input events
-                EventHandler.Update();
+                Events.Update();
 
                 // Update game state
                 Update();

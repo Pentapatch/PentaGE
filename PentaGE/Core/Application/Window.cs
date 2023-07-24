@@ -272,7 +272,7 @@ namespace PentaGE.Core
                 return;
             }
 
-            _engine.EventHandler.AddCallbacks(this);
+            _engine.Events.AddCallbacks(this);
         }
 
 
@@ -294,7 +294,7 @@ namespace PentaGE.Core
                 return;
             }
 
-            _engine.EventHandler.RemoveCallbacks(this);
+            _engine.Events.RemoveCallbacks(this);
         }
 
     }

@@ -1,5 +1,5 @@
 ﻿using GLFW;
-using Serilog;
+using System.Numerics;
 
 namespace PentaGE.Core.Events
 {
@@ -7,10 +7,6 @@ namespace PentaGE.Core.Events
     {
         private readonly Dictionary<GLFW.Window, Window> _registeredWindows = new();
         private readonly List<EngineEvent> _eventBuffer = new();
-
-        public event EventHandler<KeyDownEventArgs>? KeyDown;
-        public event EventHandler<KeyDownEventArgs>? KeyRepeat;
-        public event EventHandler<KeyUpEventArgs>? KeyUp;
 
         internal EventManager() { }
 
@@ -34,12 +30,39 @@ namespace PentaGE.Core.Events
             _registeredWindows.Remove(window.Handle);
         }
 
-        internal void Update()
+        internal void Update(bool pollEvents = true)
         {
-            Glfw.PollEvents();
+            // Optionally poll events from Glfw
+            if (pollEvents) Glfw.PollEvents();
 
+            // Execute the event buffer
             ExecuteEvents();
         }
+
+        #region Event declarations
+
+        public event EventHandler<KeyDownEventArgs>? KeyDown;
+        public event EventHandler<KeyDownEventArgs>? KeyRepeat;
+        public event EventHandler<KeyUpEventArgs>? KeyUp;
+
+        public event EventHandler<MouseDownEventArgs>? MouseDown;
+        public event EventHandler<MouseUpEventArgs>? MouseUp;
+
+        #endregion
+
+        #region Event handlers
+
+        private void OnKeyDown(EngineEvent e) => Invoke(e, KeyDown);
+
+        private void OnKeyRepeat(EngineEvent e) => Invoke(e, KeyDown);
+
+        private void OnKeyUp(EngineEvent e) => Invoke(e, KeyUp);
+
+        private void OnMouseDown(EngineEvent e) => Invoke(e, MouseDown);
+
+        private void OnMouseUp(EngineEvent e) => Invoke(e, MouseUp);
+
+        #endregion
 
         #region Private methods
 
@@ -55,28 +78,10 @@ namespace PentaGE.Core.Events
             _eventBuffer.Clear();
         }
 
-        private void OnKeyDown(EngineEvent e)
+        private void Invoke<T>(EngineEvent e, EventHandler<T>? eventHandler)
         {
-            if (e is KeyDownEventArgs keyDownEventArgs)
-            {
-                KeyDown?.Invoke(this, keyDownEventArgs);
-            }
-        }
-
-        private void OnKeyRepeat(EngineEvent e)
-        {
-            if (e is KeyDownEventArgs keyDownEventArgs)
-            {
-                KeyRepeat?.Invoke(this, keyDownEventArgs);
-            }
-        }
-
-        private void OnKeyUp(EngineEvent e)
-        {
-            if (e is KeyUpEventArgs keyUpEventArgs)
-            {
-                KeyUp?.Invoke(this, keyUpEventArgs);
-            }
+            // This method will greatly simply the creation of "On" methods
+            if (e is T eventArgs) eventHandler?.Invoke(this, eventArgs);
         }
 
         private Window GetWindow(GLFW.Window windowHandle) => 
@@ -115,21 +120,29 @@ namespace PentaGE.Core.Events
             }
         }
 
-        private void MousePositionCallback(GLFW.Window windowHandle, double xPos, double yPos)
-        {
-            
-        }
-
         private void MouseButtonCallback(GLFW.Window windowHandle, MouseButton button, InputState state, ModifierKeys mods)
         {
             if (state == InputState.Press)
             {
-                // Mouse button was pressed
+                _eventBuffer.Add(new MouseDownEventArgs(
+                    OnMouseDown,
+                    GetWindow(windowHandle),
+                    (Common.MouseButton)button,
+                    (Common.ModifierKey)mods));
             }
             else if (state == InputState.Release)
             {
-                // Mouse button was released
+                _eventBuffer.Add(new MouseUpEventArgs(
+                    OnMouseUp,
+                    GetWindow(windowHandle),
+                    (Common.MouseButton)button,
+                    (Common.ModifierKey)mods));
             }
+        }
+
+        private void MousePositionCallback(GLFW.Window windowHandle, double xPos, double yPos)
+        {
+            
         }
 
         #endregion

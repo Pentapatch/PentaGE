@@ -1,4 +1,6 @@
 ﻿using PentaGE.Core;
+using PentaGE.Core.Events;
+using Serilog;
 
 namespace Sandbox
 {
@@ -9,7 +11,39 @@ namespace Sandbox
             // Do initialization work
             Timing.CustomTimings[1].Tick += Application_Tick;
 
+            Events.KeyDown += Events_KeyDown;
+            Events.KeyUp += Events_KeyUp;
+            Events.KeyRepeat += Events_KeyRepeat;
+
+            Events.MouseDown += Events_MouseDown;
+            Events.MouseUp += Events_MouseUp;
+
             return true;
+        }
+
+        private void Events_MouseUp(object? sender, MouseUpEventArgs e)
+        {
+            Log.Information($"Mouse '{e.Button}' was released.");
+        }
+
+        private void Events_MouseDown(object? sender, MouseDownEventArgs e)
+        {
+            Log.Information($"Key '{e.Button}' was pressed.");
+        }
+
+        private void Events_KeyRepeat(object? sender, KeyDownEventArgs e)
+        {
+            Log.Information($"Key '{e.Key}' was held.");
+        }
+
+        private void Events_KeyUp(object? sender, KeyUpEventArgs e)
+        {
+            Log.Information($"Key '{e.Key}' was released.");
+        }
+
+        private void Events_KeyDown(object? sender, KeyDownEventArgs e)
+        {
+            Log.Information($"Key '{e.Key}' was pressed.");
         }
 
         private void Application_Tick(object? sender, CustomTimingTickEventArgs e)
