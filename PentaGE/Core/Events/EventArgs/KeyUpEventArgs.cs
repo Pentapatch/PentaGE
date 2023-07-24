@@ -5,7 +5,7 @@ namespace PentaGE.Core.Events
     /// <summary>
     /// Event arguments for a key up event.
     /// </summary>
-    public sealed class KeyUpEventArgs : EngineEvent
+    public sealed class KeyUpEventArgs : EngineEventArgs
     {
         internal override EventCategory Category =>
             EventCategory.Input | EventCategory.Keyboard | EventCategory.Button;
@@ -29,7 +29,7 @@ namespace PentaGE.Core.Events
         /// <param name="window">The window associated with the event.</param>
         /// <param name="key">The key associated with the event.</param>
         /// <param name="modifierKeys">The modifier keys that were pressed in combination with the key event.</param>
-        internal KeyUpEventArgs(Action<EngineEvent> onEvent, Window window, Key key, ModifierKey modifierKeys) :
+        internal KeyUpEventArgs(Action<EngineEventArgs> onEvent, Window window, Key key, ModifierKey modifierKeys) :
             base(onEvent, window)
         {
             Key = key;
@@ -47,7 +47,7 @@ namespace PentaGE.Core.Events
         /// <summary>
         /// Returns a string representation of the event (for debugging purposes).
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A string representation of the event.</returns>
         public override string ToString() =>
             $"{{Key={Key}, ModifierKeys={ModifierKeys}}}";
     }

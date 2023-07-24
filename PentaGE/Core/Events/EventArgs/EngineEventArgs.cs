@@ -3,9 +3,9 @@
     /// <summary>
     /// Base abstract class for events in the game engine.
     /// </summary>
-    public abstract class EngineEvent : EventArgs
+    public abstract class EngineEventArgs : EventArgs
     {
-        private readonly Action<EngineEvent> _onEvent;
+        private readonly Action<EngineEventArgs> _onEvent;
 
         /// <summary>
         /// Gets the category of the event.
@@ -36,11 +36,11 @@
         internal void RaiseEvent() => _onEvent?.Invoke(this);
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EngineEvent"/> class with the associated window.
+        /// Initializes a new instance of the <see cref="EngineEventArgs"/> class with the associated window.
         /// </summary>
         /// <param name="onEvent">The event handler to be invoked when the event is raised.</param>
         /// <param name="window">The window associated with the event.</param>
-        internal EngineEvent(Action<EngineEvent> onEvent, Window window)
+        internal EngineEventArgs(Action<EngineEventArgs> onEvent, Window window)
         {
             _onEvent = onEvent;
             Window = window;

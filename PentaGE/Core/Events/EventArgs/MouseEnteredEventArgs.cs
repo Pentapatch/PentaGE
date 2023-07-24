@@ -3,7 +3,7 @@
     /// <summary>
     /// Event arguments for a mouse entered event.
     /// </summary>
-    public sealed class MouseEnteredEventArgs : EngineEvent
+    public sealed class MouseEnteredEventArgs : EngineEventArgs
     {
         /// <summary>
         /// Gets the category of the event.
@@ -22,14 +22,14 @@
         /// </summary>
         /// <param name="onEvent">The event handler to be invoked when the event is raised.</param>
         /// <param name="window">The window associated with the event.</param>
-        public MouseEnteredEventArgs(Action<EngineEvent> onEvent, Window window) : base(onEvent, window)
+        public MouseEnteredEventArgs(Action<EngineEventArgs> onEvent, Window window) : base(onEvent, window)
         {
         }
 
         /// <summary>
         /// Returns a string representation of the event (for debugging purposes).
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A string representation of the event.</returns>
         public override string ToString() =>
             $"{{No data}}";
     }

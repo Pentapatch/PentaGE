@@ -5,7 +5,7 @@ namespace PentaGE.Core.Events
     /// <summary>
     /// Event arguments for a mouse scrolled event.
     /// </summary>
-    public sealed class MouseScrolledEventArgs : EngineEvent
+    public sealed class MouseScrolledEventArgs : EngineEventArgs
     {
         /// <summary>
         /// Gets the category of the event.
@@ -32,7 +32,7 @@ namespace PentaGE.Core.Events
         /// <param name="onEvent">The event handler to be invoked when the event is raised.</param>
         /// <param name="window">The window associated with the event.</param>
         /// <param name="offset">The scrolling offset in both the X and Y directions.</param>
-        public MouseScrolledEventArgs(Action<EngineEvent> onEvent, Window window, Vector2 offset) :
+        public MouseScrolledEventArgs(Action<EngineEventArgs> onEvent, Window window, Vector2 offset) :
             base(onEvent, window)
         {
             Offset = offset;
@@ -41,7 +41,7 @@ namespace PentaGE.Core.Events
         /// <summary>
         /// Returns a string representation of the event (for debugging purposes).
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A string representation of the event.</returns>
         public override string ToString() =>
             $"{{Offset={Offset}}}";
     }

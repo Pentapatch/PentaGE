@@ -26,7 +26,7 @@ namespace PentaGE.Core.Events
         /// <param name="window">The window associated with the event.</param>
         /// <param name="button">The mouse button associated with the event.</param>
         /// <param name="modifierKeys">The modifier keys that were pressed in combination with the key event.</param>
-        public MouseUpEventArgs(Action<EngineEvent> onEvent, Window window, MouseButton button, ModifierKey modifierKeys) :
+        public MouseUpEventArgs(Action<EngineEventArgs> onEvent, Window window, MouseButton button, ModifierKey modifierKeys) :
             base(onEvent, window, button, modifierKeys)
         {
 

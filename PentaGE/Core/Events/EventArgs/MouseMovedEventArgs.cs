@@ -5,7 +5,7 @@ namespace PentaGE.Core.Events
     /// <summary>
     /// Event arguments for a mouse moved event.
     /// </summary>
-    public sealed class MouseMovedEventArgs : EngineEvent
+    public sealed class MouseMovedEventArgs : EngineEventArgs
     {
         /// <summary>
         /// Gets the category of the event.
@@ -30,7 +30,7 @@ namespace PentaGE.Core.Events
         /// <param name="onEvent">The event handler to be invoked when the event is raised.</param>
         /// <param name="window">The window associated with the event.</param>
         /// <param name="position">The position of the mouse cursor when the event occurred.</param>
-        public MouseMovedEventArgs(Action<EngineEvent> onEvent, Window window, Point position) :
+        public MouseMovedEventArgs(Action<EngineEventArgs> onEvent, Window window, Point position) :
             base(onEvent, window)
         {
             Position = position;
@@ -39,7 +39,7 @@ namespace PentaGE.Core.Events
         /// <summary>
         /// Returns a string representation of the event (for debugging purposes).
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A string representation of the event.</returns>
         public override string ToString() =>
             $"{{Position={Position}}}";
     }

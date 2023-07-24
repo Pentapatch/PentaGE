@@ -5,7 +5,7 @@ namespace PentaGE.Core.Events
     /// <summary>
     /// Event arguments for a mouse down event.
     /// </summary>
-    public abstract class MouseButtonEventArgs : EngineEvent
+    public abstract class MouseButtonEventArgs : EngineEventArgs
     {
         /// <summary>
         /// Gets the mouse button associated with the event.
@@ -24,7 +24,7 @@ namespace PentaGE.Core.Events
         /// <param name="window">The window associated with the event.</param>
         /// <param name="button">The mouse button associated with the event.</param>
         /// <param name="modifierKeys">The modifier keys that were pressed in combination with the key event.</param>
-        internal MouseButtonEventArgs(Action<EngineEvent> onEvent, Window window, MouseButton button, ModifierKey modifierKeys) :
+        internal MouseButtonEventArgs(Action<EngineEventArgs> onEvent, Window window, MouseButton button, ModifierKey modifierKeys) :
             base(onEvent, window)
         {
             Button = button;
@@ -42,7 +42,7 @@ namespace PentaGE.Core.Events
         /// <summary>
         /// Returns a string representation of the event (for debugging purposes).
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A string representation of the event.</returns>
         public override string ToString() =>
             $"{{Button={Button}, ModifierKeys={ModifierKeys}}}";
     }

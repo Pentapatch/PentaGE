@@ -5,7 +5,7 @@ namespace PentaGE.Core.Events
     /// <summary>
     /// Event arguments for a key down event.
     /// </summary>
-    public sealed class KeyDownEventArgs : EngineEvent
+    public sealed class KeyDownEventArgs : EngineEventArgs
     {
         internal override EventCategory Category =>
             EventCategory.Input | EventCategory.Keyboard | EventCategory.Button;
@@ -35,7 +35,7 @@ namespace PentaGE.Core.Events
         /// <param name="key">The key associated with the event.</param>
         /// <param name="modifierKeys">The modifier keys that were pressed in combination with the key event.</param>
         /// <param name="isRepeat">A value indicating whether the key event is a repeat event.</param>
-        internal KeyDownEventArgs(Action<EngineEvent> onEvent, Window window, Key key, ModifierKey modifierKeys, bool isRepeat) : base(onEvent, window)
+        internal KeyDownEventArgs(Action<EngineEventArgs> onEvent, Window window, Key key, ModifierKey modifierKeys, bool isRepeat) : base(onEvent, window)
         {
             Key = key;
             ModifierKeys = modifierKeys;
@@ -53,7 +53,7 @@ namespace PentaGE.Core.Events
         /// <summary>
         /// Returns a string representation of the event (for debugging purposes).
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A string representation of the event.</returns>
         public override string ToString() =>
             $"{{Key={Key}, ModifierKeys={ModifierKeys}, IsRepeat={IsRepeat}}}";
     }

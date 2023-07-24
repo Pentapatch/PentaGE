@@ -13,7 +13,7 @@
         /// <summary>
         /// The window is being closed.
         /// </summary>
-        WindowClose,
+        WindowClosing,
 
         /// <summary>
         /// The window gains focus.

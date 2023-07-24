@@ -7,14 +7,14 @@ namespace PentaGE.Core.Events
     public sealed class EventManager
     {
         private readonly Dictionary<GLFW.Window, Window> _registeredWindows = new();
-        private readonly List<EngineEvent> _eventBuffer = new();
+        private readonly List<EngineEventArgs> _eventBuffer = new();
 
         internal EventManager() { }
 
         /// <summary>
         /// Gets or sets the category or categories of events to log.
         /// </summary>
-        internal EventCategory CategoriesToLog { get; set; } = EventCategory.None;
+        internal EventCategory CategoriesToLog { get; set; } = EventCategory.Window;
 
         #region Internal methods
 
@@ -25,6 +25,7 @@ namespace PentaGE.Core.Events
             Glfw.SetMouseButtonCallback(window.Handle, MouseButtonCallback);
             Glfw.SetCursorEnterCallback(window.Handle, MouseEnterCallback);
             Glfw.SetScrollCallback(window.Handle, MouseScrollCallback);
+            Glfw.SetCloseCallback(window.Handle, WindowClosingCallback);
 
             _registeredWindows.Add(window.Handle, window);
         }
@@ -38,6 +39,7 @@ namespace PentaGE.Core.Events
             Glfw.SetMouseButtonCallback(window.Handle, null!);
             Glfw.SetCursorEnterCallback(window.Handle, null!);
             Glfw.SetScrollCallback(window.Handle, null!);
+            Glfw.SetCloseCallback(window.Handle, null!);
 
             _registeredWindows.Remove(window.Handle);
         }
@@ -55,76 +57,48 @@ namespace PentaGE.Core.Events
         #region Event declarations
 
         public event EventHandler<KeyDownEventArgs>? KeyDown;
+
         public event EventHandler<KeyDownEventArgs>? KeyRepeat;
+
         public event EventHandler<KeyUpEventArgs>? KeyUp;
 
         public event EventHandler<MouseDownEventArgs>? MouseDown;
+
         public event EventHandler<MouseUpEventArgs>? MouseUp;
 
         public event EventHandler<MouseMovedEventArgs>? MouseMoved;
 
         public event EventHandler<MouseEnteredEventArgs>? MouseEntered;
+
         public event EventHandler<MouseLeftEventArgs>? MouseLeft;
 
         public event EventHandler<MouseScrolledEventArgs>? MouseScrolled;
+
+        public event EventHandler<WindowClosingEventArgs>? WindowClosing;
 
         #endregion
 
         #region Event handlers
 
-        private void OnKeyDown(EngineEvent e) => Invoke(e, KeyDown);
+        private void OnKeyDown(EngineEventArgs e) => InvokeEvent(e, KeyDown);
 
-        private void OnKeyRepeat(EngineEvent e) => Invoke(e, KeyDown);
+        private void OnKeyRepeat(EngineEventArgs e) => InvokeEvent(e, KeyDown);
 
-        private void OnKeyUp(EngineEvent e) => Invoke(e, KeyUp);
+        private void OnKeyUp(EngineEventArgs e) => InvokeEvent(e, KeyUp);
 
-        private void OnMouseDown(EngineEvent e) => Invoke(e, MouseDown);
+        private void OnMouseDown(EngineEventArgs e) => InvokeEvent(e, MouseDown);
 
-        private void OnMouseUp(EngineEvent e) => Invoke(e, MouseUp);
+        private void OnMouseUp(EngineEventArgs e) => InvokeEvent(e, MouseUp);
 
-        private void OnMouseMoved(EngineEvent e) => Invoke(e, MouseMoved);
+        private void OnMouseMoved(EngineEventArgs e) => InvokeEvent(e, MouseMoved);
 
-        private void OnMouseEntered(EngineEvent e) => Invoke(e, MouseEntered);
+        private void OnMouseEntered(EngineEventArgs e) => InvokeEvent(e, MouseEntered);
 
-        private void OnMouseLeft(EngineEvent e) => Invoke(e, MouseLeft);
+        private void OnMouseLeft(EngineEventArgs e) => InvokeEvent(e, MouseLeft);
 
-        private void OnMouseScrolled(EngineEvent e) => Invoke(e, MouseScrolled);
+        private void OnMouseScrolled(EngineEventArgs e) => InvokeEvent(e, MouseScrolled);
 
-        #endregion
-
-        #region Private methods
-
-        private void ExecuteEvents()
-        {
-            // Process the event buffer
-            foreach (var currentEvent in _eventBuffer)
-            {
-                currentEvent.RaiseEvent();
-                LogEvent(currentEvent);
-            }
-
-            // Clear the event buffer
-            _eventBuffer.Clear();
-        }
-
-        private void LogEvent(EngineEvent currentEvent)
-        {
-            if (CategoriesToLog == EventCategory.None) return;
-
-            if (currentEvent.BelongsToCategory(CategoriesToLog))
-            {
-                Log.Information($"Event [{currentEvent.Type}]: {currentEvent}");
-            }
-        }
-
-        private void Invoke<T>(EngineEvent e, EventHandler<T>? eventHandler)
-        {
-            // This method will greatly simply the creation of "On" methods
-            if (e is T eventArgs) eventHandler?.Invoke(this, eventArgs);
-        }
-
-        private Window GetWindow(GLFW.Window windowHandle) =>
-            _registeredWindows[windowHandle];
+        private void OnWindowClosing(EngineEventArgs e) => InvokeEvent(e, WindowClosing);
 
         #endregion
 
@@ -210,6 +184,49 @@ namespace PentaGE.Core.Events
                 GetWindow(windowHandle),
                 new Vector2((float)xOffset, (float)yOffset)));
         }
+
+        private void WindowClosingCallback(GLFW.Window windowHandle)
+        {
+            _eventBuffer.Add(new WindowClosingEventArgs(
+                OnWindowClosing,
+                GetWindow(windowHandle)));
+        }
+
+        #endregion
+
+        #region Private methods
+
+        private void ExecuteEvents()
+        {
+            // Process the event buffer
+            foreach (var currentEvent in _eventBuffer)
+            {
+                currentEvent.RaiseEvent();
+                LogEvent(currentEvent);
+            }
+
+            // Clear the event buffer
+            _eventBuffer.Clear();
+        }
+
+        private void LogEvent(EngineEventArgs currentEvent)
+        {
+            if (CategoriesToLog == EventCategory.None) return;
+
+            if (currentEvent.BelongsToCategory(CategoriesToLog))
+            {
+                Log.Information($"Event [{currentEvent.Type}]: {currentEvent}");
+            }
+        }
+
+        private void InvokeEvent<T>(EngineEventArgs e, EventHandler<T>? eventHandler)
+        {
+            // This method will greatly simply the creation of "On" methods
+            if (e is T eventArgs) eventHandler?.Invoke(this, eventArgs);
+        }
+
+        private Window GetWindow(GLFW.Window windowHandle) =>
+            _registeredWindows[windowHandle];
 
         #endregion
     }
