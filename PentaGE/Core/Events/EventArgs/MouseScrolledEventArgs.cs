@@ -39,9 +39,9 @@ namespace PentaGE.Core.Events
         }
 
         /// <summary>
-        /// Returns a string representation of the event (for debugging purposes).
+        /// Returns a string representation of the <see cref="MouseScrolledEventArgs"/> object, including the mouse scroll offset.
         /// </summary>
-        /// <returns>A string representation of the event.</returns>
+        /// <returns>A string representing the mouse scrolled event with its associated data.</returns>
         public override string ToString() =>
             $"{{Offset={Offset}}}";
     }

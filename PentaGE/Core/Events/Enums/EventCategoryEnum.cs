@@ -50,5 +50,20 @@
         /// Events related to scrolling.
         /// </summary>
         Scroll = 1 << 7,
+
+        /// <summary>
+        /// Events related to focus.
+        /// </summary>
+        Focus = 1 << 8,
+
+        /// <summary>
+        /// Events related to closing.
+        /// </summary>
+        Closing = 1 << 9,
+
+        /// <summary>
+        /// Events related to iconifying (minimizing or restoring).
+        /// </summary>
+        Iconify = 1 << 10,
     }
 }

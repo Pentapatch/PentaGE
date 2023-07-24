@@ -3,10 +3,23 @@
 namespace PentaGE.Core.Events
 {
     /// <summary>
-    /// Event arguments for a mouse down event.
+    /// Event arguments for a mouse down or up event.
     /// </summary>
-    public abstract class MouseButtonEventArgs : EngineEventArgs
+    public sealed class MouseButtonEventArgs : EngineEventArgs
     {
+        private readonly EventCategory _categories;
+        private readonly EventType _type;
+
+        /// <summary>
+        /// Gets the category of the event.
+        /// </summary>
+        internal override EventCategory Category => _categories;
+
+        /// <summary>
+        /// Gets the type of the event.
+        /// </summary>
+        internal override EventType Type => _type;
+
         /// <summary>
         /// Gets the mouse button associated with the event.
         /// </summary>
@@ -24,25 +37,35 @@ namespace PentaGE.Core.Events
         /// <param name="window">The window associated with the event.</param>
         /// <param name="button">The mouse button associated with the event.</param>
         /// <param name="modifierKeys">The modifier keys that were pressed in combination with the key event.</param>
-        internal MouseButtonEventArgs(Action<EngineEventArgs> onEvent, Window window, MouseButton button, ModifierKey modifierKeys) :
+        /// <param name="categories">The category or categories of the event.</param>
+        /// <param name="type">The type of the event.</param>
+        internal MouseButtonEventArgs(
+            Action<EngineEventArgs> onEvent,
+            Window window,
+            MouseButton button,
+            ModifierKey modifierKeys,
+            EventCategory categories,
+            EventType type) :
             base(onEvent, window)
         {
             Button = button;
             ModifierKeys = modifierKeys;
+            _categories = categories;
+            _type = type;
         }
 
         /// <summary>
-        /// Checks whether a specific modifier key was used during the key event.
+        /// Checks whether any of the specified modifier keys were used during the key event.
         /// </summary>
-        /// <param name="modifierKey">The modifier key to check.</param>
-        /// <returns><c>true</c> if the specified modifier key was used; otherwise, <c>false</c>.</returns>
-        public bool ModifierKeyWasUsed(ModifierKey modifierKey) =>
-            ModifierKeys.HasFlag(modifierKey);
+        /// <param name="modifierKeys">The modifier keys to check.</param>
+        /// <returns><c>true</c> if any of the specified modifier keys were used; otherwise, <c>false</c>.</returns>
+        public bool ModifierKeyWasUsed(ModifierKey modifierKeys) =>
+            (ModifierKeys & modifierKeys) != ModifierKey.None;
 
         /// <summary>
-        /// Returns a string representation of the event (for debugging purposes).
+        /// Returns a string representation of the <see cref="MouseButtonEventArgs"/> object, including the mouse button and modifier keys.
         /// </summary>
-        /// <returns>A string representation of the event.</returns>
+        /// <returns>A string representing the mouse button event with its associated data.</returns>
         public override string ToString() =>
             $"{{Button={Button}, ModifierKeys={ModifierKeys}}}";
     }

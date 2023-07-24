@@ -37,9 +37,9 @@ namespace PentaGE.Core.Events
         }
 
         /// <summary>
-        /// Returns a string representation of the event (for debugging purposes).
+        /// Returns a string representation of the <see cref="MouseMovedEventArgs"/> object, including the mouse position.
         /// </summary>
-        /// <returns>A string representation of the event.</returns>
+        /// <returns>A string representing the mouse moved event with its associated data.</returns>
         public override string ToString() =>
             $"{{Position={Position}}}";
     }

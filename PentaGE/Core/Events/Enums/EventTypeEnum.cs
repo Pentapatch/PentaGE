@@ -18,7 +18,7 @@
         /// <summary>
         /// The window gains focus.
         /// </summary>
-        WindowFocus,
+        WindowGotFocus,
 
         /// <summary>
         /// The window loses focus.
@@ -34,6 +34,16 @@
         /// The window is resized.
         /// </summary>
         WindowResize,
+
+        /// <summary>
+        /// The window is minimized.
+        /// </summary>
+        WindowMinimized,
+
+        /// <summary>
+        /// The window is restored.
+        /// </summary>
+        WindowRestored,
 
         /// <summary>
         /// A key is pressed.

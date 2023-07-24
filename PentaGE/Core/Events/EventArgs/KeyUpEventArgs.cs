@@ -37,17 +37,17 @@ namespace PentaGE.Core.Events
         }
 
         /// <summary>
-        /// Checks whether a specific modifier key was used during the key event.
+        /// Checks whether any of the specified modifier keys were used during the key event.
         /// </summary>
-        /// <param name="modifierKey">The modifier key to check.</param>
-        /// <returns><c>true</c> if the specified modifier key was used; otherwise, <c>false</c>.</returns>
-        public bool ModifierKeyWasUsed(ModifierKey modifierKey) =>
-            ModifierKeys.HasFlag(modifierKey);
+        /// <param name="modifierKeys">The modifier keys to check.</param>
+        /// <returns><c>true</c> if any of the specified modifier keys were used; otherwise, <c>false</c>.</returns>
+        public bool ModifierKeyWasUsed(ModifierKey modifierKeys) =>
+            (ModifierKeys & modifierKeys) != ModifierKey.None;
 
         /// <summary>
-        /// Returns a string representation of the event (for debugging purposes).
+        /// Returns a string representation of the <see cref="KeyUpEventArgs"/> object, including the key and modifier keys.
         /// </summary>
-        /// <returns>A string representation of the event.</returns>
+        /// <returns>A string representing the key event with its associated data.</returns>
         public override string ToString() =>
             $"{{Key={Key}, ModifierKeys={ModifierKeys}}}";
     }

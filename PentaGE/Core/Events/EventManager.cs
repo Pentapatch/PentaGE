@@ -26,6 +26,8 @@ namespace PentaGE.Core.Events
             Glfw.SetCursorEnterCallback(window.Handle, MouseEnterCallback);
             Glfw.SetScrollCallback(window.Handle, MouseScrollCallback);
             Glfw.SetCloseCallback(window.Handle, WindowClosingCallback);
+            Glfw.SetWindowFocusCallback(window.Handle, WindowFocusCallback);
+            Glfw.SetWindowIconifyCallback(window.Handle, WindowIconifyCallback);
 
             _registeredWindows.Add(window.Handle, window);
         }
@@ -40,6 +42,8 @@ namespace PentaGE.Core.Events
             Glfw.SetCursorEnterCallback(window.Handle, null!);
             Glfw.SetScrollCallback(window.Handle, null!);
             Glfw.SetCloseCallback(window.Handle, null!);
+            Glfw.SetWindowFocusCallback(window.Handle, null!);
+            Glfw.SetWindowIconifyCallback(window.Handle, null!);
 
             _registeredWindows.Remove(window.Handle);
         }
@@ -62,19 +66,27 @@ namespace PentaGE.Core.Events
 
         public event EventHandler<KeyUpEventArgs>? KeyUp;
 
-        public event EventHandler<MouseDownEventArgs>? MouseDown;
+        public event EventHandler<MouseButtonEventArgs>? MouseDown;
 
-        public event EventHandler<MouseUpEventArgs>? MouseUp;
+        public event EventHandler<MouseButtonEventArgs>? MouseUp;
 
         public event EventHandler<MouseMovedEventArgs>? MouseMoved;
 
-        public event EventHandler<MouseEnteredEventArgs>? MouseEntered;
+        public event EventHandler<EmptyEventArgs>? MouseEntered;
 
-        public event EventHandler<MouseLeftEventArgs>? MouseLeft;
+        public event EventHandler<EmptyEventArgs>? MouseLeft;
 
         public event EventHandler<MouseScrolledEventArgs>? MouseScrolled;
 
-        public event EventHandler<WindowClosingEventArgs>? WindowClosing;
+        public event EventHandler<EmptyEventArgs>? WindowClosing;
+
+        public event EventHandler<EmptyEventArgs>? WindowGotFocus;
+
+        public event EventHandler<EmptyEventArgs>? WindowLostFocus;
+
+        public event EventHandler<EmptyEventArgs>? WindowMinimized;
+
+        public event EventHandler<EmptyEventArgs>? WindowRestored;
 
         #endregion
 
@@ -82,7 +94,7 @@ namespace PentaGE.Core.Events
 
         private void OnKeyDown(EngineEventArgs e) => InvokeEvent(e, KeyDown);
 
-        private void OnKeyRepeat(EngineEventArgs e) => InvokeEvent(e, KeyDown);
+        private void OnKeyRepeat(EngineEventArgs e) => InvokeEvent(e, KeyRepeat);
 
         private void OnKeyUp(EngineEventArgs e) => InvokeEvent(e, KeyUp);
 
@@ -99,6 +111,14 @@ namespace PentaGE.Core.Events
         private void OnMouseScrolled(EngineEventArgs e) => InvokeEvent(e, MouseScrolled);
 
         private void OnWindowClosing(EngineEventArgs e) => InvokeEvent(e, WindowClosing);
+
+        private void OnWindowGotFocus(EngineEventArgs e) => InvokeEvent(e, WindowGotFocus);
+
+        private void OnWindowLostFocus(EngineEventArgs e) => InvokeEvent(e, WindowLostFocus);
+
+        private void OnWindowMinimized(EngineEventArgs e) => InvokeEvent(e, WindowMinimized);
+
+        private void OnWindowRestored(EngineEventArgs e) => InvokeEvent(e, WindowRestored);
 
         #endregion
 
@@ -137,19 +157,23 @@ namespace PentaGE.Core.Events
         {
             if (state == InputState.Press)
             {
-                _eventBuffer.Add(new MouseDownEventArgs(
+                _eventBuffer.Add(new MouseButtonEventArgs(
                     OnMouseDown,
                     GetWindow(windowHandle),
                     (Common.MouseButton)button,
-                    (Common.ModifierKey)mods));
+                    (Common.ModifierKey)mods,
+                    EventCategory.Input | EventCategory.Mouse | EventCategory.Button,
+                    EventType.MouseButtonDown));
             }
             else if (state == InputState.Release)
             {
-                _eventBuffer.Add(new MouseUpEventArgs(
+                _eventBuffer.Add(new MouseButtonEventArgs(
                     OnMouseUp,
                     GetWindow(windowHandle),
                     (Common.MouseButton)button,
-                    (Common.ModifierKey)mods));
+                    (Common.ModifierKey)mods,
+                    EventCategory.Input | EventCategory.Mouse | EventCategory.Button,
+                    EventType.MouseButtonUp));
             }
         }
 
@@ -165,15 +189,19 @@ namespace PentaGE.Core.Events
         {
             if (entered)
             {
-                _eventBuffer.Add(new MouseEnteredEventArgs(
+                _eventBuffer.Add(new EmptyEventArgs(
                     OnMouseEntered,
-                    GetWindow(windowHandle)));
+                    GetWindow(windowHandle),
+                    EventCategory.Input | EventCategory.Mouse | EventCategory.Hover,
+                    EventType.MouseEntered));
             }
             else
             {
-                _eventBuffer.Add(new MouseLeftEventArgs(
+                _eventBuffer.Add(new EmptyEventArgs(
                     OnMouseLeft,
-                    GetWindow(windowHandle)));
+                    GetWindow(windowHandle),
+                    EventCategory.Input | EventCategory.Mouse | EventCategory.Hover,
+                    EventType.MouseLeft));
             }
         }
 
@@ -187,9 +215,51 @@ namespace PentaGE.Core.Events
 
         private void WindowClosingCallback(GLFW.Window windowHandle)
         {
-            _eventBuffer.Add(new WindowClosingEventArgs(
+            _eventBuffer.Add(new EmptyEventArgs(
                 OnWindowClosing,
-                GetWindow(windowHandle)));
+                GetWindow(windowHandle),
+                EventCategory.Window | EventCategory.Closing,
+                EventType.WindowClosing));
+        }
+
+        private void WindowFocusCallback(GLFW.Window windowHandle, bool focused)
+        {
+            if (focused)
+            {
+                _eventBuffer.Add(new EmptyEventArgs(
+                    OnWindowGotFocus,
+                    GetWindow(windowHandle),
+                    EventCategory.Window | EventCategory.Focus,
+                    EventType.WindowGotFocus));
+            }
+            else
+            {
+                _eventBuffer.Add(new EmptyEventArgs(
+                    OnWindowLostFocus,
+                    GetWindow(windowHandle),
+                    EventCategory.Window | EventCategory.Focus,
+                    EventType.WindowLostFocus));
+            }
+        }
+
+        private void WindowIconifyCallback(IntPtr windowHandle, bool focusing)
+        {
+            if (focusing)
+            {
+                _eventBuffer.Add(new EmptyEventArgs(
+                    OnWindowMinimized,
+                    GetWindow(windowHandle),
+                    EventCategory.Window | EventCategory.Iconify,
+                    EventType.WindowMinimized));
+            }
+            else
+            {
+                _eventBuffer.Add(new EmptyEventArgs(
+                    OnWindowRestored,
+                    GetWindow(windowHandle),
+                    EventCategory.Window | EventCategory.Iconify,
+                    EventType.WindowRestored));
+            }
         }
 
         #endregion
@@ -227,6 +297,9 @@ namespace PentaGE.Core.Events
 
         private Window GetWindow(GLFW.Window windowHandle) =>
             _registeredWindows[windowHandle];
+
+        private Window GetWindow(IntPtr windowHandle) =>
+            _registeredWindows[new GLFW.Window(windowHandle)];
 
         #endregion
     }
