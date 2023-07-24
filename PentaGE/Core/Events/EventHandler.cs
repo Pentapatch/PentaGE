@@ -2,10 +2,10 @@
 
 namespace PentaGE.Core.Events
 {
-    internal class EventHandler
+    internal sealed class EventHandler
     {
         private readonly PentaGameEngine _engine;
-        private Dictionary<GLFW.Window, Window> _registeredWindows = new();
+        private readonly Dictionary<GLFW.Window, Window> _registeredWindows = new();
 
         internal EventHandler(PentaGameEngine engine)
         {
@@ -40,7 +40,7 @@ namespace PentaGE.Core.Events
         private Window GetWindow(GLFW.Window windowHandle) => 
             _registeredWindows[windowHandle];
 
-        private void KeyCallback(GLFW.Window window, Keys key, int scancode, InputState state, ModifierKeys mods)
+        private void KeyCallback(GLFW.Window windowHandle, Keys key, int scancode, InputState state, ModifierKeys mods)
         {
             // Handle the key event here
             if (state == InputState.Press)
@@ -57,12 +57,12 @@ namespace PentaGE.Core.Events
             }
         }
 
-        private void MousePositionCallback(GLFW.Window window, double xPos, double yPos)
+        private void MousePositionCallback(GLFW.Window windowHandle, double xPos, double yPos)
         {
             
         }
 
-        private void MouseButtonCallback(GLFW.Window window, MouseButton button, InputState state, ModifierKeys mods)
+        private void MouseButtonCallback(GLFW.Window windowHandle, MouseButton button, InputState state, ModifierKeys mods)
         {
             // Handle the mouse button event here
             if (state == InputState.Press)
