@@ -19,7 +19,20 @@ namespace Sandbox
             Events.MouseUp += Events_MouseUp;
             Events.MouseMoved += Events_MouseMoved;
 
+            Events.MouseEntered += Events_MouseEntered;
+            Events.MouseLeft += Events_MouseLeft;
+
             return true;
+        }
+
+        private void Events_MouseLeft(object? sender, MouseLeftEventArgs e)
+        {
+            Log.Information($"Mouse left the window.");
+        }
+
+        private void Events_MouseEntered(object? sender, MouseEnteredEventArgs e)
+        {
+            Log.Information($"Mouse entered the window.");
         }
 
         private void Events_MouseMoved(object? sender, MouseMovedEventArgs e)

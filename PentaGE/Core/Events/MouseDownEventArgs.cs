@@ -10,13 +10,13 @@ namespace PentaGE.Core.Events
         /// <summary>
         /// Gets the category of the event.
         /// </summary>
-        protected internal override EventCategory Category => 
-            EventCategory.Input | EventCategory.MouseButton;
+        internal override EventCategory Category => 
+            EventCategory.Input | EventCategory.Mouse | EventCategory.MouseButton;
 
         /// <summary>
         /// Gets the type of the event.
         /// </summary>
-        protected internal override EventType Type => 
+        internal override EventType Type => 
             EventType.MouseButtonDown;
 
         /// <summary>

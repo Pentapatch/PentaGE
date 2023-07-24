@@ -7,10 +7,10 @@ namespace PentaGE.Core.Events
     /// </summary>
     public sealed class KeyUpEventArgs : EngineEvent
     {
-        protected internal override EventCategory Category =>
-            EventCategory.Key | EventCategory.Input;
+        internal override EventCategory Category =>
+            EventCategory.Input | EventCategory.Key;
 
-        protected internal override EventType Type => EventType.KeyUp;
+        internal override EventType Type => EventType.KeyUp;
 
         /// <summary>
         /// Gets the key associated with the event.

@@ -10,11 +10,14 @@ namespace PentaGE.Core.Events
 
         internal EventManager() { }
 
+        #region Internal methods
+
         internal void AddCallbacks(Window window)
         {
             Glfw.SetKeyCallback(window.Handle, KeyCallback);
             Glfw.SetCursorPositionCallback(window.Handle, MousePositionCallback);
             Glfw.SetMouseButtonCallback(window.Handle, MouseButtonCallback);
+            Glfw.SetCursorEnterCallback(window.Handle, MouseEnterCallback);
 
             _registeredWindows.Add(window.Handle, window);
         }
@@ -29,7 +32,6 @@ namespace PentaGE.Core.Events
 
             _registeredWindows.Remove(window.Handle);
         }
-
         internal void Update(bool pollEvents = true)
         {
             // Optionally poll events from Glfw
@@ -39,6 +41,8 @@ namespace PentaGE.Core.Events
             ExecuteEvents();
         }
 
+        #endregion
+
         #region Event declarations
 
         public event EventHandler<KeyDownEventArgs>? KeyDown;
@@ -47,7 +51,11 @@ namespace PentaGE.Core.Events
 
         public event EventHandler<MouseDownEventArgs>? MouseDown;
         public event EventHandler<MouseUpEventArgs>? MouseUp;
+
         public event EventHandler<MouseMovedEventArgs>? MouseMoved;
+
+        public event EventHandler<MouseEnteredEventArgs>? MouseEntered;
+        public event EventHandler<MouseLeftEventArgs>? MouseLeft;
 
         #endregion
 
@@ -64,6 +72,10 @@ namespace PentaGE.Core.Events
         private void OnMouseUp(EngineEvent e) => Invoke(e, MouseUp);
 
         private void OnMouseMoved(EngineEvent e) => Invoke(e, MouseMoved);
+
+        private void OnMouseEntered(EngineEvent e) => Invoke(e, MouseEntered);
+
+        private void OnMouseLeft(EngineEvent e) => Invoke(e, MouseLeft);
 
         #endregion
 
@@ -149,6 +161,22 @@ namespace PentaGE.Core.Events
                     OnMouseMoved,
                     GetWindow(windowHandle),
                     new((int)xPos, (int)yPos)));
+        }
+
+        private void MouseEnterCallback(GLFW.Window windowHandle, bool entered)
+        {
+            if (entered)
+            {
+                _eventBuffer.Add(new MouseEnteredEventArgs(
+                    OnMouseEntered,
+                    GetWindow(windowHandle)));
+            }
+            else
+            {
+                _eventBuffer.Add(new MouseLeftEventArgs(
+                    OnMouseLeft,
+                    GetWindow(windowHandle)));
+            }
         }
 
         #endregion
