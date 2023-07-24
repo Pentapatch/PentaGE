@@ -7,9 +7,9 @@
     internal enum EventCategory
     {
         /// <summary>
-        /// Default or undefined category.
+        /// No category.
         /// </summary>
-        Undefined = 0,
+        None = 0,
 
         /// <summary>
         /// Events related to windows.
@@ -45,5 +45,10 @@
         /// Events related to hovering (enter or leave).
         /// </summary>
         Hover = 1 << 6,
+
+        /// <summary>
+        /// Events related to scrolling.
+        /// </summary>
+        Scroll = 1 << 7,
     }
 }

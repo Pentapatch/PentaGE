@@ -1,5 +1,6 @@
 ﻿using GLFW;
 using Serilog;
+using System.Numerics;
 
 namespace PentaGE.Core.Events
 {
@@ -13,7 +14,7 @@ namespace PentaGE.Core.Events
         /// <summary>
         /// Gets or sets the category or categories of events to log.
         /// </summary>
-        internal EventCategory CategoriesToLog { get; set; } = EventCategory.Undefined;
+        internal EventCategory CategoriesToLog { get; set; } = EventCategory.None;
 
         #region Internal methods
 
@@ -23,6 +24,7 @@ namespace PentaGE.Core.Events
             Glfw.SetCursorPositionCallback(window.Handle, MousePositionCallback);
             Glfw.SetMouseButtonCallback(window.Handle, MouseButtonCallback);
             Glfw.SetCursorEnterCallback(window.Handle, MouseEnterCallback);
+            Glfw.SetScrollCallback(window.Handle, MouseScrollCallback);
 
             _registeredWindows.Add(window.Handle, window);
         }
@@ -34,6 +36,8 @@ namespace PentaGE.Core.Events
             Glfw.SetKeyCallback(window.Handle, null!);
             Glfw.SetCursorPositionCallback(window.Handle, null!);
             Glfw.SetMouseButtonCallback(window.Handle, null!);
+            Glfw.SetCursorEnterCallback(window.Handle, null!);
+            Glfw.SetScrollCallback(window.Handle, null!);
 
             _registeredWindows.Remove(window.Handle);
         }
@@ -62,6 +66,8 @@ namespace PentaGE.Core.Events
         public event EventHandler<MouseEnteredEventArgs>? MouseEntered;
         public event EventHandler<MouseLeftEventArgs>? MouseLeft;
 
+        public event EventHandler<MouseScrolledEventArgs>? MouseScrolled;
+
         #endregion
 
         #region Event handlers
@@ -82,6 +88,8 @@ namespace PentaGE.Core.Events
 
         private void OnMouseLeft(EngineEvent e) => Invoke(e, MouseLeft);
 
+        private void OnMouseScrolled(EngineEvent e) => Invoke(e, MouseScrolled);
+
         #endregion
 
         #region Private methods
@@ -101,7 +109,7 @@ namespace PentaGE.Core.Events
 
         private void LogEvent(EngineEvent currentEvent)
         {
-            if (CategoriesToLog == EventCategory.Undefined) return;
+            if (CategoriesToLog == EventCategory.None) return;
             
             if (currentEvent.BelongsToCategory(CategoriesToLog))
             {
@@ -193,6 +201,14 @@ namespace PentaGE.Core.Events
                     OnMouseLeft,
                     GetWindow(windowHandle)));
             }
+        }
+
+        private void MouseScrollCallback(GLFW.Window windowHandle, double xOffset, double yOffset)
+        {
+            _eventBuffer.Add(new MouseScrolledEventArgs(
+                OnMouseScrolled,
+                GetWindow(windowHandle),
+                new Vector2((float)xOffset, (float)yOffset)));
         }
 
         #endregion

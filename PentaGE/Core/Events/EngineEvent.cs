@@ -23,7 +23,7 @@
         /// <param name="categories">The categories to check.</param>
         /// <returns><c>true</c> if the event belongs to any of the specified categories; otherwise, <c>false</c>.</returns>
         internal bool BelongsToCategory(EventCategory categories) =>
-            (Category & categories) != EventCategory.Undefined;
+            (Category & categories) != EventCategory.None;
 
         /// <summary>
         /// Gets the window associated with the event.
