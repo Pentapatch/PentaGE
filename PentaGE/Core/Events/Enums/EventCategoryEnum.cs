@@ -12,6 +12,11 @@
         None = 0,
 
         /// <summary>
+        /// Represents all categories of events.
+        /// </summary>
+        All = ~0,
+
+        /// <summary>
         /// Events related to windows.
         /// </summary>
         Window = 1 << 0,
@@ -75,5 +80,10 @@
         /// Events related to resizing.
         /// </summary>
         Resize = 1 << 12,
+
+        /// <summary>
+        /// Events related to errors.
+        /// </summary>
+        Error = 1 << 13
     }
 }

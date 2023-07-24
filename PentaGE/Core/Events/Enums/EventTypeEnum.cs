@@ -89,5 +89,10 @@
         /// The mouse cursor leaves the window.
         /// 
         MouseLeft,
+
+        /// <summary>
+        /// A Glfw error occurs.
+        /// </summary>
+        Error,
     }
 }

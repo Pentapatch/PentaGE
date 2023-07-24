@@ -2,6 +2,7 @@
 using Serilog;
 using System.Drawing;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace PentaGE.Core.Events
 {
@@ -15,7 +16,7 @@ namespace PentaGE.Core.Events
         /// <summary>
         /// Gets or sets the category or categories of events to log.
         /// </summary>
-        internal EventCategory CategoriesToLog { get; set; } = EventCategory.Window;
+        internal EventCategory CategoriesToLog { get; set; } = EventCategory.Error;
 
         #region Internal methods
 
@@ -32,6 +33,7 @@ namespace PentaGE.Core.Events
             Glfw.SetWindowMaximizeCallback(window.Handle, WindowMaximizeCallback);
             Glfw.SetWindowSizeCallback(window.Handle, WindowSizeCallback);
             Glfw.SetWindowPositionCallback(window.Handle, WindowPositionCallback);
+            Glfw.SetErrorCallback(ErrorCallback);
 
             _registeredWindows.Add(window.Handle, window);
         }
@@ -101,6 +103,8 @@ namespace PentaGE.Core.Events
 
         public event EventHandler<WindowMovedEventArgs>? WindowMoved;
 
+        public event EventHandler<GlfwErrorEventArgs>? GlfwError;
+
         #endregion
 
         #region Event handlers
@@ -138,6 +142,8 @@ namespace PentaGE.Core.Events
         private void OnWindowResized(EngineEventArgs e) => InvokeEvent(e, WindowResized);
 
         private void OnWindowMoved(EngineEventArgs e) => InvokeEvent(e, WindowMoved);
+
+        private void OnGlfwError(EngineEventArgs e) => InvokeEvent(e, GlfwError);
 
         #endregion
 
@@ -196,13 +202,11 @@ namespace PentaGE.Core.Events
             }
         }
 
-        private void MousePositionCallback(GLFW.Window windowHandle, double xPos, double yPos)
-        {
+        private void MousePositionCallback(GLFW.Window windowHandle, double xPos, double yPos) => 
             _eventBuffer.Add(new MouseMovedEventArgs(
                     OnMouseMoved,
                     GetWindow(windowHandle),
                     new((int)xPos, (int)yPos)));
-        }
 
         private void MouseEnterCallback(GLFW.Window windowHandle, bool entered)
         {
@@ -224,22 +228,18 @@ namespace PentaGE.Core.Events
             }
         }
 
-        private void MouseScrollCallback(GLFW.Window windowHandle, double xOffset, double yOffset)
-        {
+        private void MouseScrollCallback(GLFW.Window windowHandle, double xOffset, double yOffset) => 
             _eventBuffer.Add(new MouseScrolledEventArgs(
                 OnMouseScrolled,
                 GetWindow(windowHandle),
                 new Vector2((float)xOffset, (float)yOffset)));
-        }
 
-        private void WindowClosingCallback(GLFW.Window windowHandle)
-        {
+        private void WindowClosingCallback(GLFW.Window windowHandle) => 
             _eventBuffer.Add(new EmptyEventArgs(
                 OnWindowClosing,
                 GetWindow(windowHandle),
                 EventCategory.Window | EventCategory.Closing,
                 EventType.WindowClosing));
-        }
 
         private void WindowFocusCallback(GLFW.Window windowHandle, bool focused)
         {
@@ -301,20 +301,25 @@ namespace PentaGE.Core.Events
             }
         }
 
-        private void WindowSizeCallback(GLFW.Window windowHandle, int width, int height)
-        {
+        private void WindowSizeCallback(GLFW.Window windowHandle, int width, int height) => 
             _eventBuffer.Add(new WindowResizedEventArgs(
                 OnWindowResized,
                 GetWindow(windowHandle),
                 new Point(width, height)));
-        }
 
-        private void WindowPositionCallback(GLFW.Window windowHandle, int xPos, int yPos)
-        {
+        private void WindowPositionCallback(GLFW.Window windowHandle, int xPos, int yPos) => 
             _eventBuffer.Add(new WindowMovedEventArgs(
                 OnWindowMoved,
                 GetWindow(windowHandle),
                 new Point(xPos, yPos)));
+
+        private void ErrorCallback(ErrorCode errorCode, IntPtr message)
+        {
+            string errorMessage = Marshal.PtrToStringAnsi(message) ?? "";
+            _eventBuffer.Add(new GlfwErrorEventArgs(
+                OnGlfwError,
+                errorMessage,
+                errorCode));
         }
 
         #endregion
