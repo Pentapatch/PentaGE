@@ -49,5 +49,12 @@ namespace PentaGE.Core.Events
         /// <returns><c>true</c> if the specified modifier key was used; otherwise, <c>false</c>.</returns>
         public bool ModifierKeyWasUsed(ModifierKey modifierKey) =>
             ModifierKeys.HasFlag(modifierKey);
+
+        /// <summary>
+        /// Returns a string representation of the event (for debugging purposes).
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString() =>
+            $"{{Key={Key}, ModifierKeys={ModifierKeys}, IsRepeat={IsRepeat}}}";
     }
 }

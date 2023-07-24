@@ -1,4 +1,7 @@
-﻿namespace PentaGE.Core.Events
+﻿using GLFW;
+using PentaGE.Common;
+
+namespace PentaGE.Core.Events
 {
     /// <summary>
     /// Event arguments for mouse left event.
@@ -25,5 +28,12 @@
         public MouseLeftEventArgs(Action<EngineEvent> onEvent, Window window) : base(onEvent, window)
         {
         }
+
+        /// <summary>
+        /// Returns a string representation of the event (for debugging purposes).
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString() =>
+            $"{{No data}}";
     }
 }

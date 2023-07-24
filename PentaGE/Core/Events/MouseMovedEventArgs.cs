@@ -1,4 +1,6 @@
-﻿using System.Drawing;
+﻿using GLFW;
+using PentaGE.Common;
+using System.Drawing;
 
 namespace PentaGE.Core.Events
 {
@@ -35,5 +37,12 @@ namespace PentaGE.Core.Events
         {
             Position = position;
         }
+
+        /// <summary>
+        /// Returns a string representation of the event (for debugging purposes).
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString() =>
+            $"{{Position={Position}}}";
     }
 }

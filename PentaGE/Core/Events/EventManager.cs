@@ -13,7 +13,7 @@ namespace PentaGE.Core.Events
         /// <summary>
         /// Gets or sets the category or categories of events to log.
         /// </summary>
-        internal EventCategory CategoriesToLog { get; set; } = EventCategory.Keyboard;
+        internal EventCategory CategoriesToLog { get; set; } = EventCategory.Undefined;
 
         #region Internal methods
 
@@ -105,8 +105,7 @@ namespace PentaGE.Core.Events
             
             if (currentEvent.BelongsToCategory(CategoriesToLog))
             {
-                Log.Information($"Event: {currentEvent.Type}\n:" +
-                                $"\t{currentEvent}");
+                Log.Information($"Event [{currentEvent.Type}]: {currentEvent}");
             }
         }
 
