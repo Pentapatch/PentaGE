@@ -17,8 +17,14 @@ namespace Sandbox
 
             Events.MouseDown += Events_MouseDown;
             Events.MouseUp += Events_MouseUp;
+            Events.MouseMoved += Events_MouseMoved;
 
             return true;
+        }
+
+        private void Events_MouseMoved(object? sender, MouseMovedEventArgs e)
+        {
+            Log.Information($"Mouse position was changed: {e.Position}.");
         }
 
         private void Events_MouseUp(object? sender, MouseUpEventArgs e)

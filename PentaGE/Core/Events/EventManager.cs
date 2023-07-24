@@ -47,6 +47,7 @@ namespace PentaGE.Core.Events
 
         public event EventHandler<MouseDownEventArgs>? MouseDown;
         public event EventHandler<MouseUpEventArgs>? MouseUp;
+        public event EventHandler<MouseMovedEventArgs>? MouseMoved;
 
         #endregion
 
@@ -61,6 +62,8 @@ namespace PentaGE.Core.Events
         private void OnMouseDown(EngineEvent e) => Invoke(e, MouseDown);
 
         private void OnMouseUp(EngineEvent e) => Invoke(e, MouseUp);
+
+        private void OnMouseMoved(EngineEvent e) => Invoke(e, MouseMoved);
 
         #endregion
 
@@ -142,7 +145,10 @@ namespace PentaGE.Core.Events
 
         private void MousePositionCallback(GLFW.Window windowHandle, double xPos, double yPos)
         {
-            
+            _eventBuffer.Add(new MouseMovedEventArgs(
+                    OnMouseMoved,
+                    GetWindow(windowHandle),
+                    new((int)xPos, (int)yPos)));
         }
 
         #endregion

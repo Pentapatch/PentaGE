@@ -1,5 +1,7 @@
 ﻿namespace PentaGE.Common
 {
+    // These values comes from Glfw.Keys and will be directly converted
+
     /// <summary>
     /// Represents keyboard keys.
     /// </summary>

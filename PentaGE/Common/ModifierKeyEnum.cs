@@ -1,5 +1,7 @@
 ﻿namespace PentaGE.Common
 {
+    // These values comes from Glfw.ModifierKeys and will be directly converted
+    
     /// <summary>
     /// Specifies the modifier keys used in combination with other input events.
     /// </summary>
