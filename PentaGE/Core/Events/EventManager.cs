@@ -1,5 +1,5 @@
 ﻿using GLFW;
-using System.Numerics;
+using Serilog;
 
 namespace PentaGE.Core.Events
 {
@@ -9,6 +9,11 @@ namespace PentaGE.Core.Events
         private readonly List<EngineEvent> _eventBuffer = new();
 
         internal EventManager() { }
+
+        /// <summary>
+        /// Gets or sets the category or categories of events to log.
+        /// </summary>
+        internal EventCategory CategoriesToLog { get; set; } = EventCategory.Keyboard;
 
         #region Internal methods
 
@@ -87,10 +92,22 @@ namespace PentaGE.Core.Events
             foreach (var currentEvent in _eventBuffer)
             {
                 currentEvent.RaiseEvent();
+                LogEvent(currentEvent);
             }
 
             // Clear the event buffer
             _eventBuffer.Clear();
+        }
+
+        private void LogEvent(EngineEvent currentEvent)
+        {
+            if (CategoriesToLog == EventCategory.Undefined) return;
+            
+            if (currentEvent.BelongsToCategory(CategoriesToLog))
+            {
+                Log.Information($"Event: {currentEvent.Type}\n:" +
+                                $"\t{currentEvent}");
+            }
         }
 
         private void Invoke<T>(EngineEvent e, EventHandler<T>? eventHandler)

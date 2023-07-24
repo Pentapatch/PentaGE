@@ -22,9 +22,9 @@
         Input = 1 << 1,
 
         /// <summary>
-        /// Events related to keys.
+        /// Events related to the keyboard.
         /// </summary>
-        Key = 1 << 2,
+        Keyboard = 1 << 2,
 
         /// <summary>
         /// Events related to mouse.
@@ -32,18 +32,18 @@
         Mouse = 1 << 3,
 
         /// <summary>
-        /// Events related to mouse buttons.
+        /// Events related to mouse buttons or keyboard keys.
         /// </summary>
-        MouseButton = 1 << 4,
+        Button = 1 << 4,
 
         /// <summary>
-        /// Events related to mouse position.
+        /// Events related to positions.
         /// </summary>
-        MousePosition = 1 << 5,
+        Position = 1 << 5,
 
         /// <summary>
-        /// Events related to mouse hover (enter or leave).
+        /// Events related to hovering (enter or leave).
         /// </summary>
-        MouseHover = 1 << 6,
+        Hover = 1 << 6,
     }
 }

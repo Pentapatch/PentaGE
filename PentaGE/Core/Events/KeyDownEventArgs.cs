@@ -8,7 +8,7 @@ namespace PentaGE.Core.Events
     public sealed class KeyDownEventArgs : EngineEvent
     {
         internal override EventCategory Category =>
-            EventCategory.Input | EventCategory.Key;
+            EventCategory.Input | EventCategory.Keyboard | EventCategory.Button;
 
         internal override EventType Type => EventType.KeyDown;
 

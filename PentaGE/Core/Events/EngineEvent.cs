@@ -18,12 +18,12 @@
         internal abstract EventType Type { get; }
 
         /// <summary>
-        /// Checks if the event belongs to the specified category.
+        /// Checks if the event belongs to any of the specified categories.
         /// </summary>
-        /// <param name="category">The category to check.</param>
-        /// <returns><c>true</c> if the event belongs to the specified category; otherwise, <c>false</c>.</returns>
-        internal bool BelongsToCategory(EventCategory category) =>
-            Category.HasFlag(category);
+        /// <param name="categories">The categories to check.</param>
+        /// <returns><c>true</c> if the event belongs to any of the specified categories; otherwise, <c>false</c>.</returns>
+        internal bool BelongsToCategory(EventCategory categories) =>
+            (Category & categories) != EventCategory.Undefined;
 
         /// <summary>
         /// Gets the window associated with the event.
