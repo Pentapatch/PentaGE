@@ -52,7 +52,7 @@ namespace PentaGE.Core.Rendering
             using var logger = Log.Logger.BeginPerfLogger("Loading shader");
             try
             {
-                shader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Rendering\Shaders\SourceCode\Tutorial.shader");
+                shader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Tutorial.shader");
                 shader.Load();
             }
             catch (System.Exception ex)
@@ -116,27 +116,31 @@ namespace PentaGE.Core.Rendering
         /// </summary>
         internal void Render()
         {
-            glClearColor(MathF.Sin((float)_engine.Timing.TotalElapsedTime), MathF.Cos((float)_engine.Timing.TotalElapsedTime), 0, 1);
-            glClear(GL_COLOR_BUFFER_BIT);
+            foreach (var window in _engine.Windows)
+            {
+                window.RenderingContext.Use();
 
-            // Test drawing triangles
-            shader.Use();
+                glClearColor(MathF.Sin((float)_engine.Timing.TotalElapsedTime), MathF.Cos((float)_engine.Timing.TotalElapsedTime), 0, 1);
+                glClear(GL_COLOR_BUFFER_BIT);
 
-            // Bind the Vertex Array Object (VAO) to use the configuration of vertex attributes stored in it.
-            glBindVertexArray(vao);
+                // Test drawing triangles
+                shader.Use();
 
-            // Draw the array of vertices as triangles.
-            // GL_TRIANGLES specifies the primitive type to render (triangles in this case).
-            // The second argument, '0', indicates the starting index within the VBO to start drawing.
-            // The last argument, '6', indicates the number of vertices to draw.
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+                // Bind the Vertex Array Object (VAO) to use the configuration of vertex attributes stored in it.
+                glBindVertexArray(vao);
 
-            // Unbind the VAO to prevent accidental modification.
-            glBindVertexArray(0);
+                // Draw the array of vertices as triangles.
+                // GL_TRIANGLES specifies the primitive type to render (triangles in this case).
+                // The second argument, '0', indicates the starting index within the VBO to start drawing.
+                // The last argument, '6', indicates the number of vertices to draw.
+                glDrawArrays(GL_TRIANGLES, 0, 6);
 
-            // Log OpenGL errors
-            LogGlErrors();
-            Glfw.SwapBuffers(_engine.Windows[0].Handle);
+                // Unbind the VAO to prevent accidental modification.
+                glBindVertexArray(0);
+
+                // Log OpenGL errors
+                LogGlErrors();
+            }
         }
 
         private static void ClearGLErrors()

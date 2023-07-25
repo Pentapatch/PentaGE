@@ -1,4 +1,5 @@
 ﻿using GLFW;
+using PentaGE.Core.Rendering;
 using Serilog;
 using System.Drawing;
 using static OpenGL.GL;
@@ -57,6 +58,16 @@ namespace PentaGE.Core
             _resizable = DEFAULT_RESIZABLE;
             _focused = true;
         }
+
+        /// <summary>
+        /// Gets or sets the rendering context associated with this window.
+        /// The rendering context is responsible for handling graphics rendering operations for the window.
+        /// </summary>
+        /// <remarks>
+        /// The rendering context is created and managed by the Window class when the window is created.
+        /// It is used to render graphics and handle the OpenGL context for the associated window.
+        /// </remarks>
+        internal RenderingContext RenderingContext { get; private set; }
 
         /// <summary>
         /// Gets the handle of the GLFW window associated with this <see cref="Window"/> instance.
@@ -254,7 +265,9 @@ namespace PentaGE.Core
 
             Glfw.SetWindowPosition(_windowHandle, Location.X, Location.Y);
 
-            Glfw.MakeContextCurrent(_windowHandle);
+            // Set up the rendering context
+            RenderingContext = new(this);
+
             Import(Glfw.GetProcAddress);
 
             glViewport(0, 0, Size.Width, Size.Height);
@@ -262,8 +275,19 @@ namespace PentaGE.Core
 
             RegisterWindow();
 
+            //_engine.Events.WindowClosing += Events_WindowClosing;
+
             return true;
         }
+
+        // TODO: Will cause the engine to crash since the window is removed before the event is handled
+        //private void Events_WindowClosing(object? sender, Events.EmptyEventArgs e)
+        //{
+        //    if (e.Window.Handle == Handle)
+        //    {
+        //        Remove();
+        //    }
+        //}
 
         /// <summary>
         /// Terminates the GLFW window associated with this instance and cleans up any resources.
@@ -273,6 +297,8 @@ namespace PentaGE.Core
             if (_windowHandle == GLFW.Window.None) return;
 
             UnregisterWindow();
+
+            RenderingContext.Dispose();
 
             // Terminate the GLFW window
             Glfw.DestroyWindow(_windowHandle);
@@ -315,6 +341,5 @@ namespace PentaGE.Core
 
             _engine.Events.RemoveCallbacks(this);
         }
-
     }
 }
