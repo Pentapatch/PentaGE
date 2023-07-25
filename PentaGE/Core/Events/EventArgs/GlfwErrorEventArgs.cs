@@ -8,13 +8,13 @@
         /// <summary>
         /// Gets the event category.
         /// </summary>
-        internal override EventCategory Category => 
+        internal override EventCategory Category =>
             EventCategory.Error;
 
         /// <summary>
         /// Gets the event type.
         /// </summary>
-        internal override EventType Type => 
+        internal override EventType Type =>
             EventType.Error;
 
         /// <summary>

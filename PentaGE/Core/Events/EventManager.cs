@@ -410,7 +410,7 @@ namespace PentaGE.Core.Events
         /// <param name="windowHandle">The handle of the GLFW window that received the input.</param>
         /// <param name="xPos">The new cursor x-coordinate, relative to the left edge of the client area.</param>
         /// <param name="yPos">The new cursor y-coordinate, relative to the top edge of the client area.</param>
-        private void MousePositionCallback(GLFW.Window windowHandle, double xPos, double yPos) => 
+        private void MousePositionCallback(GLFW.Window windowHandle, double xPos, double yPos) =>
             _eventBuffer.Add(new MouseMovedEventArgs(
                     OnMouseMoved,
                     GetWindow(windowHandle),
@@ -451,7 +451,7 @@ namespace PentaGE.Core.Events
         /// <param name="windowHandle">The handle of the GLFW window that received the input.</param>
         /// <param name="xOffset">The horizontal scroll offset. Positive values indicate right-scroll, negative values indicate left-scroll.</param>
         /// <param name="yOffset">The vertical scroll offset. Positive values indicate up-scroll, negative values indicate down-scroll.</param>
-        private void MouseScrollCallback(GLFW.Window windowHandle, double xOffset, double yOffset) => 
+        private void MouseScrollCallback(GLFW.Window windowHandle, double xOffset, double yOffset) =>
             _eventBuffer.Add(new MouseScrolledEventArgs(
                 OnMouseScrolled,
                 GetWindow(windowHandle),
@@ -463,7 +463,7 @@ namespace PentaGE.Core.Events
         /// It adds the corresponding event arguments to the event buffer for processing.
         /// </summary>
         /// <param name="windowHandle">The handle of the GLFW window that received the event.</param>
-        private void WindowClosingCallback(GLFW.Window windowHandle) => 
+        private void WindowClosingCallback(GLFW.Window windowHandle) =>
             _eventBuffer.Add(new EmptyEventArgs(
                 OnWindowClosing,
                 GetWindow(windowHandle),
@@ -560,7 +560,7 @@ namespace PentaGE.Core.Events
         /// <param name="windowHandle">The handle of the GLFW window that received the event.</param>
         /// <param name="width">The new width of the window in screen coordinates.</param>
         /// <param name="height">The new height of the window in screen coordinates.</param>
-        private void WindowSizeCallback(GLFW.Window windowHandle, int width, int height) => 
+        private void WindowSizeCallback(GLFW.Window windowHandle, int width, int height) =>
             _eventBuffer.Add(new WindowResizedEventArgs(
                 OnWindowResized,
                 GetWindow(windowHandle),
@@ -574,7 +574,7 @@ namespace PentaGE.Core.Events
         /// <param name="windowHandle">The handle of the GLFW window that received the event.</param>
         /// <param name="xPos">The new x-coordinate of the top-left corner of the window in screen coordinates.</param>
         /// <param name="yPos">The new y-coordinate of the top-left corner of the window in screen coordinates.</param>
-        private void WindowPositionCallback(GLFW.Window windowHandle, int xPos, int yPos) => 
+        private void WindowPositionCallback(GLFW.Window windowHandle, int xPos, int yPos) =>
             _eventBuffer.Add(new WindowMovedEventArgs(
                 OnWindowMoved,
                 GetWindow(windowHandle),
