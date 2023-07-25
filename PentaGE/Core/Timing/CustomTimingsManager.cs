@@ -9,6 +9,11 @@
         private double lastElapsed = 0d;
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="CustomTimingsManager"/> class.
+        /// </summary>
+        internal CustomTimingsManager() { }
+
+        /// <summary>
         /// Gets the custom timing instance associated with the specified interval in seconds.
         /// If the timing doesn't exist, a new one is created.
         /// </summary>

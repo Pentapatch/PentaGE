@@ -28,7 +28,7 @@ namespace PentaGE.Core
         /// Initializes a new instance of the <see cref="CustomTiming"/> class with the specified interval.
         /// </summary>
         /// <param name="intervalInSeconds">The interval in seconds at which the custom timing occurs.</param>
-        public CustomTiming(double intervalInSeconds)
+        internal CustomTiming(double intervalInSeconds)
         {
             Interval = intervalInSeconds;
         }
@@ -38,7 +38,7 @@ namespace PentaGE.Core
         /// </summary>
         /// <param name="intervalInSeconds">The interval in seconds at which the custom timing occurs.</param>
         /// <param name="action">The action to be executed when the custom timing interval has elapsed.</param>
-        public CustomTiming(double intervalInSeconds, Action<double> action)
+        internal CustomTiming(double intervalInSeconds, Action<double> action)
         {
             Interval = intervalInSeconds;
             Action = action;
