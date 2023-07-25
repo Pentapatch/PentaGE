@@ -27,8 +27,36 @@ namespace PentaGE.Core
         private bool _focused;
         private bool _vSync;
 
-        // This needs to be set by the WindowManager when a new window is added to its list
-        internal PentaGameEngine? _engine = null;
+        private readonly PentaGameEngine _engine;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Window"/> class with the specified parameters.
+        /// This constructor is marked as internal, limiting the creation of instances to within the class assembly.
+        /// The window is associated with the provided <paramref name="engine"/> and configured with the specified <paramref name="title"/> and <paramref name="size"/>.
+        /// If the <paramref name="title"/> is not provided, the default window title will be used.
+        /// If the <paramref name="size"/> is not provided, the window will have the default width and height.
+        /// The window is centered on the primary monitor's work area, making it appear at the center of the screen.
+        /// The window is set to be resizable by default, and it will be in focus upon creation.
+        /// </summary>
+        /// <param name="engine">The associated <see cref="PentaGameEngine"/> instance that manages the window.</param>
+        /// <param name="title">The title of the window. If not provided, the default title will be used.</param>
+        /// <param name="size">The size of the window. If not provided, the default width and height will be used.</param>
+        internal Window(PentaGameEngine engine, string? title, Size? size)
+        {
+            _engine = engine;
+
+            _title = title ?? DEFAULT_TITLE;
+            _size = size ?? new(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+
+            // Center the screen
+            var screenSize = Glfw.PrimaryMonitor.WorkArea;
+            var x = (screenSize.Width - Size.Width) / 2;
+            var y = (screenSize.Height - Size.Height) / 2;
+            _location = new Point(x, y);
+
+            _resizable = DEFAULT_RESIZABLE;
+            _focused = true;
+        }
 
         /// <summary>
         /// Gets the handle of the GLFW window associated with this <see cref="Window"/> instance.
@@ -162,21 +190,39 @@ namespace PentaGE.Core
         }
 
         /// <summary>
-        /// Creates a new instance of the <see cref="Window"/> class with default settings.
+        /// Removes the window from the WindowManager in the associated PentaGameEngine instance.
+        /// The window will be unregistered from the InputHandler, and its GLFW window will be terminated.
         /// </summary>
-        public Window()
+        public void Remove() =>
+            _engine.Windows.RemoveWindow(this);
+
+        /// <summary>
+        /// Maximizes the window if it is created and not already maximized.
+        /// This operation will cause the window to occupy the entire screen, removing any window borders.
+        /// </summary>
+        public void Maximize()
         {
-            _title = DEFAULT_TITLE;
-            _size = new(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+            if (!IsCreated()) return;
+            Glfw.MaximizeWindow(_windowHandle);
+        }
 
-            // Center the screen
-            var screenSize = Glfw.PrimaryMonitor.WorkArea;
-            var x = (screenSize.Width - Size.Width) / 2;
-            var y = (screenSize.Height - Size.Height) / 2;
-            _location = new Point(x, y);
+        /// <summary>
+        /// Minimizes the window if it is created.
+        /// This operation will cause the window to be iconified (minimized) to the taskbar or dock.
+        /// </summary>
+        public void Minimize()
+        {
+            if (!IsCreated()) return;
+            Glfw.IconifyWindow(_windowHandle);
+        }
 
-            _resizable = DEFAULT_RESIZABLE;
-            _focused = true;
+        /// <summary>
+        /// Restores the window if it is created and not already restored.
+        /// </summary>
+        public void Restore()
+        {
+            if (!IsCreated()) return;
+            Glfw.RestoreWindow(_windowHandle);
         }
 
         /// <summary>
@@ -220,13 +266,6 @@ namespace PentaGE.Core
         }
 
         /// <summary>
-        /// Removes the window from the WindowManager in the associated PentaGameEngine instance.
-        /// The window will be unregistered from the InputHandler, and its GLFW window will be terminated.
-        /// </summary>
-        public void Remove() =>
-            _engine?.Windows.RemoveWindow(this);
-
-        /// <summary>
         /// Terminates the GLFW window associated with this instance and cleans up any resources.
         /// </summary>
         internal void Terminate()
@@ -241,14 +280,6 @@ namespace PentaGE.Core
         }
 
         /// <summary>
-        /// Creates a new <see cref="Window"/> instance with default settings and an optional window title.
-        /// </summary>
-        /// <param name="title">The title of the window (optional).</param>
-        /// <returns>A new instance of the <see cref="Window"/> class with default settings.</returns>
-        public static Window CreateDefault(string title = "") =>
-            new() { Title = title != "" ? title : DEFAULT_TITLE };
-
-        /// <summary>
         /// Checks if the window is created and valid.
         /// </summary>
         /// <returns><c>true</c> if the window is created; otherwise, <c>false</c>.</returns>
@@ -257,16 +288,10 @@ namespace PentaGE.Core
 
         /// <summary>
         /// Registers the window with the InputHandler in the associated PentaGameEngine instance.
-        /// If the engine reference is not set or the GLFW window has not been created, the method will log an error and return.
+        /// If the GLFW window has not been created, the method will log an error and return.
         /// </summary>
         private void RegisterWindow()
         {
-            if (_engine is null)
-            {
-                Log.Error("Attempted to register a window to the InputHandler but the reference to the engine was not set.");
-                return;
-            }
-
             if (_windowHandle == GLFW.Window.None)
             {
                 Log.Error("Attempted to register a window to the InputHandler that has not yet been created.");
@@ -276,19 +301,12 @@ namespace PentaGE.Core
             _engine.Events.AddCallbacks(this);
         }
 
-
         /// <summary>
         /// Unregisters the window from the InputHandler in the associated PentaGameEngine instance.
-        /// If the engine reference is not set or the GLFW window has not been created, the method will log an error and return.
+        /// If the GLFW window has not been created, the method will log an error and return.
         /// </summary>
         private void UnregisterWindow()
         {
-            if (_engine is null)
-            {
-                Log.Error("Attempted to unregister a window to the InputHandler but the reference to the engine was not set.");
-                return;
-            }
-
             if (_windowHandle == GLFW.Window.None)
             {
                 Log.Error("Attempted to unregister a window to the InputHandler that has not yet been created.");

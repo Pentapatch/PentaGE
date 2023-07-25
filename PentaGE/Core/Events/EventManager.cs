@@ -1,4 +1,5 @@
 ﻿using GLFW;
+using PentaGE.Common;
 using Serilog;
 using System.Drawing;
 using System.Numerics;
@@ -346,24 +347,24 @@ namespace PentaGE.Core.Events
                 _eventBuffer.Add(new KeyDownEventArgs(
                     OnKeyDown,
                     GetWindow(windowHandle),
-                    (Common.Key)key,
-                    (Common.ModifierKey)mods,
+                    (Key)key,
+                    (ModifierKey)mods,
                     false));
             }
             else if (state == InputState.Release)
             {
                 _eventBuffer.Add(new KeyUpEventArgs(OnKeyUp,
                     GetWindow(windowHandle),
-                    (Common.Key)key,
-                    (Common.ModifierKey)mods));
+                    (Key)key,
+                    (ModifierKey)mods));
 
             }
             else if (state == InputState.Repeat)
             {
                 _eventBuffer.Add(new KeyDownEventArgs(OnKeyRepeat,
                     GetWindow(windowHandle),
-                    (Common.Key)key,
-                    (Common.ModifierKey)mods,
+                    (Key)key,
+                    (ModifierKey)mods,
                     true));
             }
         }
@@ -377,7 +378,7 @@ namespace PentaGE.Core.Events
         /// <param name="button">The mouse button that was pressed or released.</param>
         /// <param name="state">The state of the mouse button (pressed or released).</param>
         /// <param name="mods">The modifier keys (Shift, Control, Alt, Super) that were pressed.</param>
-        private void MouseButtonCallback(GLFW.Window windowHandle, MouseButton button, InputState state, ModifierKeys mods)
+        private void MouseButtonCallback(GLFW.Window windowHandle, GLFW.MouseButton button, InputState state, ModifierKeys mods)
         {
             if (state == InputState.Press)
             {
@@ -385,7 +386,7 @@ namespace PentaGE.Core.Events
                     OnMouseDown,
                     GetWindow(windowHandle),
                     (Common.MouseButton)button,
-                    (Common.ModifierKey)mods,
+                    (ModifierKey)mods,
                     EventCategory.Input | EventCategory.Mouse | EventCategory.Button,
                     EventType.MouseButtonDown));
             }
@@ -395,7 +396,7 @@ namespace PentaGE.Core.Events
                     OnMouseUp,
                     GetWindow(windowHandle),
                     (Common.MouseButton)button,
-                    (Common.ModifierKey)mods,
+                    (ModifierKey)mods,
                     EventCategory.Input | EventCategory.Mouse | EventCategory.Button,
                     EventType.MouseButtonUp));
             }
@@ -409,7 +410,7 @@ namespace PentaGE.Core.Events
         /// <param name="windowHandle">The handle of the GLFW window that received the input.</param>
         /// <param name="xPos">The new cursor x-coordinate, relative to the left edge of the client area.</param>
         /// <param name="yPos">The new cursor y-coordinate, relative to the top edge of the client area.</param>
-        private void MousePositionCallback(GLFW.Window windowHandle, double xPos, double yPos) => 
+        private void MousePositionCallback(GLFW.Window windowHandle, double xPos, double yPos) =>
             _eventBuffer.Add(new MouseMovedEventArgs(
                     OnMouseMoved,
                     GetWindow(windowHandle),
@@ -450,7 +451,7 @@ namespace PentaGE.Core.Events
         /// <param name="windowHandle">The handle of the GLFW window that received the input.</param>
         /// <param name="xOffset">The horizontal scroll offset. Positive values indicate right-scroll, negative values indicate left-scroll.</param>
         /// <param name="yOffset">The vertical scroll offset. Positive values indicate up-scroll, negative values indicate down-scroll.</param>
-        private void MouseScrollCallback(GLFW.Window windowHandle, double xOffset, double yOffset) => 
+        private void MouseScrollCallback(GLFW.Window windowHandle, double xOffset, double yOffset) =>
             _eventBuffer.Add(new MouseScrolledEventArgs(
                 OnMouseScrolled,
                 GetWindow(windowHandle),
@@ -462,7 +463,7 @@ namespace PentaGE.Core.Events
         /// It adds the corresponding event arguments to the event buffer for processing.
         /// </summary>
         /// <param name="windowHandle">The handle of the GLFW window that received the event.</param>
-        private void WindowClosingCallback(GLFW.Window windowHandle) => 
+        private void WindowClosingCallback(GLFW.Window windowHandle) =>
             _eventBuffer.Add(new EmptyEventArgs(
                 OnWindowClosing,
                 GetWindow(windowHandle),
@@ -559,7 +560,7 @@ namespace PentaGE.Core.Events
         /// <param name="windowHandle">The handle of the GLFW window that received the event.</param>
         /// <param name="width">The new width of the window in screen coordinates.</param>
         /// <param name="height">The new height of the window in screen coordinates.</param>
-        private void WindowSizeCallback(GLFW.Window windowHandle, int width, int height) => 
+        private void WindowSizeCallback(GLFW.Window windowHandle, int width, int height) =>
             _eventBuffer.Add(new WindowResizedEventArgs(
                 OnWindowResized,
                 GetWindow(windowHandle),
@@ -573,7 +574,7 @@ namespace PentaGE.Core.Events
         /// <param name="windowHandle">The handle of the GLFW window that received the event.</param>
         /// <param name="xPos">The new x-coordinate of the top-left corner of the window in screen coordinates.</param>
         /// <param name="yPos">The new y-coordinate of the top-left corner of the window in screen coordinates.</param>
-        private void WindowPositionCallback(GLFW.Window windowHandle, int xPos, int yPos) => 
+        private void WindowPositionCallback(GLFW.Window windowHandle, int xPos, int yPos) =>
             _eventBuffer.Add(new WindowMovedEventArgs(
                 OnWindowMoved,
                 GetWindow(windowHandle),

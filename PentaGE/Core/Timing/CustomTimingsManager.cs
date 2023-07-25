@@ -3,10 +3,15 @@
     /// <summary>
     /// A manager class for handling custom timings in the game engine.
     /// </summary>
-    public sealed class TimingManager
+    public sealed class CustomTimingsManager
     {
         private readonly List<CustomTiming> _customTimings = new();
         private double lastElapsed = 0d;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CustomTimingsManager"/> class.
+        /// </summary>
+        internal CustomTimingsManager() { }
 
         /// <summary>
         /// Gets the custom timing instance associated with the specified interval in seconds.

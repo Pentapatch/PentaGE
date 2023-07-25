@@ -1,4 +1,4 @@
-﻿namespace PentaGE.Core
+﻿namespace PentaGE.Core.Events
 {
     /// <summary>
     /// Custom event arguments class for the "Tick" event in the <see cref="CustomTiming"/> class.

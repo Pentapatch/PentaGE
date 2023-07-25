@@ -20,7 +20,7 @@ namespace PentaGE.Rendering
         /// Creates a new instance of the Renderer class.
         /// </summary>
         /// <param name="engine">The PentaGameEngine instance associated with this Renderer.</param>
-        public Renderer(PentaGameEngine engine)
+        internal Renderer(PentaGameEngine engine)
         {
             _engine = engine;
         }
@@ -53,7 +53,7 @@ namespace PentaGE.Rendering
             using var logger = Log.Logger.BeginPerfLogger("Loading shader");
             try
             {
-                shader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Rendering\Shaders\Tutorial.shader");
+                shader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Rendering\Shaders\SourceCode\Tutorial.shader");
                 shader.Load();
             }
             catch (System.Exception ex)

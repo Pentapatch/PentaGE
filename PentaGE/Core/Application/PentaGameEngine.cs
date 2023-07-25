@@ -106,7 +106,7 @@ namespace PentaGE.Core
             Glfw.Terminate();
 
             // Allow the concrete implementation of the engine to unload resources
-            using (var logger = Log.Logger.BeginPerfLogger("Terminating concrete implementation"))
+            using (Log.Logger.BeginPerfLogger("Terminating concrete implementation"))
             {
                 Shutdown();
             }

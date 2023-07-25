@@ -10,13 +10,13 @@ namespace PentaGE.Core.Events
         /// <summary>
         /// Gets the event category.
         /// </summary>
-        internal override EventCategory Category => 
+        internal override EventCategory Category =>
             EventCategory.Window | EventCategory.Resize;
 
         /// <summary>
         /// Gets the event type.
         /// </summary>
-        internal override EventType Type => 
+        internal override EventType Type =>
             EventType.WindowResized;
 
 

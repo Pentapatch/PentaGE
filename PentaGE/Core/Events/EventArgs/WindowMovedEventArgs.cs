@@ -10,7 +10,7 @@ namespace PentaGE.Core.Events
         /// <summary>
         /// Gets the event category.
         /// </summary>
-        internal override EventCategory Category => 
+        internal override EventCategory Category =>
             EventCategory.Window | EventCategory.Position;
 
         /// <summary>

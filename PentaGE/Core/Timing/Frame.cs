@@ -21,7 +21,7 @@
         /// </summary>
         /// <param name="number">The number of the frame.</param>
         /// <param name="deltaTime">The time duration between this frame and the previous one, in seconds.</param>
-        public Frame(int number, double deltaTime)
+        internal Frame(int number, double deltaTime)
         {
             Number = number;
             DeltaTime = deltaTime;
@@ -30,7 +30,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="Frame"/> class with default values.
         /// </summary>
-        public Frame() { }
+        internal Frame() { }
 
         /// <summary>
         /// Implicitly converts a <see cref="Frame"/> to its frame number.

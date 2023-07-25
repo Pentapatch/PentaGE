@@ -1,6 +1,7 @@
 ﻿using GLFW;
 using Serilog;
 using System.Collections;
+using System.Drawing;
 
 namespace PentaGE.Core
 {
@@ -25,31 +26,37 @@ namespace PentaGE.Core
         /// <returns>The <see cref="Window"/> at the specified index.</returns>
         public Window this[int index] => _windows[index];
 
-        public WindowManager(PentaGameEngine engine)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WindowManager"/> class with a reference to the <see cref="PentaGameEngine"/>.
+        /// The window manager is responsible for handling windows in the game engine.
+        /// </summary>
+        /// <param name="engine">The <see cref="PentaGameEngine"/> instance that owns the window manager.</param>
+        internal WindowManager(PentaGameEngine engine)
         {
             _engine = engine;
         }
 
         /// <summary>
         /// Adds a new window to the window manager and initializes it if the manager is already initialized.
+        /// If the <paramref name="title"/> is not provided, the window will have the default title.
+        /// If the <paramref name="size"/> is not provided, the window will have the default width and height.
         /// </summary>
-        /// <param name="window">The <see cref="Window"/> instance to add.</param>
-        /// <returns><c>true</c> if the window is successfully added; otherwise, <c>false</c>.</returns>
-        public bool AddWindow(Window window)
+        /// <param name="title">The title of the window. If not provided, the default title will be used.</param>
+        /// <param name="size">The size of the window. If not provided, the default width and height will be used.</param>
+        /// <returns>The created <see cref="Window"/> instance.</returns>
+        public Window Add(string? title = null, Size? size = null)
         {
-            // Important note: Set the instance reference to the engine
-            // This is so that Window factory methods can be used without having to specify the engine instance
-            window._engine = _engine;
+            Window window = new(_engine, title, size);
 
             _windows.Add(window);
 
             if (_isInitialized && !window.Create())
             {
                 Log.Fatal($"Failed to add window '{window.Handle}'.");
-                return false;
+                throw new System.Exception($"Failed to add window '{window.Handle}'.");
             }
 
-            return true;
+            return window;
         }
 
         /// <summary>
@@ -111,7 +118,7 @@ namespace PentaGE.Core
         private void AddDefaultWindow()
         {
             if (_windows.Count != 0) return;
-            AddWindow(Window.CreateDefault());
+            Add();
         }
 
         /// <summary>
