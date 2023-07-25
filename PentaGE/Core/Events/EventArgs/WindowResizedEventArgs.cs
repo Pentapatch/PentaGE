@@ -23,7 +23,7 @@ namespace PentaGE.Core.Events
         /// <summary>
         /// Gets the size of the window after resizing.
         /// </summary>
-        public Point Size { get; init; }
+        public Size Size { get; init; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WindowResizedEventArgs"/> class with the associated window.
@@ -31,7 +31,7 @@ namespace PentaGE.Core.Events
         /// <param name="onEvent">The event handler to be invoked when the event is raised.</param>
         /// <param name="window">The window associated with the event.</param>
         /// <param name="size">The new size of the window after resizing.</param>
-        public WindowResizedEventArgs(Action<EngineEventArgs> onEvent, Window window, Point size) : base(onEvent, window)
+        public WindowResizedEventArgs(Action<EngineEventArgs> onEvent, Window window, Size size) : base(onEvent, window)
         {
             Size = size;
         }
