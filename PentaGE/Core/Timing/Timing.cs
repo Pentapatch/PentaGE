@@ -63,7 +63,7 @@ namespace PentaGE.Core
         /// Initializes a new instance of the Timing class with default settings.
         /// The default target frames per second (FPS) is 120, and the game speed factor is set to 1.0 (normal speed).
         /// </summary>
-        public Timing()
+        internal Timing()
         {
             _timingManager = new();
             TargetFps = 120;

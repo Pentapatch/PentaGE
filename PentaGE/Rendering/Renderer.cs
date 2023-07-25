@@ -20,7 +20,7 @@ namespace PentaGE.Rendering
         /// Creates a new instance of the Renderer class.
         /// </summary>
         /// <param name="engine">The PentaGameEngine instance associated with this Renderer.</param>
-        public Renderer(PentaGameEngine engine)
+        internal Renderer(PentaGameEngine engine)
         {
             _engine = engine;
         }
