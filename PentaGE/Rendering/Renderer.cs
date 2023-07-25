@@ -1,9 +1,9 @@
 ﻿using GLFW;
-using static OpenGL.GL;
 using PentaGE.Core;
-using Serilog;
 using PentaGE.Core.Logging;
 using PentaGE.Rendering.Shaders;
+using Serilog;
+using static OpenGL.GL;
 
 namespace PentaGE.Rendering
 {

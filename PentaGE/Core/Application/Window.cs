@@ -1,7 +1,7 @@
 ﻿using GLFW;
-using static OpenGL.GL;
-using System.Drawing;
 using Serilog;
+using System.Drawing;
+using static OpenGL.GL;
 
 namespace PentaGE.Core
 {
@@ -13,6 +13,7 @@ namespace PentaGE.Core
         private const int DEFAULT_WIDTH = 1920;
         private const int DEFAULT_HEIGHT = 1080;
         private const string DEFAULT_TITLE = "Penta Game Engine";
+        private const bool DEFAULT_RESIZABLE = false;
 
         private const int VSYNC_ON = 1;
         private const int VSYNC_OFF = 0;
@@ -25,6 +26,9 @@ namespace PentaGE.Core
         private bool _resizable;
         private bool _focused;
         private bool _vSync;
+
+        // This needs to be set by the WindowManager when a new window is added to its list
+        internal PentaGameEngine? _engine = null;
 
         /// <summary>
         /// Gets the handle of the GLFW window associated with this <see cref="Window"/> instance.
@@ -171,7 +175,7 @@ namespace PentaGE.Core
             var y = (screenSize.Height - Size.Height) / 2;
             _location = new Point(x, y);
 
-            _resizable = false;
+            _resizable = DEFAULT_RESIZABLE;
             _focused = true;
         }
 
@@ -187,7 +191,7 @@ namespace PentaGE.Core
             // Destroy the existing window if it's already created
             if (_windowHandle != GLFW.Window.None)
             {
-                Glfw.DestroyWindow(_windowHandle);
+                Terminate();
             }
 
             // Set up the window
@@ -210,8 +214,17 @@ namespace PentaGE.Core
             glViewport(0, 0, Size.Width, Size.Height);
             Glfw.SwapInterval(_vSync ? VSYNC_ON : VSYNC_OFF);
 
+            RegisterWindow();
+
             return true;
         }
+
+        /// <summary>
+        /// Removes the window from the WindowManager in the associated PentaGameEngine instance.
+        /// The window will be unregistered from the InputHandler, and its GLFW window will be terminated.
+        /// </summary>
+        public void Remove() =>
+            _engine?.Windows.RemoveWindow(this);
 
         /// <summary>
         /// Terminates the GLFW window associated with this instance and cleans up any resources.
@@ -219,6 +232,8 @@ namespace PentaGE.Core
         internal void Terminate()
         {
             if (_windowHandle == GLFW.Window.None) return;
+
+            UnregisterWindow();
 
             // Terminate the GLFW window
             Glfw.DestroyWindow(_windowHandle);
@@ -239,6 +254,49 @@ namespace PentaGE.Core
         /// <returns><c>true</c> if the window is created; otherwise, <c>false</c>.</returns>
         private bool IsCreated() =>
             _windowHandle != GLFW.Window.None;
+
+        /// <summary>
+        /// Registers the window with the InputHandler in the associated PentaGameEngine instance.
+        /// If the engine reference is not set or the GLFW window has not been created, the method will log an error and return.
+        /// </summary>
+        private void RegisterWindow()
+        {
+            if (_engine is null)
+            {
+                Log.Error("Attempted to register a window to the InputHandler but the reference to the engine was not set.");
+                return;
+            }
+
+            if (_windowHandle == GLFW.Window.None)
+            {
+                Log.Error("Attempted to register a window to the InputHandler that has not yet been created.");
+                return;
+            }
+
+            _engine.Events.AddCallbacks(this);
+        }
+
+
+        /// <summary>
+        /// Unregisters the window from the InputHandler in the associated PentaGameEngine instance.
+        /// If the engine reference is not set or the GLFW window has not been created, the method will log an error and return.
+        /// </summary>
+        private void UnregisterWindow()
+        {
+            if (_engine is null)
+            {
+                Log.Error("Attempted to unregister a window to the InputHandler but the reference to the engine was not set.");
+                return;
+            }
+
+            if (_windowHandle == GLFW.Window.None)
+            {
+                Log.Error("Attempted to unregister a window to the InputHandler that has not yet been created.");
+                return;
+            }
+
+            _engine.Events.RemoveCallbacks(this);
+        }
 
     }
 }
