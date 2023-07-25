@@ -1,4 +1,4 @@
-﻿namespace PentaGE.Core.Rendering
+﻿namespace PentaGE.Core.Rendering.Shaders
 {
     /// <summary>
     /// Represents the type of shader used in the <see cref="Shader"/> class.

@@ -1,5 +1,6 @@
 ﻿using GLFW;
 using PentaGE.Core.Logging;
+using PentaGE.Core.Rendering.Shaders;
 using Serilog;
 using static OpenGL.GL;
 
