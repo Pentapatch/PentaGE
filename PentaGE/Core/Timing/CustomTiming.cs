@@ -1,4 +1,6 @@
-﻿namespace PentaGE.Core
+﻿using PentaGE.Core.Events;
+
+namespace PentaGE.Core
 {
     /// <summary>
     /// Represents a custom timing mechanism that triggers an event or executes an action at a specified interval of time.

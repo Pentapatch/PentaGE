@@ -53,7 +53,7 @@ namespace PentaGE.Rendering
             using var logger = Log.Logger.BeginPerfLogger("Loading shader");
             try
             {
-                shader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Rendering\Shaders\Tutorial.shader");
+                shader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Rendering\Shaders\SourceCode\Tutorial.shader");
                 shader.Load();
             }
             catch (System.Exception ex)

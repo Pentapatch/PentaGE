@@ -7,7 +7,7 @@ namespace PentaGE.Core
     /// </summary>
     public sealed class Timing
     {
-        private readonly TimingManager _timingManager;
+        private readonly CustomTimingsManager _timingManager;
         private double _gameSpeedFactor;
         private double previousTime = 0d;
         private double lastFPSTime = 0d;
@@ -42,7 +42,7 @@ namespace PentaGE.Core
         /// </summary>
         public double TotalElapsedTime { get; private set; }
 
-        public TimingManager CustomTimings => _timingManager;
+        public CustomTimingsManager CustomTimings => _timingManager;
 
         /// <summary>
         /// Gets or sets the factor to scale the game speed. Default is 1.0 (normal speed).

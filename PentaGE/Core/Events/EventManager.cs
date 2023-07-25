@@ -1,4 +1,5 @@
 ﻿using GLFW;
+using PentaGE.Common;
 using Serilog;
 using System.Drawing;
 using System.Numerics;
@@ -346,24 +347,24 @@ namespace PentaGE.Core.Events
                 _eventBuffer.Add(new KeyDownEventArgs(
                     OnKeyDown,
                     GetWindow(windowHandle),
-                    (Common.Key)key,
-                    (Common.ModifierKey)mods,
+                    (Key)key,
+                    (ModifierKey)mods,
                     false));
             }
             else if (state == InputState.Release)
             {
                 _eventBuffer.Add(new KeyUpEventArgs(OnKeyUp,
                     GetWindow(windowHandle),
-                    (Common.Key)key,
-                    (Common.ModifierKey)mods));
+                    (Key)key,
+                    (ModifierKey)mods));
 
             }
             else if (state == InputState.Repeat)
             {
                 _eventBuffer.Add(new KeyDownEventArgs(OnKeyRepeat,
                     GetWindow(windowHandle),
-                    (Common.Key)key,
-                    (Common.ModifierKey)mods,
+                    (Key)key,
+                    (ModifierKey)mods,
                     true));
             }
         }
@@ -377,7 +378,7 @@ namespace PentaGE.Core.Events
         /// <param name="button">The mouse button that was pressed or released.</param>
         /// <param name="state">The state of the mouse button (pressed or released).</param>
         /// <param name="mods">The modifier keys (Shift, Control, Alt, Super) that were pressed.</param>
-        private void MouseButtonCallback(GLFW.Window windowHandle, MouseButton button, InputState state, ModifierKeys mods)
+        private void MouseButtonCallback(GLFW.Window windowHandle, GLFW.MouseButton button, InputState state, ModifierKeys mods)
         {
             if (state == InputState.Press)
             {
@@ -385,7 +386,7 @@ namespace PentaGE.Core.Events
                     OnMouseDown,
                     GetWindow(windowHandle),
                     (Common.MouseButton)button,
-                    (Common.ModifierKey)mods,
+                    (ModifierKey)mods,
                     EventCategory.Input | EventCategory.Mouse | EventCategory.Button,
                     EventType.MouseButtonDown));
             }
@@ -395,7 +396,7 @@ namespace PentaGE.Core.Events
                     OnMouseUp,
                     GetWindow(windowHandle),
                     (Common.MouseButton)button,
-                    (Common.ModifierKey)mods,
+                    (ModifierKey)mods,
                     EventCategory.Input | EventCategory.Mouse | EventCategory.Button,
                     EventType.MouseButtonUp));
             }

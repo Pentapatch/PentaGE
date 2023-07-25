@@ -6,6 +6,26 @@ using Serilog;
 
 namespace PentaGE.Core
 {
+
+    // Im building my own game engine that targets Windows only and using only OpenGL through GLFW.
+    // This is the main class that will be inherited by the concrete implementation (i.e. the game, or a game editor, etc.)
+    // This is the main entry point for the engine.
+    // My engine currently have two event management systems; one for GLFW events (window and input events), and one for
+    // custom timing events (i.e. create and subscribe to events that occours at certain times, like every 5 seconds, etc.)
+    // Currently, to access the GLFW events, users must access the Events property of the engine instance.
+    // But to access timing events, users must access the Timing property of the engine instance.
+    // Q: Should i consolidate these systems or keep them separate?
+    // A: I think i should keep them separate, because they are different systems with different purposes.
+    //    The GLFW event system is for handling window and input events, and the timing system is for handling
+    //    timing events (i.e. events that occours at certain times, like every 5 seconds, etc.)
+    //    The GLFW event system is for handling window and input events, and the timing system is for handling
+    //    timing events (i.e. events that occours at certain times, like every 5 seconds, etc.)
+    // But should i tie the events to a certain instance of a window?
+    // A: I think i should, because it makes sense to tie the events to a window instance.
+    //    But i should also have a global event system that handles events that are not tied to a window instance.
+    // Alright, so i should keep the two systems separate, and somehow provide access to them through a Window instance?
+    // A: Yes, i think that is the best way to do it.
+
     /// <summary>
     /// An abstract class representing the core of the Penta Game Engine.
     /// Concrete implementations of this class must provide specific functionality for Initialize, Shutdown, and Update methods.
