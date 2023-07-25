@@ -1,11 +1,9 @@
 ﻿using GLFW;
-using PentaGE.Core;
 using PentaGE.Core.Logging;
-using PentaGE.Rendering.Shaders;
 using Serilog;
 using static OpenGL.GL;
 
-namespace PentaGE.Rendering
+namespace PentaGE.Core.Rendering
 {
     /// <summary>
     /// The renderer responsible for handling graphics rendering in the PentaGameEngine.

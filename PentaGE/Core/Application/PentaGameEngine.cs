@@ -1,7 +1,7 @@
 ﻿using GLFW;
 using PentaGE.Core.Events;
 using PentaGE.Core.Logging;
-using PentaGE.Rendering;
+using PentaGE.Core.Rendering;
 using Serilog;
 
 namespace PentaGE.Core
