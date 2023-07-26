@@ -1,7 +1,6 @@
 ﻿using GLFW;
 using PentaGE.Common;
 using PentaGE.Core.Logging;
-using PentaGE.Maths;
 using Serilog;
 using System.Numerics;
 using static OpenGL.GL;
@@ -16,6 +15,34 @@ namespace PentaGE.Core.Rendering
         private readonly PentaGameEngine _engine;
         private uint vao;
         private Shader shader;
+
+        // Set up the rendered test objects transform
+        private Transform objectTransform = new()
+        {
+            Position = new(0, 0, 0),  // in pixels
+            Rotation = new(0, 0, 0), // in degrees
+            Scale = new(1900, 600, 1), // in pixels
+        };
+
+        private readonly Camera3d testCamera = new()
+        {
+            Position = new(0, 0, -100),
+            FieldOfView = 90,
+            Rotation = new(0, 0, 0)
+        };
+
+        // Define the vertices for the rectangle.
+        // Each line below represents a vertex and its attributes (x, y, r, g, b).
+        readonly float[] vertices = new[]
+        {
+                -0.5f, 0.5f, 1f, 0f, 0f,   // Vertex 1 (position: (-0.5, 0.5), color: (1, 0, 0))
+                0.5f, 0.5f, 0f, 1f, 0f,    // Vertex 2 (position: (0.5, 0.5), color: (0, 1, 0))
+                -0.5f, -0.5f, 0f, 0f, 1f,   // Vertex 3 (position: (-0.5, -0.5), color: (0, 0, 1))
+
+                0.5f, 0.5f, 0f, 1f, 0f,    // Vertex 4 (position: (0.5, 0.5), color: (0, 1, 0))
+                0.5f, -0.5f, 0f, 1f, 1f,   // Vertex 5 (position: (0.5, -0.5), color: (0, 1, 1))
+                -0.5f, -0.5f, 0f, 0f, 1f,  // Vertex 6 (position: (-0.5, -0.5), color: (0, 0, 1))
+            };
 
         /// <summary>
         /// Creates a new instance of the Renderer class.
@@ -62,30 +89,11 @@ namespace PentaGE.Core.Rendering
                 Log.Error($"Error loading shader: {ex}");
             }
 
-            // Testing TODO: Remove
-
-            // Generate and bind a Vertex Array Object (VAO).
-            // VAOs store the configurations of vertex attributes, allowing for easier vertex attribute setup.
             vao = glGenVertexArray();
             uint vbo = glGenBuffer();
 
-            // Generate and bind a Vertex Buffer Object (VBO).
-            // VBOs store vertex data, such as positions, colors, or texture coordinates.
             glBindVertexArray(vao);
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-            // Define the vertices for the rectangle.
-            // Each line below represents a vertex and its attributes (x, y, r, g, b).
-            float[] vertices = new[]
-            {
-                -0.5f, 0.5f, 1f, 0f, 0f,   // Vertex 1 (position: (-0.5, 0.5), color: (1, 0, 0))
-                0.5f, 0.5f, 0f, 1f, 0f,    // Vertex 2 (position: (0.5, 0.5), color: (0, 1, 0))
-                -0.5f, -0.5f, 0f, 0f, 1f,   // Vertex 3 (position: (-0.5, -0.5), color: (0, 0, 1))
-
-                0.5f, 0.5f, 0f, 1f, 0f,    // Vertex 4 (position: (0.5, 0.5), color: (0, 1, 0))
-                0.5f, -0.5f, 0f, 1f, 1f,   // Vertex 5 (position: (0.5, -0.5), color: (0, 1, 1))
-                -0.5f, -0.5f, 0f, 0f, 1f,  // Vertex 6 (position: (-0.5, -0.5), color: (0, 0, 1))
-            };
 
             // Copy the vertex data from the managed array to the VBO.
             // We use 'fixed' to pin the managed array in memory so that it can be accessed by an unmanaged pointer.
@@ -110,45 +118,38 @@ namespace PentaGE.Core.Rendering
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glBindVertexArray(0);
 
+            // Add engine events for moving the camera (during debug - remove later)
             _engine.Events.KeyDown += Events_KeyDown;
             _engine.Events.KeyRepeat += Events_KeyDown;
 
             return true;
         }
 
-        private readonly Camera2d testCamera = new(1, false) // 1 x Zoom, not top down
-        {
-            Position = new(0, 0, -1),
-            Zoom = 1,
-        };
-
         private void Events_KeyDown(object? sender, Events.KeyDownEventArgs e)
         {
-            float factor = 2000 * (float)_engine.Timing.CurrentFrame.DeltaTime;
+            // For moving the camera (during debug - remove later)
+            float increment = 100f;
             if (e.Key == Key.W)
             {
-                testCamera.Position = new(testCamera.Position.X, testCamera.Position.Y, testCamera.Position.Z + factor);
+                testCamera.Position += World.ForwardVector * increment;
+                //testCamera.Position += World.UpVector * increment; // For 2D
                 Log.Information($"Camera moving forward: {testCamera.Position}");
             }
             else if (e.Key == Key.A)
             {
-                testCamera.Position = new(testCamera.Position.X - factor, testCamera.Position.Y, testCamera.Position.Z);
+                testCamera.Position += World.LeftVector * increment;
                 Log.Information($"Camera moving left: {testCamera.Position}");
             }
             else if (e.Key == Key.D)
             {
-                testCamera.Position = new(testCamera.Position.X + factor, testCamera.Position.Y, testCamera.Position.Z);
+                testCamera.Position += World.RightVector * increment;
                 Log.Information($"Camera moving right: {testCamera.Position}");
             }
             else if (e.Key == Key.S)
             {
-                testCamera.Position = new(testCamera.Position.X, testCamera.Position.Y, testCamera.Position.Z - factor);
+                testCamera.Position += World.BackwardVector * increment;
+                //testCamera.Position += World.DownVector * increment; // For 2D
                 Log.Information($"Camera moving backward: {testCamera.Position}");
-            }
-            else if (e.Key == Key.Space)
-            {
-                testCamera.Position += World.ForwardVector * factor;
-                Log.Information($"Camera moving forward test: {testCamera.Position}");
             }
         }
 
@@ -168,26 +169,12 @@ namespace PentaGE.Core.Rendering
                 // Test drawing triangles
                 shader.Use();
 
-                // Bind the Vertex Array Object (VAO) to use the configuration of vertex attributes stored in it.
-                glBindVertexArray(vao);
-
-                // Set up the rendered test objects transform
-                Transform objectTransform = new()
-                {
-                    Position = new(0, 0, 0),  // in pixels
-                    Rotation = new(0, 0, 0), // in degrees
-                    Scale = new(1000, 600, 1), // in pixels
-                };
-
                 // Calculate the view and projection matrices from the camera
                 var viewMatrix = testCamera.GetViewMatrix();
                 var projectionMatrix = testCamera.GetProjectionMatrix(window.Size.Width, window.Size.Height);
-                var modelMatrix = Matrix4x4.CreateScale(objectTransform.Scale) *
-                       Matrix4x4.CreateFromYawPitchRoll(
-                           MathHelper.DegreesToRadians(objectTransform.Rotation.Yaw),
-                           MathHelper.DegreesToRadians(objectTransform.Rotation.Pitch),
-                           MathHelper.DegreesToRadians(objectTransform.Rotation.Roll)) *
-                       Matrix4x4.CreateTranslation(objectTransform.Position);
+                var modelMatrix = Matrix4x4.CreateScale(objectTransform.Scale)
+                    * objectTransform.Rotation.ToMatrix4x4()
+                    * Matrix4x4.CreateTranslation(objectTransform.Position);
 
                 // Combine the model, view, and projection matrices to get the final MVP matrix
                 var mvpMatrix = modelMatrix * viewMatrix * projectionMatrix;
@@ -195,30 +182,14 @@ namespace PentaGE.Core.Rendering
                 // Pass the matrices to the shader
                 shader.SetMatrix4("mvp", mvpMatrix);
 
-                // Draw the array of vertices as triangles.
-                // GL_TRIANGLES specifies the primitive type to render (triangles in this case).
-                // The second argument, '0', indicates the starting index within the VBO to start drawing.
-                // The last argument, '6', indicates the number of vertices to draw.
+                // Bind the Vertex Array Object (VAO) to use the configuration of vertex attributes stored in it.
+                glBindVertexArray(vao);
+
+                // Draw the triangles
                 glDrawArrays(GL_TRIANGLES, 0, 6);
 
                 // Unbind the VAO to prevent accidental modification.
                 glBindVertexArray(0);
-
-                // Log OpenGL errors
-                LogGlErrors();
-            }
-        }
-
-        private static void ClearGLErrors()
-        {
-            while (Glfw.GetError(out string _) != ErrorCode.None) ;
-        }
-
-        private static void LogGlErrors()
-        {
-            while (Glfw.GetError(out string description) != ErrorCode.None)
-            {
-                Log.Error(description);
             }
         }
     }

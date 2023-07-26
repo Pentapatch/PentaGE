@@ -32,11 +32,18 @@ namespace PentaGE.Core.Rendering
 
         public override Matrix4x4 GetViewMatrix()
         {
-            var cameraPosition = new Vector3(Position.X, Position.Y, Position.Z);
+            // Invert the camera's position to move the scene in the opposite direction
+            var cameraPosition = new Vector3(-Position.X, -Position.Y, -1);
             var zTarget = IsTopDown ? Position.Z - 1.0f : 0;
-            var target = new Vector3(Position.X, Position.Y, zTarget);
+            var target = new Vector3(-Position.X, -Position.Y, zTarget);
 
-            return Matrix4x4.CreateLookAt(cameraPosition, target, World.UpVector);
+            // Create the view matrix using the inverted camera position
+            Matrix4x4 viewMatrix = Matrix4x4.CreateLookAt(cameraPosition, target, World.UpVector);
+
+            // Flip the view matrix horizontally to move the scene to the left
+            viewMatrix = Matrix4x4.CreateScale(-1.0f, 1.0f, 1.0f) * viewMatrix;
+
+            return viewMatrix;
         }
     }
 }

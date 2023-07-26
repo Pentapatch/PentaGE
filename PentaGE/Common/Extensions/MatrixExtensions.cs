@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using PentaGE.Maths;
+using System.Numerics;
 
 namespace PentaGE.Common
 {
@@ -44,6 +45,5 @@ namespace PentaGE.Common
 
             return matrixArray;
         }
-
     }
 }
