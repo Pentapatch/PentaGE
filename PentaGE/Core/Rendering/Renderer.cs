@@ -124,33 +124,29 @@ namespace PentaGE.Core.Rendering
 
         private void Events_KeyDown(object? sender, Events.KeyDownEventArgs e)
         {
-            if (e.Key == Common.Key.W)
+            float factor = 2000 * (float)_engine.Timing.CurrentFrame.DeltaTime;
+            if (e.Key == Key.W)
             {
-                float factor = 10 * (float)_engine.Timing.CurrentFrame.DeltaTime;
                 testCamera.Position = new(testCamera.Position.X, testCamera.Position.Y, testCamera.Position.Z + factor);
                 Log.Information($"Camera moving forward: {testCamera.Position}");
             }
-            else if (e.Key == Common.Key.A)
+            else if (e.Key == Key.A)
             {
-                float factor = 10 * (float)_engine.Timing.CurrentFrame.DeltaTime;
                 testCamera.Position = new(testCamera.Position.X - factor, testCamera.Position.Y, testCamera.Position.Z);
-                Log.Information($"Camera moving forward: {testCamera.Position}");
+                Log.Information($"Camera moving left: {testCamera.Position}");
             }
-            else if (e.Key == Common.Key.D)
+            else if (e.Key == Key.D)
             {
-                float factor = 10 * (float)_engine.Timing.CurrentFrame.DeltaTime;
                 testCamera.Position = new(testCamera.Position.X + factor, testCamera.Position.Y, testCamera.Position.Z);
-                Log.Information($"Camera moving forward: {testCamera.Position}");
+                Log.Information($"Camera moving right: {testCamera.Position}");
             }
-            else if (e.Key == Common.Key.S)
+            else if (e.Key == Key.S)
             {
-                float factor = 10 * (float)_engine.Timing.CurrentFrame.DeltaTime;
                 testCamera.Position = new(testCamera.Position.X, testCamera.Position.Y, testCamera.Position.Z - factor);
-                Log.Information($"Camera moving forward: {testCamera.Position}");
+                Log.Information($"Camera moving backward: {testCamera.Position}");
             }
-            else if (e.Key == Common.Key.Space)
+            else if (e.Key == Key.Space)
             {
-                float factor = 10 * (float)_engine.Timing.CurrentFrame.DeltaTime;
                 testCamera.Position += World.ForwardVector * factor;
                 Log.Information($"Camera moving forward test: {testCamera.Position}");
             }
@@ -180,7 +176,7 @@ namespace PentaGE.Core.Rendering
                 {
                     Position = new(0, 0, 0),  // in pixels
                     Rotation = new(0, 0, 0), // in degrees
-                    Scale = new(800, 600, 1), // in pixels
+                    Scale = new(1000, 600, 1), // in pixels
                 };
 
                 // Calculate the view and projection matrices from the camera
@@ -197,7 +193,7 @@ namespace PentaGE.Core.Rendering
                 var mvpMatrix = modelMatrix * viewMatrix * projectionMatrix;
 
                 // Pass the matrices to the shader
-                shader.SetMatrix4("mvp", viewMatrix);
+                shader.SetMatrix4("mvp", mvpMatrix);
 
                 // Draw the array of vertices as triangles.
                 // GL_TRIANGLES specifies the primitive type to render (triangles in this case).
