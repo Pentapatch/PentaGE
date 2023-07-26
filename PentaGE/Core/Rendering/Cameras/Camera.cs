@@ -14,9 +14,13 @@ namespace PentaGE.Core.Rendering
 
         public float FarPlaneClipping { get; set; }
 
-        public Transform Transform { get; set; }
+        public Vector3 Position { get; set; }
 
-        public Rotation Rotation { get; set; }
-
+        public Camera()
+        {
+            NearPlaneClipping = 0.1f;  
+            FarPlaneClipping = 1000.0f; 
+            Position = Vector3.Zero;
+        }
     }
 }

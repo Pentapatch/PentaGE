@@ -1,7 +1,9 @@
 ﻿using GLFW;
+using PentaGE.Common;
 using PentaGE.Core.Logging;
-using PentaGE.Core.Rendering.Shaders;
+using PentaGE.Maths;
 using Serilog;
+using System.Numerics;
 using static OpenGL.GL;
 
 namespace PentaGE.Core.Rendering
@@ -52,7 +54,7 @@ namespace PentaGE.Core.Rendering
             using var logger = Log.Logger.BeginPerfLogger("Loading shader");
             try
             {
-                shader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Tutorial.shader");
+                shader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\CameraTest.shader");
                 shader.Load();
             }
             catch (System.Exception ex)
@@ -108,7 +110,50 @@ namespace PentaGE.Core.Rendering
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glBindVertexArray(0);
 
+            _engine.Events.KeyDown += Events_KeyDown;
+            _engine.Events.KeyRepeat += Events_KeyDown;
+
             return true;
+        }
+
+        private readonly Camera2d testCamera = new(1, false) // 1 x Zoom, not top down
+        {
+            Position = new(0, 0, -1),
+            Zoom = 1,
+        };
+
+        private void Events_KeyDown(object? sender, Events.KeyDownEventArgs e)
+        {
+            if (e.Key == Common.Key.W)
+            {
+                float factor = 10 * (float)_engine.Timing.CurrentFrame.DeltaTime;
+                testCamera.Position = new(testCamera.Position.X, testCamera.Position.Y, testCamera.Position.Z + factor);
+                Log.Information($"Camera moving forward: {testCamera.Position}");
+            }
+            else if (e.Key == Common.Key.A)
+            {
+                float factor = 10 * (float)_engine.Timing.CurrentFrame.DeltaTime;
+                testCamera.Position = new(testCamera.Position.X - factor, testCamera.Position.Y, testCamera.Position.Z);
+                Log.Information($"Camera moving forward: {testCamera.Position}");
+            }
+            else if (e.Key == Common.Key.D)
+            {
+                float factor = 10 * (float)_engine.Timing.CurrentFrame.DeltaTime;
+                testCamera.Position = new(testCamera.Position.X + factor, testCamera.Position.Y, testCamera.Position.Z);
+                Log.Information($"Camera moving forward: {testCamera.Position}");
+            }
+            else if (e.Key == Common.Key.S)
+            {
+                float factor = 10 * (float)_engine.Timing.CurrentFrame.DeltaTime;
+                testCamera.Position = new(testCamera.Position.X, testCamera.Position.Y, testCamera.Position.Z - factor);
+                Log.Information($"Camera moving forward: {testCamera.Position}");
+            }
+            else if (e.Key == Common.Key.Space)
+            {
+                float factor = 10 * (float)_engine.Timing.CurrentFrame.DeltaTime;
+                testCamera.Position += World.ForwardVector * factor;
+                Log.Information($"Camera moving forward test: {testCamera.Position}");
+            }
         }
 
         /// <summary>
@@ -120,7 +165,8 @@ namespace PentaGE.Core.Rendering
             {
                 window.RenderingContext.Use();
 
-                glClearColor(MathF.Sin((float)_engine.Timing.TotalElapsedTime), MathF.Cos((float)_engine.Timing.TotalElapsedTime), 0, 1);
+                //glClearColor(MathF.Sin((float)_engine.Timing.TotalElapsedTime), MathF.Cos((float)_engine.Timing.TotalElapsedTime), 0, 1);
+                glClearColor(0.2f, 0.2f, 0.2f, 1);
                 glClear(GL_COLOR_BUFFER_BIT);
 
                 // Test drawing triangles
@@ -128,6 +174,30 @@ namespace PentaGE.Core.Rendering
 
                 // Bind the Vertex Array Object (VAO) to use the configuration of vertex attributes stored in it.
                 glBindVertexArray(vao);
+
+                // Set up the rendered test objects transform
+                Transform objectTransform = new()
+                {
+                    Position = new(0, 0, 0),  // in pixels
+                    Rotation = new(0, 0, 0), // in degrees
+                    Scale = new(800, 600, 1), // in pixels
+                };
+
+                // Calculate the view and projection matrices from the camera
+                var viewMatrix = testCamera.GetViewMatrix();
+                var projectionMatrix = testCamera.GetProjectionMatrix(window.Size.Width, window.Size.Height);
+                var modelMatrix = Matrix4x4.CreateScale(objectTransform.Scale) *
+                       Matrix4x4.CreateFromYawPitchRoll(
+                           MathHelper.DegreesToRadians(objectTransform.Rotation.Yaw),
+                           MathHelper.DegreesToRadians(objectTransform.Rotation.Pitch),
+                           MathHelper.DegreesToRadians(objectTransform.Rotation.Roll)) *
+                       Matrix4x4.CreateTranslation(objectTransform.Position);
+
+                // Combine the model, view, and projection matrices to get the final MVP matrix
+                var mvpMatrix = modelMatrix * viewMatrix * projectionMatrix;
+
+                // Pass the matrices to the shader
+                shader.SetMatrix4("mvp", viewMatrix);
 
                 // Draw the array of vertices as triangles.
                 // GL_TRIANGLES specifies the primitive type to render (triangles in this case).

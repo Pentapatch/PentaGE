@@ -4,7 +4,7 @@ using System.Numerics;
 using System.Text;
 using static OpenGL.GL;
 
-namespace PentaGE.Core.Rendering.Shaders
+namespace PentaGE.Core.Rendering
 {
     /// <summary>
     /// Represents a shader program used for rendering graphics on the GPU.

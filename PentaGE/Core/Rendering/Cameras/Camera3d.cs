@@ -1,4 +1,6 @@
-﻿using System.Numerics;
+﻿using PentaGE.Common;
+using PentaGE.Maths;
+using System.Numerics;
 
 namespace PentaGE.Core.Rendering
 {
@@ -8,12 +10,13 @@ namespace PentaGE.Core.Rendering
 
         public float AspectRatio { get; private set; }
 
+        public Rotation Rotation { get; set; }
+
         public Camera3d() : base() { }
 
-        public Camera3d(float fieldOfView, float aspectRatio) : base()
+        public Camera3d(float fieldOfView) : base()
         {
             FieldOfView = fieldOfView;
-            AspectRatio = aspectRatio;
         }
 
         public override Matrix4x4 GetProjectionMatrix(int viewportWidth, int viewportHeight)
@@ -22,8 +25,8 @@ namespace PentaGE.Core.Rendering
             AspectRatio = (float)viewportWidth / viewportHeight;
 
             // Create the perspective projection matrix
-            Matrix4x4 projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(
-                MathF.PI * FieldOfView / 180.0f, // Convert field of view from degrees to radians
+            var projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(
+                MathHelper.DegreesToRadians(FieldOfView),
                 AspectRatio,
                 NearPlaneClipping,
                 FarPlaneClipping
@@ -35,12 +38,12 @@ namespace PentaGE.Core.Rendering
         public override Matrix4x4 GetViewMatrix()
         {
             // Extract the camera's position, target, and up vector
-            Vector3 cameraPosition = Transform.Position;
-            Vector3 target = cameraPosition + Rotation.GetForwardVector();
-            Vector3 up = Rotation.GetUpVector();
+            var cameraPosition = Position;
+            var target = cameraPosition + Rotation.GetForwardVector();
+            var up = Rotation.GetUpVector();
 
             // Create the view matrix using the camera's position, target, and up vector
-            Matrix4x4 viewMatrix = Matrix4x4.CreateLookAt(cameraPosition, target, up);
+            var viewMatrix = Matrix4x4.CreateLookAt(cameraPosition, target, up);
 
             return viewMatrix;
         }
