@@ -14,35 +14,71 @@ namespace PentaGE.Core.Rendering
     {
         private readonly PentaGameEngine _engine;
         private uint vao;
+        private uint vbo;
+        private uint ebo;
         private Shader shader;
 
         // Set up the rendered test objects transform
         private Transform objectTransform = new()
         {
-            Position = new(0, 0, 0),  // in pixels
-            Rotation = new(0, 0, 0), // in degrees
-            Scale = new(1900, 600, 1), // in pixels
+            Position = new(0, 0, 0),    // in pixels
+            Rotation = new(0, 0, 0),    // in degrees
+            Scale = new(1, 1, 1),  // in pixels
         };
 
         private readonly Camera3d testCamera = new()
         {
-            Position = new(0, 0, -100),
+            Position = new(0, 0, -2),
             FieldOfView = 90,
-            Rotation = new(0, 0, 0)
+            Rotation = new(
+                0,  // Yaw 
+                0,  // Pitch
+                0   // Roll
+            )
         };
 
-        // Define the vertices for the rectangle.
-        // Each line below represents a vertex and its attributes (x, y, r, g, b).
-        readonly float[] vertices = new[]
+        private readonly float[] cubeVertices = new[]
         {
-                -0.5f, 0.5f, 1f, 0f, 0f,   // Vertex 1 (position: (-0.5, 0.5), color: (1, 0, 0))
-                0.5f, 0.5f, 0f, 1f, 0f,    // Vertex 2 (position: (0.5, 0.5), color: (0, 1, 0))
-                -0.5f, -0.5f, 0f, 0f, 1f,   // Vertex 3 (position: (-0.5, -0.5), color: (0, 0, 1))
+            // Front face
+            -0.5f, -0.5f,  0.5f,    1f, 0f, 0f,  // Vertex 0
+             0.5f, -0.5f,  0.5f,    0f, 1f, 0f,  // Vertex 1
+             0.5f,  0.5f,  0.5f,    0f, 0f, 1f,  // Vertex 2
+            -0.5f,  0.5f,  0.5f,    1f, 0f, 0f,  // Vertex 3
+                                    
+            // Back face            
+            -0.5f, -0.5f, -0.5f,    0f, 1f, 0f,  // Vertex 4
+             0.5f, -0.5f, -0.5f,    0f, 0f, 1f,  // Vertex 5
+             0.5f,  0.5f, -0.5f,    1f, 0f, 0f,  // Vertex 6
+            -0.5f,  0.5f, -0.5f,    0f, 1f, 0f,  // Vertex 7
+        };
 
-                0.5f, 0.5f, 0f, 1f, 0f,    // Vertex 4 (position: (0.5, 0.5), color: (0, 1, 0))
-                0.5f, -0.5f, 0f, 1f, 1f,   // Vertex 5 (position: (0.5, -0.5), color: (0, 1, 1))
-                -0.5f, -0.5f, 0f, 0f, 1f,  // Vertex 6 (position: (-0.5, -0.5), color: (0, 0, 1))
-            };
+        // Indices to define the triangles for each face
+        private readonly uint[] cubeIndices = new uint[]
+        {
+            // Front face
+            0, 1, 2,
+            2, 3, 0,
+
+            // Right face
+            1, 5, 6,
+            6, 2, 1,
+
+            // Back face
+            5, 4, 7,
+            7, 6, 5,
+
+            // Left face
+            4, 0, 3,
+            3, 7, 4,
+
+            // Top face
+            3, 2, 6,
+            6, 7, 3,
+
+            // Bottom face
+            0, 4, 5,
+            5, 1, 0,
+        };
 
         /// <summary>
         /// Creates a new instance of the Renderer class.
@@ -89,34 +125,42 @@ namespace PentaGE.Core.Rendering
                 Log.Error($"Error loading shader: {ex}");
             }
 
-            vao = glGenVertexArray();
-            uint vbo = glGenBuffer();
+            #region testing
 
-            glBindVertexArray(vao);
+            vao = glGenVertexArray(); // Vertex array object
+            vbo = glGenBuffer(); // Vertex buffer object
+            ebo = glGenBuffer(); // Element buffer object
+
+            glBindVertexArray(vao); // Bind the VAO to the current context
+
+            // Bind and copy the vertex data from the managed array to the VBO.
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-            // Copy the vertex data from the managed array to the VBO.
-            // We use 'fixed' to pin the managed array in memory so that it can be accessed by an unmanaged pointer.
-            fixed (float* v = &vertices[0])
+            fixed (float* v = &cubeVertices[0])
             {
-                glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.Length, v, GL_STATIC_DRAW);
+                // Sets the data for the currently bound buffer
+                // GL_STATIC_DRAW means the data will not be changed (much)
+                glBufferData(GL_ARRAY_BUFFER, sizeof(float) * cubeVertices.Length, v, GL_STATIC_DRAW);
+            }
+
+            // Bind and copy the indices to the EBO.
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+            fixed (uint* i = &cubeIndices[0])
+            {
+                glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * cubeIndices.Length, i, GL_STATIC_DRAW);
             }
 
             // Specify how the vertex attributes should be interpreted.
-            // In this case, attribute 0 represents the position (x, y) and has two components (GL_FLOAT), 
-            // and attribute 1 represents the color (r, g, b) and has three components.
-            // The stride is the byte offset between consecutive vertex attribute data.
-            // The last argument is the offset of the attribute within the vertex data.
-            glVertexAttribPointer(0, 2, GL_FLOAT, false, 5 * sizeof(float), (void*)0);
-            glVertexAttribPointer(1, 3, GL_FLOAT, false, 5 * sizeof(float), (void*)(2 * sizeof(float)));
+            glVertexAttribPointer(0, 3, GL_FLOAT, false, 6 * sizeof(float), (void*)0); // Positions
+            glVertexAttribPointer(1, 3, GL_FLOAT, false, 6 * sizeof(float), (void*)(3 * sizeof(float))); // Colors
+            glEnableVertexAttribArray(0); // Enable the vertex attribute at index 0 for positions
+            glEnableVertexAttribArray(1); // Enable the vertex attribute at index 1 for colors
 
-            // Enable vertex attributes 0 and 1.
-            glEnableVertexAttribArray(0);
-            glEnableVertexAttribArray(1);
+            // Unbind the VBO, EBO, and VAO to prevent further changes to them.
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // Unbind the EBO
+            glBindBuffer(GL_ARRAY_BUFFER, 0);         // Unbind the VBO
+            glBindVertexArray(0);                     // Unbind the VAO
 
-            // Unbind the VBO and VAO to prevent further changes to them.
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-            glBindVertexArray(0);
+            #endregion
 
             // Add engine events for moving the camera (during debug - remove later)
             _engine.Events.KeyDown += Events_KeyDown;
@@ -128,7 +172,7 @@ namespace PentaGE.Core.Rendering
         private void Events_KeyDown(object? sender, Events.KeyDownEventArgs e)
         {
             // For moving the camera (during debug - remove later)
-            float increment = 100f;
+            float increment = 0.25f;
             if (e.Key == Key.W)
             {
                 testCamera.Position += World.ForwardVector * increment;
@@ -151,22 +195,61 @@ namespace PentaGE.Core.Rendering
                 //testCamera.Position += World.DownVector * increment; // For 2D
                 Log.Information($"Camera moving backward: {testCamera.Position}");
             }
+            else if (e.Key == Key.Q)
+            {
+                testCamera.Position += World.UpVector * increment;
+                Log.Information($"Camera moving up: {testCamera.Position}");
+            }
+            else if (e.Key == Key.E)
+            {
+                testCamera.Position += World.DownVector * increment;
+                Log.Information($"Camera moving down: {testCamera.Position}");
+            }
+            else if (e.Key == Key.Left)
+            {
+                testCamera.Rotation += new Rotation(1, 0, 0) * 5;
+                Log.Information($"Camera yaw right: {testCamera.Rotation}");
+            }
+            else if (e.Key == Key.Right)
+            {
+                testCamera.Rotation += new Rotation(-1, 0, 0) * 5;
+                Log.Information($"Camera yaw left: {testCamera.Rotation}");
+            }
+            else if (e.Key == Key.Up)
+            {
+                testCamera.Rotation += new Rotation(0, 1, 0) * 5;
+                Log.Information($"Camera yaw right: {testCamera.Rotation}");
+            }
+            else if (e.Key == Key.Down)
+            {
+                testCamera.Rotation += new Rotation(0, -1, 0) * 5;
+                Log.Information($"Camera yaw left: {testCamera.Rotation}");
+            }
+            else if (e.Key == Key.Z)
+            {
+                testCamera.FieldOfView += 5;
+                Log.Information($"Camera FoV increasing: {testCamera.FieldOfView}");
+            }
+            else if (e.Key == Key.X)
+            {
+                testCamera.FieldOfView -= 5;
+                Log.Information($"Camera FoV decreasing: {testCamera.FieldOfView}");
+            }
         }
 
         /// <summary>
         /// Handles graphics rendering.
         /// </summary>
-        internal void Render()
+        internal unsafe void Render()
         {
             foreach (var window in _engine.Windows)
             {
                 window.RenderingContext.Use();
 
-                //glClearColor(MathF.Sin((float)_engine.Timing.TotalElapsedTime), MathF.Cos((float)_engine.Timing.TotalElapsedTime), 0, 1);
                 glClearColor(0.2f, 0.2f, 0.2f, 1);
                 glClear(GL_COLOR_BUFFER_BIT);
 
-                // Test drawing triangles
+                // Use the shader program
                 shader.Use();
 
                 // Calculate the view and projection matrices from the camera
@@ -179,17 +262,27 @@ namespace PentaGE.Core.Rendering
                 // Combine the model, view, and projection matrices to get the final MVP matrix
                 var mvpMatrix = modelMatrix * viewMatrix * projectionMatrix;
 
-                // Pass the matrices to the shader
+                // Pass the matrices to the shader (must be done after shader.Use())
                 shader.SetMatrix4("mvp", mvpMatrix);
 
                 // Bind the Vertex Array Object (VAO) to use the configuration of vertex attributes stored in it.
-                glBindVertexArray(vao);
+                glBindVertexArray(vao); // Bind the VAO to the current context
 
-                // Draw the triangles
-                glDrawArrays(GL_TRIANGLES, 0, 6);
+                // Draw the cube using the indices of the EBO
+                glDrawElements(GL_TRIANGLES, cubeIndices);
 
                 // Unbind the VAO to prevent accidental modification.
-                glBindVertexArray(0);
+                glBindVertexArray(0);                     // Unbind the VAO
+                glBindBuffer(GL_ARRAY_BUFFER, 0);         // Unbind the VBO (optional, but good practice)
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // Unbind the EBO (optional, but good practice)
+            }
+        }
+
+        private static void LogGlErrors()
+        {
+            while (Glfw.GetError(out string description) != ErrorCode.None)
+            {
+                Log.Error(description);
             }
         }
     }

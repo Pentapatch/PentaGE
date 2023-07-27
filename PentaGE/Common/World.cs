@@ -16,6 +16,6 @@ namespace PentaGE.Common
 
         public static readonly Vector3 LeftVector = -RightVector;
 
-        public const float PixelsPerMeter = 32.0f;
+        public const float PixelsPerMeter = 200.0f;
     }
 }
