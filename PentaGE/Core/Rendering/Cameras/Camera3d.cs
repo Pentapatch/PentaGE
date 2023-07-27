@@ -38,12 +38,15 @@ namespace PentaGE.Core.Rendering
         public override Matrix4x4 GetViewMatrix()
         {
             // Extract the camera's position, target, and up vector
-            var cameraPosition = Position;
+            var cameraPosition = new Vector3(-Position.X, -Position.Y, Position.Z);
             var target = cameraPosition + Rotation.GetForwardVector();
             var up = Rotation.GetUpVector();
 
             // Create the view matrix using the camera's position, target, and up vector
             var viewMatrix = Matrix4x4.CreateLookAt(cameraPosition, target, up);
+
+            // Flip the view matrix horizontally to move the scene to the left
+            viewMatrix = Matrix4x4.CreateScale(-1.0f, 1.0f, 1.0f) * viewMatrix;
 
             return viewMatrix;
         }
