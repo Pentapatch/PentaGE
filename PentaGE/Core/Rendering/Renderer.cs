@@ -28,7 +28,7 @@ namespace PentaGE.Core.Rendering
 
         private readonly Camera3d testCamera = new()
         {
-            Position = new(0, 0, -2),
+            Position = new(0, 0, -6),
             FieldOfView = 90,
             Rotation = new(
                 0,  // Yaw 
@@ -37,47 +37,26 @@ namespace PentaGE.Core.Rendering
             )
         };
 
-        private readonly float[] cubeVertices = new[]
+        private readonly float[] vertices = new float[]
         {
-            // Front face
-            -0.5f, -0.5f,  0.5f,    1f, 0f, 0f,  // Vertex 0
-             0.5f, -0.5f,  0.5f,    0f, 1f, 0f,  // Vertex 1
-             0.5f,  0.5f,  0.5f,    0f, 0f, 1f,  // Vertex 2
-            -0.5f,  0.5f,  0.5f,    1f, 0f, 0f,  // Vertex 3
-                                    
-            // Back face            
-            -0.5f, -0.5f, -0.5f,    0f, 1f, 0f,  // Vertex 4
-             0.5f, -0.5f, -0.5f,    0f, 0f, 1f,  // Vertex 5
-             0.5f,  0.5f, -0.5f,    1f, 0f, 0f,  // Vertex 6
-            -0.5f,  0.5f, -0.5f,    0f, 1f, 0f,  // Vertex 7
+           -1f, -3f, -1f,   1, 0, 0,   // Vertex 0
+           -1f,  3f, -1f,   1, 0, 0,   // Vertex 1
+            1f,  3f, -1f,   1, 0, 0,   // Vertex 2
+            1f, -3f, -1f,   1, 0, 0,   // Vertex 3
+           -1f, -3f,  1f,   1, 0, 0,   // Vertex 4
+           -1f,  3f,  1f,   1, 0, 0,   // Vertex 5
+            1f,  3f,  1f,   1, 0, 0,   // Vertex 6
+            1f, -3f,  1f,   1, 0, 0    // Vertex 7
         };
 
-        // Indices to define the triangles for each face
-        private readonly uint[] cubeIndices = new uint[]
+        private readonly uint[] indices = new uint[]
         {
-            // Front face
-            0, 1, 2,
-            2, 3, 0,
-
-            // Right face
-            1, 5, 6,
-            6, 2, 1,
-
-            // Back face
-            5, 4, 7,
-            7, 6, 5,
-
-            // Left face
-            4, 0, 3,
-            3, 7, 4,
-
-            // Top face
-            3, 2, 6,
-            6, 7, 3,
-
-            // Bottom face
-            0, 4, 5,
-            5, 1, 0,
+           0, 1, 2,    0, 2, 3,    // Face 0: Front
+           4, 6, 5,    4, 7, 6,    // Face 1: Back
+           4, 5, 1,    4, 1, 0,    // Face 2: Left
+           3, 2, 6,    3, 6, 7,    // Face 3: Right
+           1, 5, 6,    1, 6, 2,    // Face 4: Top
+           4, 0, 3,    4, 3, 7     // Face 5: Bottom
         };
 
         /// <summary>
@@ -135,18 +114,18 @@ namespace PentaGE.Core.Rendering
 
             // Bind and copy the vertex data from the managed array to the VBO.
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            fixed (float* v = &cubeVertices[0])
+            fixed (float* v = &vertices[0])
             {
                 // Sets the data for the currently bound buffer
                 // GL_STATIC_DRAW means the data will not be changed (much)
-                glBufferData(GL_ARRAY_BUFFER, sizeof(float) * cubeVertices.Length, v, GL_STATIC_DRAW);
+                glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.Length, v, GL_STATIC_DRAW);
             }
 
             // Bind and copy the indices to the EBO.
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-            fixed (uint* i = &cubeIndices[0])
+            fixed (uint* i = &indices[0])
             {
-                glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * cubeIndices.Length, i, GL_STATIC_DRAW);
+                glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * indices.Length, i, GL_STATIC_DRAW);
             }
 
             // Specify how the vertex attributes should be interpreted.
@@ -252,6 +231,9 @@ namespace PentaGE.Core.Rendering
                 // Use the shader program
                 shader.Use();
 
+                // Test: Rotating the object
+                objectTransform.Rotation = new(MathF.Sin((float)_engine.Timing.TotalElapsedTime) * 90, 0, 0);
+
                 // Calculate the view and projection matrices from the camera
                 var viewMatrix = testCamera.GetViewMatrix();
                 var projectionMatrix = testCamera.GetProjectionMatrix(window.Size.Width, window.Size.Height);
@@ -269,7 +251,7 @@ namespace PentaGE.Core.Rendering
                 glBindVertexArray(vao); // Bind the VAO to the current context
 
                 // Draw the cube using the indices of the EBO
-                glDrawElements(GL_TRIANGLES, cubeIndices);
+                glDrawElements(GL_TRIANGLES, indices);
 
                 // Unbind the VAO to prevent accidental modification.
                 glBindVertexArray(0);                     // Unbind the VAO
