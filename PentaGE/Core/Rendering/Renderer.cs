@@ -13,51 +13,12 @@ namespace PentaGE.Core.Rendering
     internal class Renderer
     {
         private readonly PentaGameEngine _engine;
-        private uint vao;
-        private uint vbo;
-        private uint ebo;
+        private VertexArray vao;
+        private VertexBuffer vbo;
+        private ElementBuffer ebo;
         private Shader shader;
-
-        // Set up the rendered test objects transform
-        private Transform objectTransform = new()
-        {
-            Position = new(0, 0, 0),    // in pixels
-            Rotation = new(0, 0, 0),    // in degrees
-            Scale = new(1, 1, 1),  // in pixels
-        };
-
-        private readonly Camera3d testCamera = new()
-        {
-            Position = new(0, 0, -6),
-            FieldOfView = 90,
-            Rotation = new(
-                0,  // Yaw 
-                0,  // Pitch
-                0   // Roll
-            )
-        };
-
-        private readonly float[] vertices = new float[]
-        {
-           -1f, -3f, -1f,   1, 0, 0,   // Vertex 0
-           -1f,  3f, -1f,   1, 0, 0,   // Vertex 1
-            1f,  3f, -1f,   1, 0, 0,   // Vertex 2
-            1f, -3f, -1f,   1, 0, 0,   // Vertex 3
-           -1f, -3f,  1f,   1, 0, 0,   // Vertex 4
-           -1f,  3f,  1f,   1, 0, 0,   // Vertex 5
-            1f,  3f,  1f,   1, 0, 0,   // Vertex 6
-            1f, -3f,  1f,   1, 0, 0    // Vertex 7
-        };
-
-        private readonly uint[] indices = new uint[]
-        {
-           0, 1, 2,    0, 2, 3,    // Face 0: Front
-           4, 6, 5,    4, 7, 6,    // Face 1: Back
-           4, 5, 1,    4, 1, 0,    // Face 2: Left
-           3, 2, 6,    3, 6, 7,    // Face 3: Right
-           1, 5, 6,    1, 6, 2,    // Face 4: Top
-           4, 0, 3,    4, 3, 7     // Face 5: Bottom
-        };
+        private bool rotate = true;
+        private bool wireframe = true;
 
         /// <summary>
         /// Creates a new instance of the Renderer class.
@@ -67,6 +28,48 @@ namespace PentaGE.Core.Rendering
         {
             _engine = engine;
         }
+
+        // Set up the rendered test objects transform
+        private Transform objectTransform = new()
+        {
+            Position = new(0, 0, 0),    // in units
+            Rotation = new(0, 0, 0),    // in degrees
+            Scale = new(1, 1, 1),       // multipliers
+        };
+
+        private readonly Camera3d testCamera = new()
+        {
+            Position = new(0, 0, -3),
+            FieldOfView = 90,
+            Rotation = new(
+                0,  // Yaw 
+                0,  // Pitch
+                0   // Roll
+            )
+        };
+
+        private float[] vertices = new float[]
+        {
+            // Coordinates          // Colors               // Texture Coordinates
+            -1.0f, -1.0f, -1.0f,    0.83f, 0.70f, 0.44f,    
+             1.0f, -1.0f, -1.0f,    0.83f, 0.70f, 0.44f,    
+             1.0f,  1.0f, -1.0f,    0.83f, 0.70f, 0.44f,
+            -1.0f,  1.0f, -1.0f,    0.83f, 0.70f, 0.44f,
+            -1.0f, -1.0f,  1.0f,    0.92f, 0.86f, 0.76f,
+             1.0f, -1.0f,  1.0f,    0.92f, 0.86f, 0.76f,
+             1.0f,  1.0f,  1.0f,    0.92f, 0.86f, 0.76f,
+            -1.0f,  1.0f,  1.0f,    0.92f, 0.86f, 0.76f
+        };
+
+        private uint[] indices = new uint[]
+        {
+            0, 1, 2,    2, 3, 0,    // Front face
+            4, 5, 6,    6, 7, 4,    // Back face
+            0, 4, 7,    7, 3, 0,    // Left face
+            1, 5, 6,    6, 2, 1,    // Right face
+            3, 2, 6,    6, 7, 3,    // Top face
+            0, 1, 5,    5, 4, 0     // Bottom face
+        };
 
         /// <summary>
         /// Initializes GLFW and sets up the necessary context hints for rendering.
@@ -80,6 +83,8 @@ namespace PentaGE.Core.Rendering
                 return false;
             }
 
+            _engine.Events.GlfwError += Events_GlfwError;
+
             // Set up GLFW versioning
             Glfw.WindowHint(Hint.ContextVersionMajor, 3);
             Glfw.WindowHint(Hint.ContextVersionMinor, 3);
@@ -92,11 +97,17 @@ namespace PentaGE.Core.Rendering
                 return false;
             }
 
+            // Enable face culling
+            //glEnable(GL_CULL_FACE);
+            //glCullFace(GL_BACK);
+            //glFrontFace(GL_CW);
+            //glEnable(GL_DEPTH_TEST);
+
             // Initializing test shader
             using var logger = Log.Logger.BeginPerfLogger("Loading shader");
             try
             {
-                shader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\CameraTest.shader");
+                shader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\FaceShader.shader");
                 shader.Load();
             }
             catch (System.Exception ex)
@@ -104,50 +115,108 @@ namespace PentaGE.Core.Rendering
                 Log.Error($"Error loading shader: {ex}");
             }
 
-            #region testing
-
-            vao = glGenVertexArray(); // Vertex array object
-            vbo = glGenBuffer(); // Vertex buffer object
-            ebo = glGenBuffer(); // Element buffer object
-
-            glBindVertexArray(vao); // Bind the VAO to the current context
-
-            // Bind and copy the vertex data from the managed array to the VBO.
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            fixed (float* v = &vertices[0])
-            {
-                // Sets the data for the currently bound buffer
-                // GL_STATIC_DRAW means the data will not be changed (much)
-                glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.Length, v, GL_STATIC_DRAW);
-            }
-
-            // Bind and copy the indices to the EBO.
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-            fixed (uint* i = &indices[0])
-            {
-                glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * indices.Length, i, GL_STATIC_DRAW);
-            }
-
-            // Specify how the vertex attributes should be interpreted.
-            glVertexAttribPointer(0, 3, GL_FLOAT, false, 6 * sizeof(float), (void*)0); // Positions
-            glVertexAttribPointer(1, 3, GL_FLOAT, false, 6 * sizeof(float), (void*)(3 * sizeof(float))); // Colors
-            glEnableVertexAttribArray(0); // Enable the vertex attribute at index 0 for positions
-            glEnableVertexAttribArray(1); // Enable the vertex attribute at index 1 for colors
-
-            // Unbind the VBO, EBO, and VAO to prevent further changes to them.
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // Unbind the EBO
-            glBindBuffer(GL_ARRAY_BUFFER, 0);         // Unbind the VBO
-            glBindVertexArray(0);                     // Unbind the VAO
-
-            #endregion
-
             // Add engine events for moving the camera (during debug - remove later)
             _engine.Events.KeyDown += Events_KeyDown;
             _engine.Events.KeyRepeat += Events_KeyDown;
 
+            #region Set up a test object to render
+
+            // Create a VAO, VBO, and EBO
+            vao = new();
+            vbo = new(ref vertices, sizeof(float) * vertices.Length);
+            ebo = new(ref indices, sizeof(uint) * indices.Length);
+
+            // Bind the VAO, VBO, and EBO to the current context
+            vao.Bind();
+            ebo.Bind();
+
+            // Specify how the vertex attributes should be interpreted.
+            vao.LinkAttribute(ref vbo, 0, 3, GL_FLOAT, 6 * sizeof(float), (void*)0);
+            vao.LinkAttribute(ref vbo, 1, 3, GL_FLOAT, 6 * sizeof(float), (void*)(3 * sizeof(float))); // Normals
+
+            // Unbind the VBO, EBO, and VAO to prevent further changes to them.
+            VertexBuffer.Unbind();  // Unbind the VBO
+            ElementBuffer.Unbind(); // Unbind the EBO
+            VertexArray.Unbind();   // Unbind the VAO
+
+            #endregion
+
             return true;
         }
 
+        /// <summary>
+        /// Handles graphics rendering.
+        /// </summary>
+        internal unsafe void Render()
+        {
+            foreach (var window in _engine.Windows)
+            {
+                #region Test rotation
+
+                // Rotate the object based on the current time
+                //objectTransform.Rotation = rotate ? new(
+                //    MathF.Sin((float)_engine.Timing.TotalElapsedTime) * 90,
+                //    MathF.Cos((float)_engine.Timing.TotalElapsedTime) * 90,
+                //    0) :
+                //    new(0, 0, 0);
+                objectTransform.Rotation = rotate ? new(
+                    MathF.Sin((float)_engine.Timing.TotalElapsedTime) * 180,
+                    0,
+                    0) :
+                    objectTransform.Rotation;//new(0, 0, 0);
+
+                #endregion
+
+                // Update the current window's rendering context
+                window.RenderingContext.Use();
+
+                // Clear the screen to a dark gray color and clear the depth buffer
+                glClearColor(0.2f, 0.2f, 0.2f, 1);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+                // Use the shader program
+                shader.Use();
+
+                // Calculate the view and projection matrices from the camera
+                var viewMatrix = testCamera.GetViewMatrix();
+                var projectionMatrix = testCamera.GetProjectionMatrix(window.Size.Width, window.Size.Height);
+                var modelMatrix = Matrix4x4.CreateScale(objectTransform.Scale)
+                    * objectTransform.Rotation.ToMatrix4x4()
+                    * Matrix4x4.CreateTranslation(objectTransform.Position);
+
+                // Combine the model, view, and projection matrices to get the final MVP matrix
+                var mvpMatrix = modelMatrix * viewMatrix * projectionMatrix;
+
+                // Pass the matrices to the shader (must be done after shader.Use())
+                shader.SetMatrix4("mvp", mvpMatrix);
+
+                // Bind the Vertex Array Object (VAO) to use the configuration
+                // of vertex attributes stored in it.
+                vao.Bind();
+
+                // Draw the object using the indices of the EBO
+                glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
+                glDrawElements(GL_TRIANGLES, indices); // Draw the object using the indices of the EBO
+
+                // Unbind the VAO, VBO & EBO to prevent accidental modification.
+                VertexArray.Unbind();   // Unbind the VAO
+                VertexBuffer.Unbind();  // Unbind the VBO (not necessary, but good practice)
+                ElementBuffer.Unbind(); // Unbind the EBO (not necessary, but good practice)
+            }
+        }
+
+        internal void Terminate()
+        {
+            vbo.Dispose();
+            ebo.Dispose();
+        }
+
+        private void Events_GlfwError(object? sender, Events.GlfwErrorEventArgs e)
+        {
+            Log.Error($"GLFW Error: {e.ErrorCode} - {e.Message}");
+        }
+
+        // This code does not belong here, but is here for testing purposes
         private void Events_KeyDown(object? sender, Events.KeyDownEventArgs e)
         {
             // For moving the camera (during debug - remove later)
@@ -186,8 +255,16 @@ namespace PentaGE.Core.Rendering
             }
             else if (e.Key == Key.Left)
             {
-                testCamera.Rotation += new Rotation(1, 0, 0) * 5;
-                Log.Information($"Camera yaw right: {testCamera.Rotation}");
+                if (e.ModifierKeyWasUsed(ModifierKey.Control))
+                {
+                    objectTransform.Rotation += new Rotation(1, 0, 0) * 5;
+                    Log.Information($"Object yaw right: {objectTransform.Rotation}");
+                }
+                else
+                {
+                    testCamera.Rotation += new Rotation(1, 0, 0) * 5;
+                    Log.Information($"Camera yaw right: {testCamera.Rotation}");
+                }
             }
             else if (e.Key == Key.Right)
             {
@@ -196,8 +273,16 @@ namespace PentaGE.Core.Rendering
             }
             else if (e.Key == Key.Up)
             {
-                testCamera.Rotation += new Rotation(0, 1, 0) * 5;
-                Log.Information($"Camera yaw right: {testCamera.Rotation}");
+                if (e.ModifierKeyWasUsed(ModifierKey.Control))
+                {
+                    objectTransform.Rotation += new Rotation(0, 1, 0) * 5;
+                    Log.Information($"Object pitch right: {objectTransform.Rotation}");
+                }
+                else
+                {
+                    testCamera.Rotation += new Rotation(0, 1, 0) * 5;
+                    Log.Information($"Camera pitch right: {testCamera.Rotation}");
+                }
             }
             else if (e.Key == Key.Down)
             {
@@ -214,57 +299,13 @@ namespace PentaGE.Core.Rendering
                 testCamera.FieldOfView -= 5;
                 Log.Information($"Camera FoV decreasing: {testCamera.FieldOfView}");
             }
-        }
-
-        /// <summary>
-        /// Handles graphics rendering.
-        /// </summary>
-        internal unsafe void Render()
-        {
-            foreach (var window in _engine.Windows)
+            else if (e.Key == Key.R)
             {
-                window.RenderingContext.Use();
-
-                glClearColor(0.2f, 0.2f, 0.2f, 1);
-                glClear(GL_COLOR_BUFFER_BIT);
-
-                // Use the shader program
-                shader.Use();
-
-                // Test: Rotating the object
-                objectTransform.Rotation = new(MathF.Sin((float)_engine.Timing.TotalElapsedTime) * 90, 0, 0);
-
-                // Calculate the view and projection matrices from the camera
-                var viewMatrix = testCamera.GetViewMatrix();
-                var projectionMatrix = testCamera.GetProjectionMatrix(window.Size.Width, window.Size.Height);
-                var modelMatrix = Matrix4x4.CreateScale(objectTransform.Scale)
-                    * objectTransform.Rotation.ToMatrix4x4()
-                    * Matrix4x4.CreateTranslation(objectTransform.Position);
-
-                // Combine the model, view, and projection matrices to get the final MVP matrix
-                var mvpMatrix = modelMatrix * viewMatrix * projectionMatrix;
-
-                // Pass the matrices to the shader (must be done after shader.Use())
-                shader.SetMatrix4("mvp", mvpMatrix);
-
-                // Bind the Vertex Array Object (VAO) to use the configuration of vertex attributes stored in it.
-                glBindVertexArray(vao); // Bind the VAO to the current context
-
-                // Draw the cube using the indices of the EBO
-                glDrawElements(GL_TRIANGLES, indices);
-
-                // Unbind the VAO to prevent accidental modification.
-                glBindVertexArray(0);                     // Unbind the VAO
-                glBindBuffer(GL_ARRAY_BUFFER, 0);         // Unbind the VBO (optional, but good practice)
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // Unbind the EBO (optional, but good practice)
+                rotate = !rotate;
             }
-        }
-
-        private static void LogGlErrors()
-        {
-            while (Glfw.GetError(out string description) != ErrorCode.None)
+            else if (e.Key == Key.F1)
             {
-                Log.Error(description);
+                wireframe = !wireframe;
             }
         }
     }

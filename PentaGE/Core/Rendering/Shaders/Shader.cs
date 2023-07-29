@@ -219,6 +219,24 @@ namespace PentaGE.Core.Rendering
             glUniformMatrix4fv(location, 1, false, value.ToArray());
         }
 
+        public void SetVec2Array(string name, float[] values)
+        {
+            int location = glGetUniformLocation(ProgramId, name);
+            int length = values.Length / 2; // Divide by 2 since each vector has 2 components (X, Y)
+
+            // Set the uniform data using glUniform3fv
+            glUniform2fv(location, length, values);
+        }
+
+        public void SetVec3Array(string name, float[] values)
+        {
+            int location = glGetUniformLocation(ProgramId, name);
+            int length = values.Length / 3; // Divide by 3 since each vector has 3 components (RGB/XYZ)
+
+            // Set the uniform data using glUniform3fv
+            glUniform3fv(location, length, values);
+        }
+
         /// <summary>
         /// Compiles a shader of the specified type using the provided source code.
         /// </summary>

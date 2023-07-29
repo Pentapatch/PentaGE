@@ -101,6 +101,10 @@ namespace PentaGE.Core
             // Update the game state
             _state = GameState.Terminating;
 
+            // Terminate the Renderer
+            Log.Information("Terminating the Renderer.");
+            _renderer.Terminate();
+
             // Terminate Glfw
             Log.Information("Terminating GLFW.");
             Glfw.Terminate();

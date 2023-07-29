@@ -76,10 +76,13 @@ namespace PentaGE.Core
         /// <summary>
         /// Initializes the window manager and creates default windows if needed.
         /// This method also creates any added windows in the window list.
+        /// Additional calls to this method will return <c>true</c> immediately.
         /// </summary>
         /// <returns><c>true</c> if the window manager is successfully initialized; otherwise, <c>false</c>.</returns>
         internal bool Initialize()
         {
+            if (_isInitialized) return true;
+
             AddDefaultWindow();
 
             foreach (var window in _windows)
