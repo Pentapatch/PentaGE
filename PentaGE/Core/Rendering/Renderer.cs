@@ -53,31 +53,40 @@ namespace PentaGE.Core.Rendering
         private float[] vertices = new float[]
         {
             // Coordinates          // Colors               // Texture Coordinates
-            //-1.0f, -1.0f, -1.0f,    0.83f, 0.70f, 0.44f,    0.1f, 1.0f,
-            // 1.0f, -1.0f, -1.0f,    0.83f, 0.70f, 0.44f,    0.1f, 1.0f,
-            // 1.0f,  1.0f, -1.0f,    0.83f, 0.70f, 0.44f,    0.1f, 1.0f,
-            //-1.0f,  1.0f, -1.0f,    0.83f, 0.70f, 0.44f,    0.1f, 1.0f,
-            //-1.0f, -1.0f,  1.0f,    0.92f, 0.86f, 0.76f,    0.1f, 1.0f,
-            // 1.0f, -1.0f,  1.0f,    0.92f, 0.86f, 0.76f,    0.1f, 1.0f,
-            // 1.0f,  1.0f,  1.0f,    0.92f, 0.86f, 0.76f,    0.1f, 1.0f,
-            //-1.0f,  1.0f,  1.0f,    0.92f, 0.86f, 0.76f,    0.1f, 1.0f
-            -1.0f, -1.0f, 0.0f,     1.0f, 0.0f, 0.0f,   0.0f, 0.0f, // Lower left corner
-	        -1.0f,  1.0f, 0.0f,     0.0f, 1.0f, 0.0f,   0.0f, 1.0f, // Upper left corner
-	         1.0f,  1.0f, 0.0f,     0.0f, 0.0f, 1.0f,   1.0f, 1.0f, // Upper right corner
-	         1.0f, -1.0f, 0.0f,     1.0f, 1.0f, 1.0f,   1.0f, 0.0f  // Lower right corner
+            //-1.0f, -1.0f, -1.0f,    0.83f, 0.70f, 0.44f,    0.1f, 1.0f, // Cube
+            // 1.0f, -1.0f, -1.0f,    0.83f, 0.70f, 0.44f,    0.1f, 1.0f, // -- " --
+            // 1.0f,  1.0f, -1.0f,    0.83f, 0.70f, 0.44f,    0.1f, 1.0f, // -- " --
+            //-1.0f,  1.0f, -1.0f,    0.83f, 0.70f, 0.44f,    0.1f, 1.0f, // -- " --
+            //-1.0f, -1.0f,  1.0f,    0.92f, 0.86f, 0.76f,    0.1f, 1.0f, // -- " --
+            // 1.0f, -1.0f,  1.0f,    0.92f, 0.86f, 0.76f,    0.1f, 1.0f, // -- " --
+            // 1.0f,  1.0f,  1.0f,    0.92f, 0.86f, 0.76f,    0.1f, 1.0f, // -- " --
+            //-1.0f,  1.0f,  1.0f,    0.92f, 0.86f, 0.76f,    0.1f, 1.0f  // -- " --
+         //   -1.0f, -1.0f, 0.0f,     1.0f, 0.0f, 0.0f,       0.0f, 0.0f, // Plane
+	        //-1.0f,  1.0f, 0.0f,     0.0f, 1.0f, 0.0f,       0.0f, 1.0f, // -- " --
+	        // 1.0f,  1.0f, 0.0f,     0.0f, 0.0f, 1.0f,       1.0f, 1.0f, // -- " --
+	        // 1.0f, -1.0f, 0.0f,     1.0f, 1.0f, 1.0f,       1.0f, 0.0f  // -- " --
+            -0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,    0.0f, 0.0f, // Pyramid
+            -0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,    5.0f, 0.0f, // -- " --
+             0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,    0.0f, 0.0f, // -- " --
+             0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,    5.0f, 0.0f, // -- " --
+             0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,    2.5f, 5.0f  // -- " --
         };
 
         private uint[] indices = new uint[]
         {
-            //0, 1, 2,    2, 3, 0,    // Front face
-            //4, 5, 6,    6, 7, 4,    // Back face
-            //0, 4, 7,    7, 3, 0,    // Left face
-            //1, 5, 6,    6, 2, 1,    // Right face
-            //3, 2, 6,    6, 7, 3,    // Top face
-            //0, 1, 5,    5, 4, 0     // Bottom face
-            0, 2, 1, // Upper triangle
-	        0, 3, 2 // Lower triangle
-
+            //0, 1, 2,    2, 3, 0,    // Cube
+            //4, 5, 6,    6, 7, 4,    // -- " --
+            //0, 4, 7,    7, 3, 0,    // -- " --
+            //1, 5, 6,    6, 2, 1,    // -- " --
+            //3, 2, 6,    6, 7, 3,    // -- " --
+            //0, 1, 5,    5, 4, 0     // -- " --
+            //0, 2, 1,    0, 3, 2     // Plane
+            0, 1, 2,                  // Pyramid
+            0, 2, 3,                  // -- " --
+            0, 1, 4,                  // -- " --
+            1, 2, 4,                  // -- " --
+            2, 3, 4,                  // -- " --
+            3, 0, 4                   // -- " --
         };
 
         /// <summary>
@@ -110,7 +119,7 @@ namespace PentaGE.Core.Rendering
             //glEnable(GL_CULL_FACE);
             //glCullFace(GL_BACK);
             //glFrontFace(GL_CW);
-            //glEnable(GL_DEPTH_TEST);
+            glEnable(GL_DEPTH_TEST);
 
             // Initializing test shader
             using (var logger = Log.Logger.BeginPerfLogger("Loading shader"))
