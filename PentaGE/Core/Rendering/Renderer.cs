@@ -1,4 +1,5 @@
-﻿using GLFW;
+﻿
+using GLFW;
 using PentaGE.Common;
 using PentaGE.Core.Logging;
 using Serilog;
@@ -17,8 +18,9 @@ namespace PentaGE.Core.Rendering
         private VertexBuffer vbo;
         private ElementBuffer ebo;
         private Shader shader;
+        private Texture texture;
         private bool rotate = true;
-        private bool wireframe = true;
+        private bool wireframe = false;
 
         /// <summary>
         /// Creates a new instance of the Renderer class.
@@ -51,24 +53,31 @@ namespace PentaGE.Core.Rendering
         private float[] vertices = new float[]
         {
             // Coordinates          // Colors               // Texture Coordinates
-            -1.0f, -1.0f, -1.0f,    0.83f, 0.70f, 0.44f,    
-             1.0f, -1.0f, -1.0f,    0.83f, 0.70f, 0.44f,    
-             1.0f,  1.0f, -1.0f,    0.83f, 0.70f, 0.44f,
-            -1.0f,  1.0f, -1.0f,    0.83f, 0.70f, 0.44f,
-            -1.0f, -1.0f,  1.0f,    0.92f, 0.86f, 0.76f,
-             1.0f, -1.0f,  1.0f,    0.92f, 0.86f, 0.76f,
-             1.0f,  1.0f,  1.0f,    0.92f, 0.86f, 0.76f,
-            -1.0f,  1.0f,  1.0f,    0.92f, 0.86f, 0.76f
+            //-1.0f, -1.0f, -1.0f,    0.83f, 0.70f, 0.44f,    0.1f, 1.0f,
+            // 1.0f, -1.0f, -1.0f,    0.83f, 0.70f, 0.44f,    0.1f, 1.0f,
+            // 1.0f,  1.0f, -1.0f,    0.83f, 0.70f, 0.44f,    0.1f, 1.0f,
+            //-1.0f,  1.0f, -1.0f,    0.83f, 0.70f, 0.44f,    0.1f, 1.0f,
+            //-1.0f, -1.0f,  1.0f,    0.92f, 0.86f, 0.76f,    0.1f, 1.0f,
+            // 1.0f, -1.0f,  1.0f,    0.92f, 0.86f, 0.76f,    0.1f, 1.0f,
+            // 1.0f,  1.0f,  1.0f,    0.92f, 0.86f, 0.76f,    0.1f, 1.0f,
+            //-1.0f,  1.0f,  1.0f,    0.92f, 0.86f, 0.76f,    0.1f, 1.0f
+            -1.0f, -1.0f, 0.0f,     1.0f, 0.0f, 0.0f,   0.0f, 0.0f, // Lower left corner
+	        -1.0f,  1.0f, 0.0f,     0.0f, 1.0f, 0.0f,   0.0f, 1.0f, // Upper left corner
+	         1.0f,  1.0f, 0.0f,     0.0f, 0.0f, 1.0f,   1.0f, 1.0f, // Upper right corner
+	         1.0f, -1.0f, 0.0f,     1.0f, 1.0f, 1.0f,   1.0f, 0.0f  // Lower right corner
         };
 
         private uint[] indices = new uint[]
         {
-            0, 1, 2,    2, 3, 0,    // Front face
-            4, 5, 6,    6, 7, 4,    // Back face
-            0, 4, 7,    7, 3, 0,    // Left face
-            1, 5, 6,    6, 2, 1,    // Right face
-            3, 2, 6,    6, 7, 3,    // Top face
-            0, 1, 5,    5, 4, 0     // Bottom face
+            //0, 1, 2,    2, 3, 0,    // Front face
+            //4, 5, 6,    6, 7, 4,    // Back face
+            //0, 4, 7,    7, 3, 0,    // Left face
+            //1, 5, 6,    6, 2, 1,    // Right face
+            //3, 2, 6,    6, 7, 3,    // Top face
+            //0, 1, 5,    5, 4, 0     // Bottom face
+            0, 2, 1, // Upper triangle
+	        0, 3, 2 // Lower triangle
+
         };
 
         /// <summary>
@@ -104,15 +113,17 @@ namespace PentaGE.Core.Rendering
             //glEnable(GL_DEPTH_TEST);
 
             // Initializing test shader
-            using var logger = Log.Logger.BeginPerfLogger("Loading shader");
-            try
+            using (var logger = Log.Logger.BeginPerfLogger("Loading shader"))
             {
-                shader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\FaceShader.shader");
-                shader.Load();
-            }
-            catch (System.Exception ex)
-            {
-                Log.Error($"Error loading shader: {ex}");
+                try
+                {
+                    shader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Default.shader");
+                    shader.Load();
+                }
+                catch (System.Exception ex)
+                {
+                    Log.Error($"Error loading shader: {ex}");
+                }
             }
 
             // Add engine events for moving the camera (during debug - remove later)
@@ -120,6 +131,22 @@ namespace PentaGE.Core.Rendering
             _engine.Events.KeyRepeat += Events_KeyDown;
 
             #region Set up a test object to render
+
+            // Initialize test texture
+            using (var logger = Log.Logger.BeginPerfLogger("Loading texture"))
+            {
+                try
+                {
+                    texture = new(
+                    @"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Textures\SourceFiles\TestTexture.jpg",
+                    GL_TEXTURE_2D,
+                    GL_TEXTURE0,
+                    GL_RGBA,
+                    GL_UNSIGNED_BYTE);
+                    Texture.SetTextureSlot(shader, "tex0", 0); // Set the texture slot to 0
+                }
+                catch { /* Gets logged in the constructor */ }
+            }
 
             // Create a VAO, VBO, and EBO
             vao = new();
@@ -131,8 +158,9 @@ namespace PentaGE.Core.Rendering
             ebo.Bind();
 
             // Specify how the vertex attributes should be interpreted.
-            vao.LinkAttribute(ref vbo, 0, 3, GL_FLOAT, 6 * sizeof(float), (void*)0);
-            vao.LinkAttribute(ref vbo, 1, 3, GL_FLOAT, 6 * sizeof(float), (void*)(3 * sizeof(float))); // Normals
+            vao.LinkAttribute(ref vbo, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);                    // Coordinates
+            vao.LinkAttribute(ref vbo, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));  // Colors
+            vao.LinkAttribute(ref vbo, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));  // Texture coordinates
 
             // Unbind the VBO, EBO, and VAO to prevent further changes to them.
             VertexBuffer.Unbind();  // Unbind the VBO
@@ -189,6 +217,9 @@ namespace PentaGE.Core.Rendering
 
                 // Pass the matrices to the shader (must be done after shader.Use())
                 shader.SetMatrix4("mvp", mvpMatrix);
+
+                // Bind the texture to the current context
+                texture.Bind();
 
                 // Bind the Vertex Array Object (VAO) to use the configuration
                 // of vertex attributes stored in it.
