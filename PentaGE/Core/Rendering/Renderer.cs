@@ -21,6 +21,7 @@ namespace PentaGE.Core.Rendering
         private Texture texture;
         private bool rotate = true;
         private bool wireframe = false;
+        private bool moveInWorldSpace = false;
 
         /// <summary>
         /// Creates a new instance of the Renderer class.
@@ -41,7 +42,7 @@ namespace PentaGE.Core.Rendering
 
         private readonly Camera3d testCamera = new()
         {
-            Position = new(0, 0, -3),
+            Position = new(0, 0, 2.5f),
             FieldOfView = 90,
             Rotation = new(
                 0,  // Yaw 
@@ -61,15 +62,15 @@ namespace PentaGE.Core.Rendering
             // 1.0f, -1.0f,  1.0f,    0.92f, 0.86f, 0.76f,    0.1f, 1.0f, // -- " --
             // 1.0f,  1.0f,  1.0f,    0.92f, 0.86f, 0.76f,    0.1f, 1.0f, // -- " --
             //-1.0f,  1.0f,  1.0f,    0.92f, 0.86f, 0.76f,    0.1f, 1.0f  // -- " --
-         //   -1.0f, -1.0f, 0.0f,     1.0f, 0.0f, 0.0f,       0.0f, 0.0f, // Plane
+            //-1.0f, -1.0f, 0.0f,     1.0f, 0.0f, 0.0f,       0.0f, 0.0f, // Plane
 	        //-1.0f,  1.0f, 0.0f,     0.0f, 1.0f, 0.0f,       0.0f, 1.0f, // -- " --
 	        // 1.0f,  1.0f, 0.0f,     0.0f, 0.0f, 1.0f,       1.0f, 1.0f, // -- " --
 	        // 1.0f, -1.0f, 0.0f,     1.0f, 1.0f, 1.0f,       1.0f, 0.0f  // -- " --
-            -0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,    0.0f, 0.0f, // Pyramid
-            -0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,    5.0f, 0.0f, // -- " --
-             0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,    0.0f, 0.0f, // -- " --
-             0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,    5.0f, 0.0f, // -- " --
-             0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,    2.5f, 5.0f  // -- " --
+            -1.0f, -1.0f,  1.0f,     0.83f, 0.70f, 0.44f,    0.0f, 0.0f, // Pyramid
+            -1.0f, -1.0f, -1.0f,     0.83f, 0.70f, 0.44f,    5.0f, 0.0f, // -- " --
+             1.0f, -1.0f, -1.0f,     0.83f, 0.70f, 0.44f,    0.0f, 0.0f, // -- " --
+             1.0f, -1.0f,  1.0f,     0.83f, 0.70f, 0.44f,    5.0f, 0.0f, // -- " --
+             0.0f,  2.0f,  0.0f,     0.92f, 0.86f, 0.76f,    2.5f, 5.0f  // -- " --
         };
 
         private uint[] indices = new uint[]
@@ -81,12 +82,12 @@ namespace PentaGE.Core.Rendering
             //3, 2, 6,    6, 7, 3,    // -- " --
             //0, 1, 5,    5, 4, 0     // -- " --
             //0, 2, 1,    0, 3, 2     // Plane
-            0, 1, 2,                  // Pyramid
-            0, 2, 3,                  // -- " --
-            0, 1, 4,                  // -- " --
-            1, 2, 4,                  // -- " --
-            2, 3, 4,                  // -- " --
-            3, 0, 4                   // -- " --
+            0, 1, 2,                // Pyramid
+            0, 2, 3,                // -- " --
+            0, 1, 4,                // -- " --
+            1, 2, 4,                // -- " --
+            2, 3, 4,                // -- " --
+            3, 0, 4                 // -- " --
         };
 
         /// <summary>
@@ -121,6 +122,12 @@ namespace PentaGE.Core.Rendering
             //glFrontFace(GL_CW);
             glEnable(GL_DEPTH_TEST);
 
+            // Add engine events for moving the camera (during debug - remove later)
+            _engine.Events.KeyDown += Events_KeyDown;
+            _engine.Events.KeyRepeat += Events_KeyDown;
+
+            #region Set up a test object to render
+
             // Initializing test shader
             using (var logger = Log.Logger.BeginPerfLogger("Loading shader"))
             {
@@ -134,12 +141,6 @@ namespace PentaGE.Core.Rendering
                     Log.Error($"Error loading shader: {ex}");
                 }
             }
-
-            // Add engine events for moving the camera (during debug - remove later)
-            _engine.Events.KeyDown += Events_KeyDown;
-            _engine.Events.KeyRepeat += Events_KeyDown;
-
-            #region Set up a test object to render
 
             // Initialize test texture
             using (var logger = Log.Logger.BeginPerfLogger("Loading texture"))
@@ -215,6 +216,10 @@ namespace PentaGE.Core.Rendering
                 shader.Use();
 
                 // Calculate the view and projection matrices from the camera
+                // ViewMatrix means "camera space" (or "eye space") and is used for moving the camera.
+                // ProjectionMatrix means "clip space" (or "normalized device coordinates")
+                //  and is used for clipping and perspective.
+                // ModelMatrix means "object space" (or "model space") - the default space for an object.
                 var viewMatrix = testCamera.GetViewMatrix();
                 var projectionMatrix = testCamera.GetProjectionMatrix(window.Size.Width, window.Size.Height);
                 var modelMatrix = Matrix4x4.CreateScale(objectTransform.Scale)
@@ -263,37 +268,56 @@ namespace PentaGE.Core.Rendering
             float increment = 0.25f;
             if (e.Key == Key.W)
             {
-                testCamera.Position += World.ForwardVector * increment;
+                Vector3 direction = moveInWorldSpace ? World.ForwardVector : testCamera.Rotation.GetBackwardVector();
+                testCamera.Position += direction * increment;
                 //testCamera.Position += World.UpVector * increment; // For 2D
                 Log.Information($"Camera moving forward: {testCamera.Position}");
             }
             else if (e.Key == Key.A)
             {
-                testCamera.Position += World.LeftVector * increment;
+                Vector3 direction = moveInWorldSpace ? World.LeftVector : testCamera.Rotation.GetLeftVector();
+                testCamera.Position += direction * increment;
                 Log.Information($"Camera moving left: {testCamera.Position}");
             }
             else if (e.Key == Key.D)
             {
-                testCamera.Position += World.RightVector * increment;
+                Vector3 direction = moveInWorldSpace ? World.RightVector : testCamera.Rotation.GetRightVector();
+                testCamera.Position += direction * increment;
                 Log.Information($"Camera moving right: {testCamera.Position}");
             }
             else if (e.Key == Key.S)
             {
-                testCamera.Position += World.BackwardVector * increment;
+                Vector3 direction = moveInWorldSpace ? World.BackwardVector : testCamera.Rotation.GetForwardVector();
+                testCamera.Position += direction * increment;
                 //testCamera.Position += World.DownVector * increment; // For 2D
                 Log.Information($"Camera moving backward: {testCamera.Position}");
             }
             else if (e.Key == Key.Q)
             {
-                testCamera.Position += World.UpVector * increment;
+                Vector3 direction = moveInWorldSpace ? World.UpVector : testCamera.Rotation.GetUpVector();
+                testCamera.Position += direction * increment;
                 Log.Information($"Camera moving up: {testCamera.Position}");
             }
             else if (e.Key == Key.E)
             {
-                testCamera.Position += World.DownVector * increment;
+                Vector3 direction = moveInWorldSpace ? World.DownVector : testCamera.Rotation.GetDownVector();
+                testCamera.Position += direction * increment;
                 Log.Information($"Camera moving down: {testCamera.Position}");
             }
             else if (e.Key == Key.Left)
+            {
+                if (e.ModifierKeyWasUsed(ModifierKey.Control))
+                {
+                    objectTransform.Rotation += new Rotation(-1, 0, 0) * 5;
+                    Log.Information($"Object yaw left: {objectTransform.Rotation}");
+                }
+                else
+                {
+                    testCamera.Rotation += new Rotation(1, 0, 0) * 5;
+                    Log.Information($"Camera yaw left: {testCamera.Rotation}");
+                }
+            }
+            else if (e.Key == Key.Right)
             {
                 if (e.ModifierKeyWasUsed(ModifierKey.Control))
                 {
@@ -302,32 +326,27 @@ namespace PentaGE.Core.Rendering
                 }
                 else
                 {
-                    testCamera.Rotation += new Rotation(1, 0, 0) * 5;
+                    testCamera.Rotation += new Rotation(-1, 0, 0) * 5;
                     Log.Information($"Camera yaw right: {testCamera.Rotation}");
                 }
-            }
-            else if (e.Key == Key.Right)
-            {
-                testCamera.Rotation += new Rotation(-1, 0, 0) * 5;
-                Log.Information($"Camera yaw left: {testCamera.Rotation}");
             }
             else if (e.Key == Key.Up)
             {
                 if (e.ModifierKeyWasUsed(ModifierKey.Control))
                 {
                     objectTransform.Rotation += new Rotation(0, 1, 0) * 5;
-                    Log.Information($"Object pitch right: {objectTransform.Rotation}");
+                    Log.Information($"Object pitch up: {objectTransform.Rotation}");
                 }
                 else
                 {
                     testCamera.Rotation += new Rotation(0, 1, 0) * 5;
-                    Log.Information($"Camera pitch right: {testCamera.Rotation}");
+                    Log.Information($"Camera pitch up: {testCamera.Rotation}");
                 }
             }
             else if (e.Key == Key.Down)
             {
                 testCamera.Rotation += new Rotation(0, -1, 0) * 5;
-                Log.Information($"Camera yaw left: {testCamera.Rotation}");
+                Log.Information($"Camera pitch down: {testCamera.Rotation}");
             }
             else if (e.Key == Key.Z)
             {
@@ -346,6 +365,16 @@ namespace PentaGE.Core.Rendering
             else if (e.Key == Key.F1)
             {
                 wireframe = !wireframe;
+            }
+            else if (e.Key == Key.Alpha1)
+            {
+                testCamera.Rotation += new Rotation(0, 0, 1) * 5;
+                Log.Information($"Object roll left: {testCamera.Rotation}");
+            }
+            else if (e.Key == Key.Alpha2)
+            {
+                testCamera.Rotation += new Rotation(0, 0, -1) * 5;
+                Log.Information($"Object roll right: {testCamera.Rotation}");
             }
         }
     }

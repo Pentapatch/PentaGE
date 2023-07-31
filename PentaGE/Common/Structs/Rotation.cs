@@ -9,17 +9,17 @@ namespace PentaGE.Common
     public struct Rotation
     {
         /// <summary>
-        /// Gets or sets the yaw angle (rotation around the vertical axis, positive Z).
+        /// Gets or sets the yaw angle (rotation around the vertical axis, positive Y).
         /// </summary>
         public float Yaw { get; set; }
 
         /// <summary>
-        /// Gets or sets the pitch angle (rotation around the lateral axis, positive Y).
+        /// Gets or sets the pitch angle (rotation around the lateral axis, positive X).
         /// </summary>
         public float Pitch { get; set; }
 
         /// <summary>
-        /// Gets or sets the roll angle (rotation around the longitudinal axis, positive X).
+        /// Gets or sets the roll angle (rotation around the longitudinal axis, positive Z).
         /// </summary>
         public float Roll { get; set; }
 
@@ -44,17 +44,18 @@ namespace PentaGE.Common
         /// <returns>The normalized forward vector as a <see cref="Vector3"/> object.</returns>
         public Vector3 GetForwardVector()
         {
-            // Convert the yaw and pitch angles to radians
-            float yawRad = MathHelper.DegreesToRadians(Yaw);
-            float pitchRad = MathHelper.DegreesToRadians(Pitch);
+            // Create the rotation matrix from the yaw, pitch, and roll angles
+            Matrix4x4 rotationMatrix = Matrix4x4.CreateFromYawPitchRoll(
+                MathHelper.DegreesToRadians(Yaw),
+                MathHelper.DegreesToRadians(Pitch),
+                MathHelper.DegreesToRadians(Roll)
+            );
 
-            // Calculate the forward vector using spherical coordinate conversions
-            float x = MathF.Cos(pitchRad) * MathF.Sin(yawRad);
-            float y = MathF.Sin(pitchRad);
-            float z = MathF.Cos(pitchRad) * MathF.Cos(yawRad);
+            // Extract the right, up, and forward vectors from the rotation matrix
+            Vector3 forward = new(rotationMatrix.M31, rotationMatrix.M32, rotationMatrix.M33);
 
-            // Normalize the vector to ensure unit length
-            return Vector3.Normalize(new Vector3(x, y, z));
+            // Normalize the vectors to ensure unit length
+            return Vector3.Normalize(forward);
         }
 
         /// <summary>
@@ -63,12 +64,18 @@ namespace PentaGE.Common
         /// <returns>The normalized up vector as a <see cref="Vector3"/> object.</returns>
         public Vector3 GetUpVector()
         {
-            // Calculate the forward and right vectors
-            Vector3 forward = GetForwardVector();
-            Vector3 right = GetRightVector();
+            // Create the rotation matrix from the yaw, pitch, and roll angles
+            Matrix4x4 rotationMatrix = Matrix4x4.CreateFromYawPitchRoll(
+                MathHelper.DegreesToRadians(Yaw),
+                MathHelper.DegreesToRadians(Pitch),
+                MathHelper.DegreesToRadians(Roll)
+            );
 
-            // Calculate the up vector by taking the cross product of forward and right
-            return Vector3.Cross(forward, right);
+            // Extract the right, up, and forward vectors from the rotation matrix
+            Vector3 up = new(rotationMatrix.M21, rotationMatrix.M22, rotationMatrix.M23);
+
+            // Normalize the vectors to ensure unit length
+            return Vector3.Normalize(up);
         }
 
         /// <summary>
@@ -77,16 +84,17 @@ namespace PentaGE.Common
         /// <returns>The normalized right vector as a <see cref="Vector3"/> object.</returns>
         public Vector3 GetRightVector()
         {
-            // Convert the yaw angle to radians
-            float yawRad = MathHelper.DegreesToRadians(Yaw);
+            Matrix4x4 rotationMatrix = Matrix4x4.CreateFromYawPitchRoll(
+                MathHelper.DegreesToRadians(Yaw),
+                MathHelper.DegreesToRadians(Pitch),
+                MathHelper.DegreesToRadians(Roll)
+            );
 
-            // Calculate the right vector using spherical coordinate conversions
-            float x = MathF.Cos(yawRad);
-            float y = 0;
-            float z = -MathF.Sin(yawRad);
+            // Extract the right, up, and forward vectors from the rotation matrix
+            Vector3 rightVector = new(rotationMatrix.M11, rotationMatrix.M12, rotationMatrix.M13);
 
-            // Normalize the vector to ensure unit length
-            return Vector3.Normalize(new Vector3(x, y, z));
+            // Normalize the vectors to ensure unit length
+            return Vector3.Normalize(rightVector);
         }
 
         /// <summary>
@@ -338,11 +346,28 @@ namespace PentaGE.Common
 
         #endregion
 
+        #region Conversations
+
+        /// <summary>
+        /// Converts this <see cref="Rotation"/> to a <see cref="Matrix4x4"/> representing the rotation.
+        /// </summary>
+        /// <returns>A <see cref="Matrix4x4"/> representing this rotation.</returns>
+        public Matrix4x4 ToMatrix4x4()
+        {
+            Quaternion q = Quaternion.CreateFromYawPitchRoll(
+                MathHelper.DegreesToRadians(Yaw),
+                MathHelper.DegreesToRadians(Pitch),
+                MathHelper.DegreesToRadians(Roll));
+            return Matrix4x4.CreateFromQuaternion(q);
+        }
+
         /// <summary>
         /// Returns a string representation of the <see cref="Rotation"/> in the format "Y{Yaw} P{Pitch} R{Roll}".
         /// </summary>
         /// <returns>A string representing the <see cref="Rotation"/>.</returns>
         public override readonly string ToString() => $"Y{Yaw} P{Pitch} R{Roll}";
+
+        #endregion
 
         private static float NormalizeAngle(float angle)
         {
