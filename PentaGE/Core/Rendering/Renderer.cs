@@ -237,7 +237,7 @@ namespace PentaGE.Core.Rendering
                 var mvpMatrix = modelMatrix * viewMatrix * projectionMatrix;
 
                 // Pass the matrices to the shader (must be done after shader.Use())
-                shader.SetMatrix4("mvp", mvpMatrix);
+                shader.SetUniform("mvp", mvpMatrix);
 
                 // Bind the texture to the current context
                 texture.Bind();

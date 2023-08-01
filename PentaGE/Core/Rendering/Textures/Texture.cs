@@ -58,7 +58,7 @@ namespace PentaGE.Core.Rendering
         }
 
         public static void SetTextureSlot(Shader shader, string uniformName, int slot) => 
-            shader.SetInt(uniformName, slot);
+            shader.SetUniform(uniformName, slot);
 
         public void Bind() => 
             glBindTexture(_type, _id);

@@ -147,7 +147,7 @@ namespace PentaGE.Core.Rendering
         /// </summary>
         /// <param name="name">The name of the uniform variable.</param>
         /// <param name="value">The integer value to set.</param>
-        public void SetInt(string name, int value)
+        public void SetUniform(string name, int value)
         {
             int location = glGetUniformLocation(ProgramId, name);
             glUniform1i(location, value);
@@ -158,7 +158,7 @@ namespace PentaGE.Core.Rendering
         /// </summary>
         /// <param name="name">The name of the uniform variable.</param>
         /// <param name="value">The floating-point value to set.</param>
-        public void SetFloat(string name, float value)
+        public void SetUniform(string name, float value)
         {
             int location = glGetUniformLocation(ProgramId, name);
             glUniform1f(location, value);
@@ -169,7 +169,7 @@ namespace PentaGE.Core.Rendering
         /// </summary>
         /// <param name="name">The name of the uniform variable.</param>
         /// <param name="value">The 2D vector (Vec2) value to set.</param>
-        public void SetVec2(string name, Vector2 value)
+        public void SetUniform(string name, Vector2 value)
         {
             int location = glGetUniformLocation(ProgramId, name);
             glUniform2f(location, value.X, value.Y);
@@ -180,7 +180,7 @@ namespace PentaGE.Core.Rendering
         /// </summary>
         /// <param name="name">The name of the uniform variable.</param>
         /// <param name="value">The 3D vector (Vec3) value to set.</param>
-        public void SetVec3(string name, Vector3 value)
+        public void SetUniform(string name, Vector3 value)
         {
             int location = glGetUniformLocation(ProgramId, name);
             glUniform3f(location, value.X, value.Y, value.Z);
@@ -191,7 +191,7 @@ namespace PentaGE.Core.Rendering
         /// </summary>
         /// <param name="name">The name of the uniform variable.</param>
         /// <param name="value">The 4D vector (Vec4) value to set.</param>
-        public void SetVec4(string name, Vector4 value)
+        public void SetUniform(string name, Vector4 value)
         {
             int location = glGetUniformLocation(ProgramId, name);
             glUniform4f(location, value.X, value.Y, value.Z, value.W);
@@ -202,7 +202,7 @@ namespace PentaGE.Core.Rendering
         /// </summary>
         /// <param name="name">The name of the uniform variable.</param>
         /// <param name="value">The 3x2 matrix value to set.</param>
-        public void SetMatrix3x2(string name, Matrix3x2 value)
+        public void SetUniform(string name, Matrix3x2 value)
         {
             int location = glGetUniformLocation(ProgramId, name);
             glUniformMatrix3x2fv(location, 1, false, value.ToArray());
@@ -213,7 +213,7 @@ namespace PentaGE.Core.Rendering
         /// </summary>
         /// <param name="name">The name of the uniform variable.</param>
         /// <param name="value">The 4x4 matrix value to set.</param>
-        public void SetMatrix4(string name, Matrix4x4 value)
+        public void SetUniform(string name, Matrix4x4 value)
         {
             int location = glGetUniformLocation(ProgramId, name);
             glUniformMatrix4fv(location, 1, false, value.ToArray());
