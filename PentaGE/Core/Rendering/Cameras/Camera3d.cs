@@ -1,16 +1,37 @@
 ﻿using PentaGE.Common;
 using PentaGE.Maths;
+using Serilog;
 using System.Numerics;
 
 namespace PentaGE.Core.Rendering
 {
     public sealed class Camera3d : Camera
     {
-        public float FieldOfView { get; set; }
+        private float _fieldOfView = 90;
+
+        public float FieldOfView
+        {
+            get => _fieldOfView;
+            set
+            {
+                if (value > 170)
+                {
+                    Log.Warning("Field of view cannot be greater than 170 degrees");
+                    value = 170;
+                }
+                else if (value < 10)
+                {
+                    Log.Warning("Field of view cannot be less than 10 degrees");
+                    value = 10;
+                }
+
+                _fieldOfView = value;
+            }
+        }
 
         public float AspectRatio { get; private set; }
 
-        public Rotation  Rotation { get; set; }
+        public Rotation Rotation { get; set; }
 
         public Camera3d() : base() { }
 

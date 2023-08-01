@@ -3,6 +3,7 @@ using GLFW;
 using PentaGE.Common;
 using PentaGE.Core.Logging;
 using Serilog;
+using System.Drawing;
 using System.Numerics;
 using static OpenGL.GL;
 
@@ -125,6 +126,9 @@ namespace PentaGE.Core.Rendering
             // Add engine events for moving the camera (during debug - remove later)
             _engine.Events.KeyDown += Events_KeyDown;
             _engine.Events.KeyRepeat += Events_KeyDown;
+            _engine.Events.MouseDown += Events_MouseDown;
+            _engine.Events.MouseMoved += Events_MouseMoved;
+            _engine.Events.MouseUp += Events_MouseUp;
 
             #region Set up a test object to render
 
@@ -292,13 +296,13 @@ namespace PentaGE.Core.Rendering
                 //testCamera.Position += World.DownVector * increment; // For 2D
                 Log.Information($"Camera moving backward: {testCamera.Position}");
             }
-            else if (e.Key == Key.Q)
+            else if (e.Key == Key.E)
             {
                 Vector3 direction = moveInWorldSpace ? World.UpVector : testCamera.Rotation.GetUpVector();
                 testCamera.Position += direction * increment;
                 Log.Information($"Camera moving up: {testCamera.Position}");
             }
-            else if (e.Key == Key.E)
+            else if (e.Key == Key.Q)
             {
                 Vector3 direction = moveInWorldSpace ? World.DownVector : testCamera.Rotation.GetDownVector();
                 testCamera.Position += direction * increment;
@@ -353,7 +357,7 @@ namespace PentaGE.Core.Rendering
                 testCamera.FieldOfView += 5;
                 Log.Information($"Camera FoV increasing: {testCamera.FieldOfView}");
             }
-            else if (e.Key == Key.X)
+            else if (e.Key == Key.C)
             {
                 testCamera.FieldOfView -= 5;
                 Log.Information($"Camera FoV decreasing: {testCamera.FieldOfView}");
@@ -377,5 +381,66 @@ namespace PentaGE.Core.Rendering
                 Log.Information($"Object roll right: {testCamera.Rotation}");
             }
         }
+
+        #region Mouse events
+
+        private bool _mouseDown = false;
+        private Point _mouseInitialLocation = new(0, 0);
+        private bool _mouseInitialLocationSet = false;
+        private Rotation _initialRotation = new(0, 0, 0);
+
+        private void Events_MouseMoved(object? sender, Events.MouseMovedEventArgs e)
+        {
+            if (_mouseDown)
+            {
+                if (!_mouseInitialLocationSet)
+                {
+                    _mouseInitialLocation = e.Position;
+                    _mouseInitialLocationSet = true;
+                    _initialRotation = testCamera.Rotation;
+                }
+
+                float sensitivity = 1f;
+
+                float xDiff = (e.Position.X - _mouseInitialLocation.X) / ((float)e.Window.Size.Width / 2) * sensitivity;
+                float yDiff = (e.Position.Y - _mouseInitialLocation.Y) / ((float)e.Window.Size.Height / 2) * sensitivity;
+
+                float yaw = _initialRotation.Yaw - (xDiff * 90);
+                float pitch = _initialRotation.Pitch - (yDiff * 90);
+
+                testCamera.Rotation = new(yaw, pitch, testCamera.Rotation.Roll);
+
+                // Reset the mouse position to the center of the screen
+                if (e.Position.X > e.Window.Size.Width || e.Position.X < 0 ||
+                    e.Position.Y > e.Window.Size.Height || e.Position.Y < 0)
+                {
+                    Glfw.SetCursorPosition(e.Window.Handle, e.Window.Size.Width / 2, e.Window.Size.Height / 2);
+                    _mouseInitialLocation = new(e.Window.Size.Width / 2, e.Window.Size.Height / 2);
+                    _initialRotation = testCamera.Rotation;
+                }
+            }
+        }
+
+        private void Events_MouseDown(object? sender, Events.MouseButtonEventArgs e)
+        {
+            if (e.Button == Common.MouseButton.Left)
+            {
+                _mouseDown = true;
+                Glfw.SetInputMode(e.Window.Handle, InputMode.Cursor, (int)CursorMode.Hidden);
+            }
+        }
+
+        private void Events_MouseUp(object? sender, Events.MouseButtonEventArgs e)
+        {
+            if (e.Button == Common.MouseButton.Left)
+            {
+                _mouseDown = false;
+                _mouseInitialLocationSet = false;
+                Glfw.SetInputMode(e.Window.Handle, InputMode.Cursor, (int)CursorMode.Normal);
+            }
+        }
+
+        #endregion
+
     }
 }
