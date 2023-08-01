@@ -22,7 +22,6 @@ namespace PentaGE.Core.Rendering
         private Texture texture;
         private bool rotate = true;
         private bool wireframe = false;
-        private bool moveInWorldSpace = false;
 
         /// <summary>
         /// Creates a new instance of the Renderer class.
@@ -125,6 +124,7 @@ namespace PentaGE.Core.Rendering
 
             // Add engine events for moving the camera (during debug - remove later)
             _engine.Events.KeyDown += Events_KeyDown;
+            _engine.Events.KeyUp += Events_KeyUp;
             _engine.Events.KeyRepeat += Events_KeyDown;
             _engine.Events.MouseDown += Events_MouseDown;
             _engine.Events.MouseMoved += Events_MouseMoved;
@@ -209,6 +209,8 @@ namespace PentaGE.Core.Rendering
 
                 #endregion
 
+                UpdateCameraPosition();
+
                 // Update the current window's rendering context
                 window.RenderingContext.Use();
 
@@ -266,91 +268,57 @@ namespace PentaGE.Core.Rendering
         }
 
         // This code does not belong here, but is here for testing purposes
+
+        #region Keyboard events
+
+        private Vector3 _direction = Vector3.Zero;
+
         private void Events_KeyDown(object? sender, Events.KeyDownEventArgs e)
         {
             // For moving the camera (during debug - remove later)
-            float increment = 0.25f;
             if (e.Key == Key.W)
             {
-                Vector3 direction = moveInWorldSpace ? World.ForwardVector : testCamera.Rotation.GetBackwardVector();
-                testCamera.Position += direction * increment;
-                //testCamera.Position += World.UpVector * increment; // For 2D
-                Log.Information($"Camera moving forward: {testCamera.Position}");
-            }
-            else if (e.Key == Key.A)
-            {
-                Vector3 direction = moveInWorldSpace ? World.LeftVector : testCamera.Rotation.GetLeftVector();
-                testCamera.Position += direction * increment;
-                Log.Information($"Camera moving left: {testCamera.Position}");
-            }
-            else if (e.Key == Key.D)
-            {
-                Vector3 direction = moveInWorldSpace ? World.RightVector : testCamera.Rotation.GetRightVector();
-                testCamera.Position += direction * increment;
-                Log.Information($"Camera moving right: {testCamera.Position}");
+                _direction = new(_direction.X, _direction.Y, 1);
             }
             else if (e.Key == Key.S)
             {
-                Vector3 direction = moveInWorldSpace ? World.BackwardVector : testCamera.Rotation.GetForwardVector();
-                testCamera.Position += direction * increment;
-                //testCamera.Position += World.DownVector * increment; // For 2D
-                Log.Information($"Camera moving backward: {testCamera.Position}");
+                _direction = new(_direction.X, _direction.Y, -1);
+            }
+            else if(e.Key == Key.A)
+            {
+                _direction = new(-1, _direction.Y, _direction.Z);
+            }
+            else if (e.Key == Key.D)
+            {
+                _direction = new(1, _direction.Y, _direction.Z);
+            }
+            else if(e.Key == Key.Q)
+            {
+                _direction = new(_direction.X, -1, _direction.Z);
             }
             else if (e.Key == Key.E)
             {
-                Vector3 direction = moveInWorldSpace ? World.UpVector : testCamera.Rotation.GetUpVector();
-                testCamera.Position += direction * increment;
-                Log.Information($"Camera moving up: {testCamera.Position}");
+                _direction = new(_direction.X, 1, _direction.Z);
             }
-            else if (e.Key == Key.Q)
+            else if(e.Key == Key.Left)
             {
-                Vector3 direction = moveInWorldSpace ? World.DownVector : testCamera.Rotation.GetDownVector();
-                testCamera.Position += direction * increment;
-                Log.Information($"Camera moving down: {testCamera.Position}");
-            }
-            else if (e.Key == Key.Left)
-            {
-                if (e.ModifierKeyWasUsed(ModifierKey.Control))
-                {
-                    objectTransform.Rotation += new Rotation(-1, 0, 0) * 5;
-                    Log.Information($"Object yaw left: {objectTransform.Rotation}");
-                }
-                else
-                {
-                    testCamera.Rotation += new Rotation(1, 0, 0) * 5;
-                    Log.Information($"Camera yaw left: {testCamera.Rotation}");
-                }
+                objectTransform.Rotation += new Rotation(-1, 0, 0) * 5;
+                Log.Information($"Object yaw left: {objectTransform.Rotation}");
             }
             else if (e.Key == Key.Right)
             {
-                if (e.ModifierKeyWasUsed(ModifierKey.Control))
-                {
-                    objectTransform.Rotation += new Rotation(1, 0, 0) * 5;
-                    Log.Information($"Object yaw right: {objectTransform.Rotation}");
-                }
-                else
-                {
-                    testCamera.Rotation += new Rotation(-1, 0, 0) * 5;
-                    Log.Information($"Camera yaw right: {testCamera.Rotation}");
-                }
+                objectTransform.Rotation += new Rotation(1, 0, 0) * 5;
+                Log.Information($"Object yaw right: {objectTransform.Rotation}");
             }
             else if (e.Key == Key.Up)
             {
-                if (e.ModifierKeyWasUsed(ModifierKey.Control))
-                {
-                    objectTransform.Rotation += new Rotation(0, 1, 0) * 5;
-                    Log.Information($"Object pitch up: {objectTransform.Rotation}");
-                }
-                else
-                {
-                    testCamera.Rotation += new Rotation(0, 1, 0) * 5;
-                    Log.Information($"Camera pitch up: {testCamera.Rotation}");
-                }
+                objectTransform.Rotation += new Rotation(0, 1, 0) * 5;
+                Log.Information($"Object pitch up: {objectTransform.Rotation}");
             }
             else if (e.Key == Key.Down)
             {
-                testCamera.Rotation += new Rotation(0, -1, 0) * 5;
-                Log.Information($"Camera pitch down: {testCamera.Rotation}");
+                objectTransform.Rotation += new Rotation(0, -1, 0) * 5;
+                Log.Information($"Object pitch down: {objectTransform.Rotation}");
             }
             else if (e.Key == Key.Z)
             {
@@ -381,6 +349,57 @@ namespace PentaGE.Core.Rendering
                 Log.Information($"Object roll right: {testCamera.Rotation}");
             }
         }
+
+        private void Events_KeyUp(object? sender, Events.KeyUpEventArgs e)
+        {
+            if (e.Key == Key.W)
+            {
+                _direction = new(_direction.X, _direction.Y, 0);
+            }
+            else if (e.Key == Key.S)
+            {
+                _direction = new(_direction.X, _direction.Y, 0);
+            }
+            else if (e.Key == Key.A)
+            {
+                _direction = new(0, _direction.Y, _direction.Z);
+            }
+            else if (e.Key == Key.D)
+            {
+                _direction = new(0, _direction.Y, _direction.Z);
+            }
+            else if (e.Key == Key.Q)
+            {
+                _direction = new(_direction.X, 0, _direction.Z);
+            }
+            else if (e.Key == Key.E)
+            {
+                _direction = new(_direction.X, 0, _direction.Z);
+            }
+        }
+
+        private void UpdateCameraPosition()
+        {
+            float increment = 5f;
+            Vector3 direction = Vector3.Zero;
+
+            if (_direction.X == 1)
+                direction += testCamera.Rotation.GetRightVector();
+            else if (_direction.X == -1)
+                direction += testCamera.Rotation.GetLeftVector();
+            if (_direction.Y == 1)
+                direction += testCamera.Rotation.GetUpVector();
+            else if (_direction.Y == -1)
+                direction += testCamera.Rotation.GetDownVector();
+            if (_direction.Z == 1)
+                direction -= testCamera.Rotation.GetForwardVector();
+            else if (_direction.Z == -1)
+                direction -= testCamera.Rotation.GetBackwardVector();
+
+            testCamera.Position += direction * (increment * (float)_engine.Timing.CurrentFrame.DeltaTime);
+        }
+
+        #endregion
 
         #region Mouse events
 
