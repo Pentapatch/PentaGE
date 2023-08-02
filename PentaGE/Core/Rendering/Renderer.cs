@@ -1,5 +1,7 @@
 ﻿using GLFW;
 using PentaGE.Common;
+using PentaGE.Core.Components;
+using PentaGE.Core.Entities;
 using PentaGE.Core.Graphics;
 using PentaGE.Core.Logging;
 using Serilog;
@@ -142,6 +144,12 @@ namespace PentaGE.Core.Rendering
 
             // TODO: Initialize test mesh
             testMesh1 = new(vertices, indices);
+            var transform = new Transform(new(0, 0, 0), new(0, 0, 0), new(0.5f, 0.5f, 1f));
+            var renderableMesh = new RenderableMeshEntity(testMesh1, shader, texture);
+
+            renderableMesh.AddComponent(new TransformComponent(transform));
+
+            _engine.Scene.AddEntity(renderableMesh);
 
             #endregion
 
@@ -169,6 +177,8 @@ namespace PentaGE.Core.Rendering
                     0) :
                     objectTransform.Rotation;//new(0, 0, 0);
 
+                _engine.Scene[0].GetComponent<TransformComponent>()!.Transform = objectTransform;
+
                 #endregion
 
                 UpdateCameraPosition();
@@ -180,37 +190,14 @@ namespace PentaGE.Core.Rendering
                 glClearColor(0.2f, 0.2f, 0.2f, 1);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-                // Use the shader program
-                shader.Use();
-
-                // Calculate the view and projection matrices from the camera
-                // ViewMatrix means "camera space" (or "eye space") and is used for moving the camera.
-                // ProjectionMatrix means "clip space" (or "normalized device coordinates")
-                //  and is used for clipping and perspective.
-                // ModelMatrix means "object space" (or "model space") - the default space for an object.
-                var viewMatrix = testCamera.GetViewMatrix();
-                var projectionMatrix = testCamera.GetProjectionMatrix(window.Size.Width, window.Size.Height);
-                var modelMatrix = Matrix4x4.CreateScale(objectTransform.Scale)
-                    * objectTransform.Rotation.ToMatrix4x4()
-                    * Matrix4x4.CreateTranslation(objectTransform.Position);
-
-                // Combine the model, view, and projection matrices to get the final MVP matrix
-                var mvpMatrix = modelMatrix * viewMatrix * projectionMatrix;
-
-                // Pass the matrices to the shader (must be done after shader.Use())
-                shader.SetUniform("mvp", mvpMatrix);
-
-                // Bind the texture to the current context
-                texture.Bind();
-
                 // Draw the test mesh
-                testMesh1.Draw();
+                _engine.Scene.Render(testCamera, window);
             }
         }
 
         internal void Terminate()
         {
-            testMesh1.Dispose();
+            
         }
 
         private void Events_GlfwError(object? sender, Events.GlfwErrorEventArgs e)

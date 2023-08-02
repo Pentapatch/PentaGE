@@ -9,7 +9,7 @@ namespace PentaGE.Core.Rendering
     /// <summary>
     /// Represents a shader program used for rendering graphics on the GPU.
     /// </summary>
-    public class Shader : IDisposable
+    public sealed class Shader : IDisposable
     {
         private string _vertexSourceCode = string.Empty;
         private string _fragmentSourceCode = string.Empty;

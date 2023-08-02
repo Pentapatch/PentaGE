@@ -2,6 +2,7 @@
 using PentaGE.Core.Events;
 using PentaGE.Core.Logging;
 using PentaGE.Core.Rendering;
+using PentaGE.Core.Scenes;
 using Serilog;
 
 namespace PentaGE.Core
@@ -17,6 +18,8 @@ namespace PentaGE.Core
         private readonly WindowManager _windowManager;
         private readonly EventManager _eventManager = new();
         private GameState _state = GameState.Initializing;
+
+        public Scene Scene { get; } = new();
 
         /// <summary>
         /// Gets the timing manager for the game engine, responsible for handling frame timing and delta time calculation.
@@ -167,6 +170,9 @@ namespace PentaGE.Core
 
                 // Update game state
                 Update();
+
+                // Update the scene
+                Scene.Update((float)Timing.CurrentFrame.DeltaTime);
 
                 // Render graphics
                 Renderer.Render();
