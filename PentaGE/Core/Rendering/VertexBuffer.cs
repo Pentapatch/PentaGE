@@ -1,4 +1,5 @@
-﻿using static OpenGL.GL;
+﻿using PentaGE.Core.Graphics;
+using static OpenGL.GL;
 
 namespace PentaGE.Core.Rendering
 {
@@ -6,15 +7,27 @@ namespace PentaGE.Core.Rendering
     {
         private readonly uint _id;
 
-        public unsafe VertexBuffer(ref float[] vertices, int size)
+        public unsafe VertexBuffer(Vertex[] vertices)
         {
             _id = glGenBuffer(); // Generate a buffer object and store its ID
 
             glBindBuffer(GL_ARRAY_BUFFER, _id);
-            fixed (float* v = &vertices[0])
+            fixed (Vertex* v = &vertices[0])
             {
-                glBufferData(GL_ARRAY_BUFFER, size, v, GL_STATIC_DRAW);
+                // Calculate the size of the buffer based on the number of vertices
+                int size = sizeof(Vertex) * vertices.Length;
+
+                // Create a pointer to the data
+                IntPtr data = new(v);
+
+                // Pass the data to glBufferData
+                glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW); // TODO: Check if Use only v instead of data?
             }
+        }
+
+        public VertexBuffer(List<Vertex> vertices) : this(vertices.ToArray())
+        {
+                
         }
 
         public void Bind()

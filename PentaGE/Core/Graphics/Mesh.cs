@@ -1,62 +1,80 @@
-﻿namespace PentaGE.Core.Graphics
+﻿using static OpenGL.GL;
+using PentaGE.Core.Rendering;
+
+namespace PentaGE.Core.Graphics
 {
-    public class Mesh
+    public class Mesh : IDisposable
     {
-        private readonly int _vertexStride;
-       
-        public float[] Vertices { get; set; }
-        public int VertexCount { get; private set; }
-        public float[]? TextureCoordinates { get; set; } // For texture mapping
-        public float[]? Normals { get; set; } // For lighting calculations
+        private readonly VertexArray vao;
+        private readonly VertexBuffer vbo;
+        private readonly ElementBuffer? ebo = null;
 
+        internal List<Vertex> Vertices { get; set; }
 
-        public Mesh(float[] vertices, float[]? textureCoordinates, float[]? normals)
+        internal List<uint>? Indices { get; set; }
+
+        internal unsafe Mesh(List<Vertex> vertices, List<uint>? indices = null)
         {
             Vertices = vertices;
-            TextureCoordinates = textureCoordinates;
-            Normals = normals;
-            _vertexStride = CalculateVertexStride();
-            VertexCount = vertices.Length / (_vertexStride / sizeof(float));
-        }
+            Indices = indices ?? new List<uint>();
 
-        public static Mesh CreateRectangle2d(float width, float height)
-        {
-            float[] vertices = new float[]
+            // Create a VAO, VBO, and (optionally) EBO
+            vao = new();
+            vbo = new(vertices);
+            
+            if (indices is not null)
             {
-                // Position                 // Texture coordinates
-                -width / 2, -height / 2,    0.0f, 0.0f, // Bottom-left
-                width / 2, -height / 2,     1.0f, 0.0f, // Bottom-right
-                width / 2, height / 2,      1.0f, 1.0f, // Top-right
-                -width / 2, height / 2,     0.0f, 1.0f // Top-left
-            };
-
-            return new Mesh(vertices, null, null); // Texture coordinates and normals are null for 2D rectangle
-        }
-
-        private int CalculateVertexStride()
-        {
-            int stride = 0;
-
-            // Position (x, y)
-            stride += 2;
-
-            // Texture coordinates (u, v)
-            if (TextureCoordinates is not null)
-            {
-                stride += 2;
+                ebo = new(indices);
             }
 
-            // Normals (x, y, z)
-            if (Normals is not null)
-            {
-                stride += 3;
-            }
+            // Bind the VAO, VBO, and EBO to the current context
+            vao.Bind();
+            vbo.Bind();
+            ebo?.Bind();
 
-            // Add padding to make the stride a multiple of float size (optional but recommended for performance)
-            stride += stride % 4 == 0 ? 0 : 4 - (stride % 4);
+            // Specify how the vertex attributes should be interpreted.
+            int vertexSize = sizeof(Vertex);
+            VertexArray.LinkAttribute(0, 3, GL_FLOAT, vertexSize, (void*)0);                          // Coordinates
+            VertexArray.LinkAttribute(1, 3, GL_FLOAT, vertexSize, (void*)(3 * sizeof(float)));        // Normal
+            VertexArray.LinkAttribute(2, 4, GL_FLOAT, vertexSize, (void*)(6 * sizeof(float)));        // Color
+            VertexArray.LinkAttribute(3, 2, GL_FLOAT, vertexSize, (void*)(10 * sizeof(float)));       // Texture coordinates
 
-            return stride * sizeof(float);
+            // Unbind the VBO, EBO, and VAO to prevent further changes to them.
+            VertexBuffer.Unbind();  // Unbind the VBO
+            ElementBuffer.Unbind(); // Unbind the EBO
+            VertexArray.Unbind();   // Unbind the VAO
         }
 
+        internal unsafe void Draw(bool wireframe = false)
+        {
+            // Bind the Vertex Array Object (VAO) to use the configuration
+            // of vertex attributes stored in it.
+            vao.Bind();
+
+            // Draw the object using the indices of the EBO
+            glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
+
+            if (ebo is not null && Indices is not null)
+            {
+                ebo.Bind();
+                glDrawElements(GL_TRIANGLES, Indices.Count, GL_UNSIGNED_INT, null);
+            }
+            else
+            {
+                glDrawArrays(GL_TRIANGLES, 0, Vertices.Count);
+            }
+
+            // Unbind the VAO, VBO & EBO to prevent accidental modification.
+            VertexArray.Unbind();   // Unbind the VAO
+            VertexBuffer.Unbind();  // Unbind the VBO (not necessary, but good practice)
+            ElementBuffer.Unbind(); // Unbind the EBO (not necessary, but good practice)
+        }
+
+        public void Dispose()
+        {
+            vao.Dispose();
+            vbo.Dispose();
+            ebo?.Dispose();
+        }
     }
 }

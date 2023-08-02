@@ -1,7 +1,6 @@
-﻿
-
-using GLFW;
+﻿using GLFW;
 using PentaGE.Common;
+using PentaGE.Core.Graphics;
 using PentaGE.Core.Logging;
 using Serilog;
 using System.Drawing;
@@ -16,11 +15,9 @@ namespace PentaGE.Core.Rendering
     internal class Renderer
     {
         private readonly PentaGameEngine _engine;
-        private VertexArray vao;
-        private VertexBuffer vbo;
-        private ElementBuffer ebo;
         private Shader shader;
         private Texture texture;
+        private Mesh testMesh1;
         private bool rotate = true;
         private bool wireframe = false;
 
@@ -52,43 +49,23 @@ namespace PentaGE.Core.Rendering
             )
         };
 
-        private float[] vertices = new float[]
+        private readonly List<Vertex> vertices = new()
         {
-            // Coordinates          // Colors               // Texture Coordinates
-            //-1.0f, -1.0f, -1.0f,    0.83f, 0.70f, 0.44f,    0.1f, 1.0f, // Cube
-            // 1.0f, -1.0f, -1.0f,    0.83f, 0.70f, 0.44f,    0.1f, 1.0f, // -- " --
-            // 1.0f,  1.0f, -1.0f,    0.83f, 0.70f, 0.44f,    0.1f, 1.0f, // -- " --
-            //-1.0f,  1.0f, -1.0f,    0.83f, 0.70f, 0.44f,    0.1f, 1.0f, // -- " --
-            //-1.0f, -1.0f,  1.0f,    0.92f, 0.86f, 0.76f,    0.1f, 1.0f, // -- " --
-            // 1.0f, -1.0f,  1.0f,    0.92f, 0.86f, 0.76f,    0.1f, 1.0f, // -- " --
-            // 1.0f,  1.0f,  1.0f,    0.92f, 0.86f, 0.76f,    0.1f, 1.0f, // -- " --
-            //-1.0f,  1.0f,  1.0f,    0.92f, 0.86f, 0.76f,    0.1f, 1.0f  // -- " --
-            //-1.0f, -1.0f, 0.0f,     1.0f, 0.0f, 0.0f,       0.0f, 0.0f, // Plane
-	        //-1.0f,  1.0f, 0.0f,     0.0f, 1.0f, 0.0f,       0.0f, 1.0f, // -- " --
-	        // 1.0f,  1.0f, 0.0f,     0.0f, 0.0f, 1.0f,       1.0f, 1.0f, // -- " --
-	        // 1.0f, -1.0f, 0.0f,     1.0f, 1.0f, 1.0f,       1.0f, 0.0f  // -- " --
-            -1.0f, -1.0f,  1.0f,     0.83f, 0.70f, 0.44f,    0.0f, 0.0f, // Pyramid
-            -1.0f, -1.0f, -1.0f,     0.83f, 0.70f, 0.44f,    5.0f, 0.0f, // -- " --
-             1.0f, -1.0f, -1.0f,     0.83f, 0.70f, 0.44f,    0.0f, 0.0f, // -- " --
-             1.0f, -1.0f,  1.0f,     0.83f, 0.70f, 0.44f,    5.0f, 0.0f, // -- " --
-             0.0f,  2.0f,  0.0f,     0.92f, 0.86f, 0.76f,    2.5f, 5.0f  // -- " --
+            new(new(-1.0f, -1.0f,  1.0f), new(0f, 0f, 0f), new(0.83f, 0.70f, 0.44f, 1.0f), new(0.0f, 0.0f)),
+            new(new(-1.0f, -1.0f, -1.0f), new(0f, 0f, 0f), new(0.83f, 0.70f, 0.44f, 1.0f), new(5.0f, 0.0f)),
+            new(new( 1.0f, -1.0f, -1.0f), new(0f, 0f, 0f), new(0.83f, 0.70f, 0.44f, 1.0f), new(0.0f, 0.0f)),
+            new(new( 1.0f, -1.0f,  1.0f), new(0f, 0f, 0f), new(0.83f, 0.70f, 0.44f, 1.0f), new(5.0f, 0.0f)),
+            new(new( 0.0f,  2.0f,  0.0f), new(0f, 0f, 0f), new(0.92f, 0.86f, 0.76f, 1.0f), new(2.5f, 5.0f)),
         };
 
-        private uint[] indices = new uint[]
+        private readonly List<uint> indices = new()
         {
-            //0, 1, 2,    2, 3, 0,    // Cube
-            //4, 5, 6,    6, 7, 4,    // -- " --
-            //0, 4, 7,    7, 3, 0,    // -- " --
-            //1, 5, 6,    6, 2, 1,    // -- " --
-            //3, 2, 6,    6, 7, 3,    // -- " --
-            //0, 1, 5,    5, 4, 0     // -- " --
-            //0, 2, 1,    0, 3, 2     // Plane
-            0, 1, 2,                // Pyramid
-            0, 2, 3,                // -- " --
-            0, 1, 4,                // -- " --
-            1, 2, 4,                // -- " --
-            2, 3, 4,                // -- " --
-            3, 0, 4                 // -- " --
+            0, 1, 2,
+            0, 2, 3,
+            0, 1, 4,
+            1, 2, 4,
+            2, 3, 4,
+            3, 0, 4 
         };
 
         /// <summary>
@@ -163,24 +140,8 @@ namespace PentaGE.Core.Rendering
                 catch { /* Gets logged in the constructor */ }
             }
 
-            // Create a VAO, VBO, and EBO
-            vao = new();
-            vbo = new(ref vertices, sizeof(float) * vertices.Length);
-            ebo = new(ref indices, sizeof(uint) * indices.Length);
-
-            // Bind the VAO, VBO, and EBO to the current context
-            vao.Bind();
-            ebo.Bind();
-
-            // Specify how the vertex attributes should be interpreted.
-            vao.LinkAttribute(ref vbo, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);                    // Coordinates
-            vao.LinkAttribute(ref vbo, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));  // Colors
-            vao.LinkAttribute(ref vbo, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));  // Texture coordinates
-
-            // Unbind the VBO, EBO, and VAO to prevent further changes to them.
-            VertexBuffer.Unbind();  // Unbind the VBO
-            ElementBuffer.Unbind(); // Unbind the EBO
-            VertexArray.Unbind();   // Unbind the VAO
+            // TODO: Initialize test mesh
+            testMesh1 = new(vertices, indices);
 
             #endregion
 
@@ -242,25 +203,14 @@ namespace PentaGE.Core.Rendering
                 // Bind the texture to the current context
                 texture.Bind();
 
-                // Bind the Vertex Array Object (VAO) to use the configuration
-                // of vertex attributes stored in it.
-                vao.Bind();
-
-                // Draw the object using the indices of the EBO
-                glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
-                glDrawElements(GL_TRIANGLES, indices); // Draw the object using the indices of the EBO
-
-                // Unbind the VAO, VBO & EBO to prevent accidental modification.
-                VertexArray.Unbind();   // Unbind the VAO
-                VertexBuffer.Unbind();  // Unbind the VBO (not necessary, but good practice)
-                ElementBuffer.Unbind(); // Unbind the EBO (not necessary, but good practice)
+                // Draw the test mesh
+                testMesh1.Draw();
             }
         }
 
         internal void Terminate()
         {
-            vbo.Dispose();
-            ebo.Dispose();
+            testMesh1.Dispose();
         }
 
         private void Events_GlfwError(object? sender, Events.GlfwErrorEventArgs e)

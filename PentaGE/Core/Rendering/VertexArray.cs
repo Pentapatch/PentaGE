@@ -12,12 +12,10 @@ namespace PentaGE.Core.Rendering
             _id = glGenVertexArray();
         }
 
-        public unsafe void LinkAttribute(ref VertexBuffer vertexBuffer, uint index, int size, int type, int stride, void* pointer)
+        public static unsafe void LinkAttribute(uint index, int size, int type, int stride, void* pointer)
         {
-            vertexBuffer.Bind();
             glVertexAttribPointer(index, size, type, false, stride, pointer);
             glEnableVertexAttribArray(index);
-            VertexBuffer.Unbind();
         }
 
         public void Bind()

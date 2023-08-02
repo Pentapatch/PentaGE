@@ -6,15 +6,23 @@ namespace PentaGE.Core.Rendering
     {
         private readonly uint _id;
 
-        public unsafe ElementBuffer(ref uint[] indices, int size)
+        public unsafe ElementBuffer(uint[] indices)
         {
             _id = glGenBuffer(); // Generate a buffer object and store its ID
 
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _id);
             fixed (uint* i = &indices[0])
             {
+                // Calculate the size of the buffer based on the number of vertices
+                int size = sizeof(uint) * indices.Length;
+
                 glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, i, GL_STATIC_DRAW);
             }
+        }
+
+        public ElementBuffer(List<uint> indices) : this(indices.ToArray())
+        {
+                
         }
 
         public void Bind()
