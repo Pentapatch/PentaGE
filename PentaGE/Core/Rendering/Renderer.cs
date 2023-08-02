@@ -67,7 +67,7 @@ namespace PentaGE.Core.Rendering
             0, 1, 4,
             1, 2, 4,
             2, 3, 4,
-            3, 0, 4 
+            3, 0, 4
         };
 
         /// <summary>
@@ -197,7 +197,7 @@ namespace PentaGE.Core.Rendering
 
         internal void Terminate()
         {
-            
+
         }
 
         private void Events_GlfwError(object? sender, Events.GlfwErrorEventArgs e)
@@ -296,33 +296,19 @@ namespace PentaGE.Core.Rendering
         private void Events_KeyUp(object? sender, Events.KeyUpEventArgs e)
         {
             if (e.Key == Key.W)
-            {
                 _direction = new(_direction.X, _direction.Y, 0);
-            }
             else if (e.Key == Key.S)
-            {
                 _direction = new(_direction.X, _direction.Y, 0);
-            }
             else if (e.Key == Key.A)
-            {
                 _direction = new(0, _direction.Y, _direction.Z);
-            }
             else if (e.Key == Key.D)
-            {
                 _direction = new(0, _direction.Y, _direction.Z);
-            }
             else if (e.Key == Key.Q)
-            {
                 _direction = new(_direction.X, 0, _direction.Z);
-            }
             else if (e.Key == Key.E)
-            {
                 _direction = new(_direction.X, 0, _direction.Z);
-            }
             else if (e.Key == Key.LeftShift)
-            {
                 _modifierPressed = false;
-            }
         }
 
         private void UpdateCameraPosition()
@@ -330,48 +316,27 @@ namespace PentaGE.Core.Rendering
             float increment = 5f;
             Vector3 direction = Vector3.Zero;
 
+            Rotation originalRotation = testCamera.Rotation;
+            if (_modifierPressed)
+                testCamera.Rotation = new(testCamera.Rotation.Yaw, 0, testCamera.Rotation.Roll);
+
             if (_direction.X == 1)
                 direction += testCamera.Rotation.GetRightVector();
             else if (_direction.X == -1)
                 direction += testCamera.Rotation.GetLeftVector();
             if (_direction.Y == 1)
-                direction += testCamera.Rotation.GetUpVector();
+                    direction += testCamera.Rotation.GetUpVector();
             else if (_direction.Y == -1)
                 direction += testCamera.Rotation.GetDownVector();
             if (_direction.Z == 1)
-            {
-                if (_modifierPressed)
-                {
-                    Rotation originalRotation = testCamera.Rotation;
-                    testCamera.Rotation = new(testCamera.Rotation.Yaw, 0, testCamera.Rotation.Roll);
-
                     direction -= testCamera.Rotation.GetForwardVector();
-
-                    testCamera.Rotation = originalRotation;
-                }
-                else
-                {
-                    direction -= testCamera.Rotation.GetForwardVector();
-                }
-            }
             else if (_direction.Z == -1)
-            {
-                if (_modifierPressed)
-                {
-                    Rotation originalRotation = testCamera.Rotation;
-                    testCamera.Rotation = new(testCamera.Rotation.Yaw, 0, testCamera.Rotation.Roll);
-
                     direction -= testCamera.Rotation.GetBackwardVector();
-
-                    testCamera.Rotation = originalRotation;
-                }
-                else
-                {
-                    direction -= testCamera.Rotation.GetBackwardVector();
-                }
-            }
 
             testCamera.Position += direction * (increment * (float)_engine.Timing.CurrentFrame.DeltaTime);
+
+            if (_modifierPressed)
+                testCamera.Rotation = originalRotation;
         }
 
         #endregion
@@ -426,9 +391,9 @@ namespace PentaGE.Core.Rendering
                     _lastY = e.Position.Y;
                 }
 
-                float sensitivity = 1f;
+                float sensitivityFactor = 1f;
 
-                float xDiff = (e.Position.X - _mouseInitialLocation.X) / ((float)e.Window.Size.Width / 2) * sensitivity;
+                float xDiff = (e.Position.X - _mouseInitialLocation.X) / ((float)e.Window.Size.Width / 2) * sensitivityFactor;
 
                 float yaw = _initialRotation.Yaw - (xDiff * 90);
 
