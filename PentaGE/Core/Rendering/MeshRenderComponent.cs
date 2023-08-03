@@ -78,6 +78,12 @@ namespace PentaGE.Core.Rendering
 
             // Pass the matrices to the shader (must be done after shader.Use())
             Shader.SetUniform("mvp", mvpMatrix);
+            Shader.SetUniform("model", modelMatrix);
+
+            // Set the light color uniform
+            Shader.SetUniform("lightColor", new Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+            Shader.SetUniform("lightPosition", new Vector3(0.75f, 0.75f, 0.75f));
+            Shader.SetUniform("cameraPosition", camera.Position);
 
             // Bind the texture to the current context
             Texture?.Bind();
@@ -86,7 +92,7 @@ namespace PentaGE.Core.Rendering
             // of vertex attributes stored in it.
             vao.Bind();
 
-            // Draw the object using the indices of the EBO
+            // Draw the object using the indices of the EBO or the vertices of the VBO.
             glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
 
             if (ebo is not null && Mesh.Indices is not null)
