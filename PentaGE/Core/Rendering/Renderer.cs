@@ -24,6 +24,7 @@ namespace PentaGE.Core.Rendering
         private Mesh lightMesh1;
         private bool rotate = true;
         private bool wireframe = false;
+        private bool followTarget = false;
 
         /// <summary>
         /// Creates a new instance of the Renderer class.
@@ -44,7 +45,7 @@ namespace PentaGE.Core.Rendering
 
         private readonly Camera3d testCamera = new()
         {
-            Position = new(0, 0, 2.5f),
+            Position = new(0, 0, 2f),
             FieldOfView = 90,
             Rotation = new(
                 0,  // Yaw 
@@ -149,7 +150,9 @@ namespace PentaGE.Core.Rendering
             // Enable face culling
             //glEnable(GL_CULL_FACE);
             //glCullFace(GL_BACK);
-            //glFrontFace(GL_CW);
+            //glFrontFace(GL_CCW);
+
+            // Enable depth testing
             glEnable(GL_DEPTH_TEST);
 
             // Add engine events for moving the camera (during debug - remove later)
@@ -161,6 +164,7 @@ namespace PentaGE.Core.Rendering
             _engine.Events.MouseUp += Events_MouseUp;
 
             #region Set up a test object to render
+            // TODO: None of these should be here, it's just for testing
 
             // Initializing test shader
             using (var logger = Log.Logger.BeginPerfLogger("Loading default shader"))
@@ -207,6 +211,8 @@ namespace PentaGE.Core.Rendering
 
             // Initialize test mesh
             testMesh1 = new(vertices, indices);
+            testMesh1.Offset(0, -0.25f, 0);
+            //testMesh1.Rotate(45, 45, 45);
             var transform = new Transform(new(0, 0, 0), new(0, 0, 0), new(1f, 1f, 1f));
             var renderableMesh = new RenderableMeshEntity(testMesh1, shader, texture);
 
@@ -249,6 +255,7 @@ namespace PentaGE.Core.Rendering
                     objectTransform.Rotation;//new(0, 0, 0);
 
                 _engine.Scene[0].GetComponent<TransformComponent>()!.Transform = objectTransform;
+                if (followTarget) testCamera.Rotation = Rotation.GetLookAt(new(0), testCamera.Position);
 
                 #endregion
 
@@ -361,6 +368,15 @@ namespace PentaGE.Core.Rendering
             else if (e.Key == Key.LeftShift)
             {
                 _modifierPressed = true;
+            }
+            else if (e.Key == Key.Space)
+            {
+                testCamera.Position = new(0, 0, 2);
+                testCamera.Rotation = new();
+            }
+            else if (e.Key == Key.Backspace)
+            {
+                followTarget = !followTarget;
             }
         }
 

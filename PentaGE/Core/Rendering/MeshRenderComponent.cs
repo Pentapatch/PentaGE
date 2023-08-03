@@ -1,5 +1,4 @@
-﻿using GLFW;
-using PentaGE.Common;
+﻿using PentaGE.Common;
 using PentaGE.Core.Components;
 using PentaGE.Core.Graphics;
 using System.Numerics;
@@ -82,7 +81,7 @@ namespace PentaGE.Core.Rendering
 
             // Set the light color uniform
             Shader.SetUniform("lightColor", new Vector4(1.0f, 1.0f, 1.0f, 1.0f));
-            Shader.SetUniform("lightPosition", new Vector3(0.75f, 0.75f, 0.75f));
+            Shader.SetUniform("lightPosition", new Vector3(0.5f, 0.5f, 0.5f));
             Shader.SetUniform("cameraPosition", camera.Position);
 
             // Bind the texture to the current context

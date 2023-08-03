@@ -220,9 +220,9 @@ namespace PentaGE.Common
         /// The rotation will be adjusted to face the <paramref name="targetPosition"/> in the X-Z plane,
         /// and the pitch angle will be adjusted to look at the <paramref name="targetPosition"/> in the Y direction.
         /// </remarks>
-        public void LookAt(Vector3 targetPosition)
+        public void LookAt(Vector3 targetPosition, Vector3 sourcePosition)
         {
-            Vector3 direction = Vector3.Normalize(targetPosition - Vector3.Zero);
+            Vector3 direction = Vector3.Normalize(sourcePosition - targetPosition);
 
             // Calculate and set the rotation angles
             Yaw = MathHelper.RadiansToDegrees(MathF.Atan2(direction.X, direction.Z));
@@ -238,9 +238,9 @@ namespace PentaGE.Common
         /// The rotation will be adjusted to face the <paramref name="targetPosition"/> in the X-Z plane,
         /// and the pitch angle will be adjusted to look at the <paramref name="targetPosition"/> in the Y direction.
         /// </remarks>
-        public static Rotation GetLookAt(Vector3 targetPosition)
+        public static Rotation GetLookAt(Vector3 targetPosition, Vector3 sourcePosition)
         {
-            Vector3 direction = Vector3.Normalize(targetPosition - Vector3.Zero);
+            Vector3 direction = Vector3.Normalize(sourcePosition - targetPosition);
 
             // Calculate the rotation angles
             float yaw = MathHelper.RadiansToDegrees(MathF.Atan2(direction.X, direction.Z));
