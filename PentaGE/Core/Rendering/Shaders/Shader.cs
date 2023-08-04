@@ -13,6 +13,7 @@ namespace PentaGE.Core.Rendering
     {
         private string _vertexSourceCode = string.Empty;
         private string _fragmentSourceCode = string.Empty;
+        private string _geometrySourceCode = string.Empty;
         private readonly string _filePath = string.Empty;
 
         public uint ProgramId { get; private set; } = 0u;
@@ -22,10 +23,12 @@ namespace PentaGE.Core.Rendering
         /// </summary>
         /// <param name="vertexSourceCode">The source code of the vertex shader written in GLSL (OpenGL Shading Language).</param>
         /// <param name="fragmentSourceCode">The source code of the fragment shader written in GLSL (OpenGL Shading Language).</param>
-        public Shader(string vertexSourceCode, string fragmentSourceCode)
+        /// <param name="geometrySourceCode">The source code of the geometry shader written in GLSL (OpenGL Shading Language).</param>
+        public Shader(string vertexSourceCode, string fragmentSourceCode, string? geometrySourceCode = null)
         {
             _vertexSourceCode = vertexSourceCode;
             _fragmentSourceCode = fragmentSourceCode;
+            _geometrySourceCode = geometrySourceCode ?? string.Empty;
         }
 
         /// <summary>
@@ -52,22 +55,36 @@ namespace PentaGE.Core.Rendering
             }
 
             uint vertexShader, fragmentShader;
+            uint? geometryShader = null;
             bool hasError = false;
 
             // Compile and create the vertex and fragment shaders
             vertexShader = CompileShader(GL_VERTEX_SHADER, _vertexSourceCode, ref hasError);
             fragmentShader = CompileShader(GL_FRAGMENT_SHADER, _fragmentSourceCode, ref hasError);
+            if (_geometrySourceCode != string.Empty)
+            {
+                geometryShader = CompileShader(GL_GEOMETRY_SHADER, _geometrySourceCode, ref hasError);
+            }
 
             // Create and link the shader program with the vertex and fragment shaders
-            LinkShaderProgram(vertexShader, fragmentShader, ref hasError);
+            LinkShaderProgram(vertexShader, fragmentShader, geometryShader, ref hasError);
 
             // Detach and delete the shaders after they have been linked into the program
             // This is safe because the shader program has its own copy of the shader source code
             // The linked program no longer requires the individual shaders once they are linked
             glDetachShader(ProgramId, vertexShader);
             glDetachShader(ProgramId, fragmentShader);
+            if (geometryShader.HasValue)
+            {
+                glDetachShader(ProgramId, geometryShader.Value);
+            }
+
             glDeleteShader(vertexShader);
             glDeleteShader(fragmentShader);
+            if (geometryShader.HasValue)
+            {
+                glDeleteShader(geometryShader.Value);
+            }
 
             return !hasError;
         }
@@ -278,13 +295,15 @@ namespace PentaGE.Core.Rendering
         /// </summary>
         /// <param name="vertexShader">The ID of the compiled vertex shader.</param>
         /// <param name="fragmentShader">The ID of the compiled fragment shader.</param>
+        /// <param name="geometryShader">The ID of the compiled geometry shader, or null if there is no geometry shader.</param>
         /// <param name="error">A reference to a boolean flag that will be set to true if there is an error in the linking process.</param>
-        private void LinkShaderProgram(uint vertexShader, uint fragmentShader, ref bool error)
+        private void LinkShaderProgram(uint vertexShader, uint fragmentShader, uint? geometryShader, ref bool error)
         {
             // Create the shader program and attach the shaders to it
             ProgramId = glCreateProgram();
             glAttachShader(ProgramId, vertexShader);
             glAttachShader(ProgramId, fragmentShader);
+            if (geometryShader.HasValue) glAttachShader(ProgramId, geometryShader.Value);
 
             // Link the shader program, creating an executable that runs on the GPU
             glLinkProgram(ProgramId);
@@ -313,6 +332,7 @@ namespace PentaGE.Core.Rendering
             // Create string builders to store the vertex and fragment shader source code
             StringBuilder vertexShaderSource = new();
             StringBuilder fragmentShaderSource = new();
+            StringBuilder geometryShaderSource = new();
 
             // Set the parsing mode
             ShaderType parsingMode = ShaderType.Unknown;
@@ -328,6 +348,10 @@ namespace PentaGE.Core.Rendering
                 {
                     parsingMode = ShaderType.Fragment;
                 }
+                else if (line.StartsWith("#shader geometry"))
+                {
+                    parsingMode = ShaderType.Geometry;
+                }
                 else if (parsingMode == ShaderType.Vertex)
                 {
                     vertexShaderSource.AppendLine(line);
@@ -336,11 +360,16 @@ namespace PentaGE.Core.Rendering
                 {
                     fragmentShaderSource.AppendLine(line);
                 }
+                else if (parsingMode == ShaderType.Geometry)
+                {
+                    geometryShaderSource.AppendLine(line);
+                }
             }
 
             // Set the source code values
             _vertexSourceCode = vertexShaderSource.ToString();
             _fragmentSourceCode = fragmentShaderSource.ToString();
+            _geometrySourceCode = geometryShaderSource.ToString();
         }
 
         /// <summary>
@@ -352,6 +381,7 @@ namespace PentaGE.Core.Rendering
         {
             GL_VERTEX_SHADER => "vertex",
             GL_FRAGMENT_SHADER => "fragment",
+            GL_GEOMETRY_SHADER => "geometry",
             _ => throw new NotSupportedException()
         };
 

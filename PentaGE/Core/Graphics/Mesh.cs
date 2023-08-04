@@ -12,7 +12,7 @@ namespace PentaGE.Core.Graphics
         internal Mesh(List<Vertex> vertices, List<uint>? indices = null)
         {
             Vertices = vertices;
-            Indices = indices ?? new List<uint>();
+            Indices = indices;
         }
 
         public void Offset(float x, float y, float z) =>

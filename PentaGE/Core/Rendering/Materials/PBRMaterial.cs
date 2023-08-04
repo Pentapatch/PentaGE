@@ -62,6 +62,8 @@ namespace PentaGE.Core.Rendering.Materials
         /// </remarks>
         public float SpecularStrength { get; set; }
 
+        public float Opacity { get; set; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="PBRMaterial"/> class with default property values.
         /// </summary>

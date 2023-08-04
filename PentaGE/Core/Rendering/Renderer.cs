@@ -19,12 +19,15 @@ namespace PentaGE.Core.Rendering
         private readonly PentaGameEngine _engine;
         private Shader shader;
         private Shader lightShader;
+        private Shader gridShader;
         private Texture texture;
         private Mesh testMesh1;
         private Mesh lightMesh1;
         private bool rotate = true;
         private bool wireframe = false;
         private bool followTarget = false;
+        private readonly Grid gridA = new(10, 10, new(1, 1, 1), 0.2f);
+        private readonly Grid gridB = new(10, 20, new(0, 0, 0), 0.15f);
 
         /// <summary>
         /// Creates a new instance of the Renderer class.
@@ -155,6 +158,10 @@ namespace PentaGE.Core.Rendering
             // Enable depth testing
             glEnable(GL_DEPTH_TEST);
 
+            // Enable blending
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
             // Add engine events for moving the camera (during debug - remove later)
             _engine.Events.KeyDown += Events_KeyDown;
             _engine.Events.KeyUp += Events_KeyUp;
@@ -186,6 +193,19 @@ namespace PentaGE.Core.Rendering
                 {
                     lightShader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Light.shader");
                     lightShader.Load();
+                }
+                catch (System.Exception ex)
+                {
+                    Log.Error($"Error loading shader: {ex}");
+                }
+            }
+
+            using (var logger = Log.Logger.BeginPerfLogger("Loading grid shader"))
+            {
+                try
+                {
+                    gridShader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Grid.shader");
+                    gridShader.Load();
                 }
                 catch (System.Exception ex)
                 {
@@ -227,8 +247,15 @@ namespace PentaGE.Core.Rendering
 
             renderableLight.AddComponent(new TransformComponent(transform2));
 
+            // Initialize grid
+            //gridB.Mesh.Offset(0, -0.25f, 0);
+            var renderableGridMajor = new RenderableGridEntity(gridA, gridShader);
+            var renderableGridMinor = new RenderableGridEntity(gridB, gridShader);
+
             _engine.Scene.AddEntity(renderableMesh);
             _engine.Scene.AddEntity(renderableLight);
+            _engine.Scene.AddEntity(renderableGridMajor);
+            _engine.Scene.AddEntity(renderableGridMinor);
 
             #endregion
 

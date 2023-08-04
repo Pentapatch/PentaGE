@@ -22,12 +22,15 @@ namespace PentaGE.Core.Rendering
 
         public PBRMaterial Material { get; set; }
 
+        public DrawMode DrawMode { get; set; }
+
         public unsafe MeshRenderComponent(Mesh mesh, Shader shader, Texture? texture = null, PBRMaterial? material = null)
         {
             Mesh = mesh;
             Shader = shader;
             Texture = texture;
             Material = material ?? new();
+            DrawMode = DrawMode.Triangles;
 
             // Create a VAO, VBO, and (optionally) EBO
             vao = new();
@@ -84,6 +87,8 @@ namespace PentaGE.Core.Rendering
             // Pass the matrices to the shader (must be done after shader.Use())
             Shader.SetUniform("mvp", mvpMatrix);
             Shader.SetUniform("model", modelMatrix);
+            Shader.SetUniform("view", viewMatrix);
+            Shader.SetUniform("projection", projectionMatrix);
 
             // Set the light color uniforms
             Shader.SetUniform("lightColor", new Vector4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -96,6 +101,7 @@ namespace PentaGE.Core.Rendering
             Shader.SetUniform("material.metalness", Material.Metalness);
             Shader.SetUniform("material.ambientOcclusion", Material.AmbientOcclusion);
             Shader.SetUniform("material.specularStrength", Material.SpecularStrength);
+            Shader.SetUniform("material.opacity", Material.Opacity);
 
             // Bind the texture to the current context
             Texture?.Bind();
@@ -110,11 +116,11 @@ namespace PentaGE.Core.Rendering
             if (ebo is not null && Mesh.Indices is not null)
             {
                 ebo.Bind();
-                glDrawElements(GL_TRIANGLES, Mesh.Indices.Count, GL_UNSIGNED_INT, null);
+                glDrawElements((int)DrawMode, Mesh.Indices.Count, GL_UNSIGNED_INT, null);
             }
             else
             {
-                glDrawArrays(GL_TRIANGLES, 0, Mesh.Vertices.Count);
+                glDrawArrays((int)DrawMode, 0, Mesh.Vertices.Count);
             }
 
             // Unbind the VAO, VBO & EBO to prevent accidental modification.

@@ -42,6 +42,7 @@ uniform struct Material {
     float metalness;
     float ambientOcclusion;
     float specularStrength;
+    float opacity;
 } material;
 
 vec3 calculateDiffuse(vec3 lightDirection, vec3 normalizedNormal) {
