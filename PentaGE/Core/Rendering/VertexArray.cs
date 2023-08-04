@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using static OpenGL.GL;
+﻿using static OpenGL.GL;
 
 namespace PentaGE.Core.Rendering
 {

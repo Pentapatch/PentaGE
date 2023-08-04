@@ -1,5 +1,4 @@
-﻿using PentaGE.Maths;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace PentaGE.Common
 {

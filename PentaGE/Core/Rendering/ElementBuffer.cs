@@ -22,7 +22,7 @@ namespace PentaGE.Core.Rendering
 
         public ElementBuffer(List<uint> indices) : this(indices.ToArray())
         {
-                
+
         }
 
         public void Bind()

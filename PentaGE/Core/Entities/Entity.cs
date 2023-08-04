@@ -46,7 +46,7 @@ namespace PentaGE.Core.Entities
         public IEnumerator<Component> GetEnumerator() =>
             ((IEnumerable<Component>)_components).GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator() => 
+        IEnumerator IEnumerable.GetEnumerator() =>
             ((IEnumerable)_components).GetEnumerator();
     }
 }

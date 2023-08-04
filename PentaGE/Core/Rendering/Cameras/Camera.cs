@@ -1,5 +1,4 @@
-﻿using PentaGE.Common;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace PentaGE.Core.Rendering
 {
@@ -18,8 +17,8 @@ namespace PentaGE.Core.Rendering
 
         public Camera()
         {
-            NearPlaneClipping = 0.1f;  
-            FarPlaneClipping = 1000.0f; 
+            NearPlaneClipping = 0.1f;
+            FarPlaneClipping = 1000.0f;
             Position = Vector3.Zero;
         }
     }

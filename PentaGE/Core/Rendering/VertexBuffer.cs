@@ -27,7 +27,7 @@ namespace PentaGE.Core.Rendering
 
         public VertexBuffer(List<Vertex> vertices) : this(vertices.ToArray())
         {
-                
+
         }
 
         public void Bind()

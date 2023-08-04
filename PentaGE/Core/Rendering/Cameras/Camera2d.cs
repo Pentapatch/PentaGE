@@ -15,7 +15,7 @@ namespace PentaGE.Core.Rendering
         {
             Zoom = zoom;
             IsTopDown = isTopDown;
-        } 
+        }
 
         public override Matrix4x4 GetProjectionMatrix(int viewportWidth, int viewportHeight)
         {

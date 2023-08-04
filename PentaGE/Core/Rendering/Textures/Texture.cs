@@ -57,16 +57,16 @@ namespace PentaGE.Core.Rendering
             Unbind();
         }
 
-        public static void SetTextureSlot(Shader shader, string uniformName, int slot) => 
+        public static void SetTextureSlot(Shader shader, string uniformName, int slot) =>
             shader.SetUniform(uniformName, slot);
 
-        public void Bind() => 
+        public void Bind() =>
             glBindTexture(_type, _id);
 
-        public void Unbind() => 
+        public void Unbind() =>
             glBindTexture(_type, 0);
 
-        public void Dispose() => 
+        public void Dispose() =>
             glDeleteTexture(_id);
     }
 }

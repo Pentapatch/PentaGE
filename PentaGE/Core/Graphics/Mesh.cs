@@ -29,7 +29,7 @@ namespace PentaGE.Core.Graphics
             }
         }
 
-        public void Scale(float scale) => 
+        public void Scale(float scale) =>
             Scale(new Vector3(scale));
 
         public void Scale(float x, float y, float z) =>
