@@ -56,31 +56,31 @@ namespace PentaGE.Core.Rendering
 
         private readonly List<Vertex> vertices = new()
         {
-            //new(new(-1.0f, -1.0f,  1.0f), new(0f, 0f, 0f), new(0.83f, 0.70f, 0.44f, 1.0f), new(0.0f, 0.0f)),
-            //new(new(-1.0f, -1.0f, -1.0f), new(0f, 0f, 0f), new(0.83f, 0.70f, 0.44f, 1.0f), new(5.0f, 0.0f)),
-            //new(new( 1.0f, -1.0f, -1.0f), new(0f, 0f, 0f), new(0.83f, 0.70f, 0.44f, 1.0f), new(0.0f, 0.0f)),
-            //new(new( 1.0f, -1.0f,  1.0f), new(0f, 0f, 0f), new(0.83f, 0.70f, 0.44f, 1.0f), new(5.0f, 0.0f)),
-            //new(new( 0.0f,  2.0f,  0.0f), new(0f, 0f, 0f), new(0.92f, 0.86f, 0.76f, 1.0f), new(2.5f, 5.0f)),
-            new(new(-0.5f, 0.0f,  0.5f), new( 0.0f, -1.0f, 0.0f), new(0.83f, 0.70f, 0.44f, 1.0f), new(0.0f, 0.0f)),      // Bottom side
-	        new(new(-0.5f, 0.0f, -0.5f), new( 0.0f, -1.0f, 0.0f), new(0.83f, 0.70f, 0.44f, 1.0f), new(0.0f, 5.0f)),      // Bottom side
-	        new(new( 0.5f, 0.0f, -0.5f), new( 0.0f, -1.0f, 0.0f), new(0.83f, 0.70f, 0.44f, 1.0f), new(5.0f, 5.0f)),     // Bottom side
-	        new(new( 0.5f, 0.0f,  0.5f), new( 0.0f, -1.0f, 0.0f), new(0.83f, 0.70f, 0.44f, 1.0f), new(5.0f, 0.0f)),     // Bottom side
+            //new(new(-1.0f, -1.0f,  1.0f), new(0f, 0f, 0f), new(0.0f, 0.0f)),
+            //new(new(-1.0f, -1.0f, -1.0f), new(0f, 0f, 0f), new(5.0f, 0.0f)),
+            //new(new( 1.0f, -1.0f, -1.0f), new(0f, 0f, 0f), new(0.0f, 0.0f)),
+            //new(new( 1.0f, -1.0f,  1.0f), new(0f, 0f, 0f), new(5.0f, 0.0f)),
+            //new(new( 0.0f,  2.0f,  0.0f), new(0f, 0f, 0f), new(2.5f, 5.0f)),
+            new(new(-0.5f, 0.0f,  0.5f), new( 0.0f, -1.0f, 0.0f), new(0.0f, 0.0f)),      // Bottom side
+	        new(new(-0.5f, 0.0f, -0.5f), new( 0.0f, -1.0f, 0.0f), new(0.0f, 5.0f)),      // Bottom side
+	        new(new( 0.5f, 0.0f, -0.5f), new( 0.0f, -1.0f, 0.0f), new(5.0f, 5.0f)),     // Bottom side
+	        new(new( 0.5f, 0.0f,  0.5f), new( 0.0f, -1.0f, 0.0f), new(5.0f, 0.0f)),     // Bottom side
 
-            new(new(-0.5f, 0.0f,  0.5f), new(-0.8f, 0.5f,  0.0f), new(0.83f, 0.70f, 0.44f, 1.0f), new(0.0f, 0.0f)),     // Left Side
-	        new(new(-0.5f, 0.0f, -0.5f), new(-0.8f, 0.5f,  0.0f), new(0.83f, 0.70f, 0.44f, 1.0f), new(5.0f, 0.0f)),     // Left Side
-	        new(new( 0.0f, 0.8f,  0.0f), new(-0.8f, 0.5f,  0.0f), new(0.92f, 0.86f, 0.76f, 1.0f), new(2.5f, 5.0f)),     // Left Side
+            new(new(-0.5f, 0.0f,  0.5f), new(-0.8f, 0.5f,  0.0f), new(0.0f, 0.0f)),     // Left Side
+	        new(new(-0.5f, 0.0f, -0.5f), new(-0.8f, 0.5f,  0.0f), new(5.0f, 0.0f)),     // Left Side
+	        new(new( 0.0f, 0.8f,  0.0f), new(-0.8f, 0.5f,  0.0f), new(2.5f, 5.0f)),     // Left Side
 
-	        new(new(-0.5f, 0.0f, -0.5f), new( 0.0f, 0.5f, -0.8f), new(0.83f, 0.70f, 0.44f, 1.0f), new(5.0f, 0.0f)),     // Non-facing side
-	        new(new( 0.5f, 0.0f, -0.5f), new( 0.0f, 0.5f, -0.8f), new(0.83f, 0.70f, 0.44f, 1.0f), new(0.0f, 0.0f)),     // Non-facing side
-	        new(new( 0.0f, 0.8f,  0.0f), new( 0.0f, 0.5f, -0.8f), new(0.92f, 0.86f, 0.76f, 1.0f), new(2.5f, 5.0f)),     // Non-facing side
+	        new(new(-0.5f, 0.0f, -0.5f), new( 0.0f, 0.5f, -0.8f), new(5.0f, 0.0f)),     // Non-facing side
+	        new(new( 0.5f, 0.0f, -0.5f), new( 0.0f, 0.5f, -0.8f), new(0.0f, 0.0f)),     // Non-facing side
+	        new(new( 0.0f, 0.8f,  0.0f), new( 0.0f, 0.5f, -0.8f), new(2.5f, 5.0f)),     // Non-facing side
 
-	        new(new( 0.5f, 0.0f, -0.5f), new( 0.8f, 0.5f,  0.0f), new(0.83f, 0.70f, 0.44f, 1.0f), new(0.0f, 0.0f)),    // Right side
-	        new(new( 0.5f, 0.0f,  0.5f), new( 0.8f, 0.5f,  0.0f), new(0.83f, 0.70f, 0.44f, 1.0f), new(5.0f, 0.0f)),     // Right side
-	        new(new( 0.0f, 0.8f,  0.0f), new( 0.8f, 0.5f,  0.0f), new(0.92f, 0.86f, 0.76f, 1.0f), new(2.5f, 5.0f)),     // Right side
+	        new(new( 0.5f, 0.0f, -0.5f), new( 0.8f, 0.5f,  0.0f), new(0.0f, 0.0f)),    // Right side
+	        new(new( 0.5f, 0.0f,  0.5f), new( 0.8f, 0.5f,  0.0f), new(5.0f, 0.0f)),     // Right side
+	        new(new( 0.0f, 0.8f,  0.0f), new( 0.8f, 0.5f,  0.0f), new(2.5f, 5.0f)),     // Right side
 
-	        new(new( 0.5f, 0.0f,  0.5f), new( 0.0f, 0.5f,  0.8f), new(0.83f, 0.70f, 0.44f, 1.0f), new(5.0f, 0.0f)),     // Facing side
-	        new(new(-0.5f, 0.0f,  0.5f), new( 0.0f, 0.5f,  0.8f), new(0.83f, 0.70f, 0.44f, 1.0f), new(0.0f, 0.0f)),     // Facing side
-	        new(new( 0.0f, 0.8f,  0.0f), new( 0.0f, 0.5f,  0.8f), new(0.92f, 0.86f, 0.76f, 1.0f), new(2.5f, 5.0f))       // Facing side
+	        new(new( 0.5f, 0.0f,  0.5f), new( 0.0f, 0.5f,  0.8f), new(5.0f, 0.0f)),     // Facing side
+	        new(new(-0.5f, 0.0f,  0.5f), new( 0.0f, 0.5f,  0.8f), new(0.0f, 0.0f)),     // Facing side
+	        new(new( 0.0f, 0.8f,  0.0f), new( 0.0f, 0.5f,  0.8f), new(2.5f, 5.0f))       // Facing side
         };
 
         private readonly List<uint> indices = new()
@@ -217,6 +217,8 @@ namespace PentaGE.Core.Rendering
             var renderableMesh = new RenderableMeshEntity(testMesh1, shader, texture);
 
             renderableMesh.AddComponent(new TransformComponent(transform));
+            renderableMesh.GetComponent<MeshRenderComponent>()!.Material.Albedo = new(1f, 0f, 1f);
+            renderableMesh.GetComponent<MeshRenderComponent>()!.Material.SpecularStrength = 1f;
 
             // Initialize test light
             lightMesh1 = new(lightVertices, lightIndices);

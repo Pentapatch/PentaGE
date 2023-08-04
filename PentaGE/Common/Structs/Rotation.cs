@@ -216,6 +216,7 @@ namespace PentaGE.Common
         /// Sets the rotation to face a target position.
         /// </summary>
         /// <param name="targetPosition">The position of the target to look at.</param>
+        /// <param name="sourcePosition">The position of the source to look from.</param>
         /// <remarks>
         /// The rotation will be adjusted to face the <paramref name="targetPosition"/> in the X-Z plane,
         /// and the pitch angle will be adjusted to look at the <paramref name="targetPosition"/> in the Y direction.
@@ -233,6 +234,7 @@ namespace PentaGE.Common
         /// Calculates the rotation needed to face a target position.
         /// </summary>
         /// <param name="targetPosition">The position of the target to look at.</param>
+        /// <param name="sourcePosition">The position of the source to look from.</param>
         /// <returns>A new <see cref="Rotation"/> instance representing the rotation needed to face the target position.</returns>
         /// <remarks>
         /// The rotation will be adjusted to face the <paramref name="targetPosition"/> in the X-Z plane,

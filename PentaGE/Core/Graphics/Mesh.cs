@@ -25,7 +25,6 @@ namespace PentaGE.Core.Graphics
                 Vertices[i] = new(
                     Vertices[i].Coordinates + offset,
                     Vertices[i].Normal,
-                    Vertices[i].Color,
                     Vertices[i].TextureCoordinates);
             }
         }
@@ -43,7 +42,6 @@ namespace PentaGE.Core.Graphics
                 Vertices[i] = new(
                     Vertices[i].Coordinates * scale,
                     Vertices[i].Normal,
-                    Vertices[i].Color,
                     Vertices[i].TextureCoordinates);
             }
         }
@@ -59,7 +57,6 @@ namespace PentaGE.Core.Graphics
                     Vector3.Transform(
                         Vertices[i].Normal,
                         Matrix4x4.CreateFromYawPitchRoll(rotation.Yaw, rotation.Pitch, rotation.Roll)),
-                    Vertices[i].Color,
                     Vertices[i].TextureCoordinates);
             }
         }
@@ -78,7 +75,6 @@ namespace PentaGE.Core.Graphics
                     Vector3.Transform(
                         Vertices[i].Normal,
                         Matrix4x4.CreateFromAxisAngle(axis, angle)),
-                    Vertices[i].Color,
                     Vertices[i].TextureCoordinates);
             }
         }

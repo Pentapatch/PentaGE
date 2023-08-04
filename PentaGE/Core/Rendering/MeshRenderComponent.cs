@@ -1,6 +1,7 @@
 ﻿using PentaGE.Common;
 using PentaGE.Core.Components;
 using PentaGE.Core.Graphics;
+using PentaGE.Core.Rendering.Materials;
 using System.Numerics;
 using static OpenGL.GL;
 
@@ -19,11 +20,14 @@ namespace PentaGE.Core.Rendering
 
         public Texture? Texture { get; }
 
-        public unsafe MeshRenderComponent(Mesh mesh, Shader shader, Texture? texture)
+        public PBRMaterial Material { get; set; }
+
+        public unsafe MeshRenderComponent(Mesh mesh, Shader shader, Texture? texture = null, PBRMaterial? material = null)
         {
             Mesh = mesh;
             Shader = shader;
             Texture = texture;
+            Material = material ?? new();
 
             // Create a VAO, VBO, and (optionally) EBO
             vao = new();
@@ -43,8 +47,7 @@ namespace PentaGE.Core.Rendering
             int vertexSize = sizeof(Vertex);
             VertexArray.LinkAttribute(0, 3, GL_FLOAT, vertexSize, (void*)0);                          // Coordinates
             VertexArray.LinkAttribute(1, 3, GL_FLOAT, vertexSize, (void*)(3 * sizeof(float)));        // Normal
-            VertexArray.LinkAttribute(2, 4, GL_FLOAT, vertexSize, (void*)(6 * sizeof(float)));        // Color
-            VertexArray.LinkAttribute(3, 2, GL_FLOAT, vertexSize, (void*)(10 * sizeof(float)));       // Texture coordinates
+            VertexArray.LinkAttribute(2, 2, GL_FLOAT, vertexSize, (void*)(6 * sizeof(float)));       // Texture coordinates
 
             // Unbind the VBO, EBO, and VAO to prevent further changes to them.
             VertexBuffer.Unbind();  // Unbind the VBO
@@ -75,14 +78,24 @@ namespace PentaGE.Core.Rendering
             // Combine the model, view, and projection matrices to get the final MVP matrix
             var mvpMatrix = modelMatrix * viewMatrix * projectionMatrix;
 
+            // Tell the shader if the object has a texture or not
+            Shader.SetUniform("hasTexture", Texture is not null);
+
             // Pass the matrices to the shader (must be done after shader.Use())
             Shader.SetUniform("mvp", mvpMatrix);
             Shader.SetUniform("model", modelMatrix);
 
-            // Set the light color uniform
+            // Set the light color uniforms
             Shader.SetUniform("lightColor", new Vector4(1.0f, 1.0f, 1.0f, 1.0f));
             Shader.SetUniform("lightPosition", new Vector3(0.5f, 0.5f, 0.5f));
             Shader.SetUniform("cameraPosition", camera.Position);
+
+            // Set the material properties as uniforms in the shader
+            Shader.SetUniform("material.albedo", Material.Albedo);
+            Shader.SetUniform("material.roughness", Material.Roughness);
+            Shader.SetUniform("material.metalness", Material.Metalness);
+            Shader.SetUniform("material.ambientOcclusion", Material.AmbientOcclusion);
+            Shader.SetUniform("material.specularStrength", Material.SpecularStrength);
 
             // Bind the texture to the current context
             Texture?.Bind();

@@ -154,6 +154,17 @@ namespace PentaGE.Core.Rendering
         }
 
         /// <summary>
+        /// Sets a boolean uniform in the shader program. The boolean value will be converted to an integer (1 for true, 0 for false).
+        /// </summary>
+        /// <param name="name">The name of the uniform variable.</param>
+        /// <param name="value">The boolean value to set.</param>
+        public void SetUniform(string name, bool value)
+        {
+            int location = glGetUniformLocation(ProgramId, name);
+            glUniform1i(location, value ? 1 : 0);
+        }
+
+        /// <summary>
         /// Sets a floating-point uniform in the shader program.
         /// </summary>
         /// <param name="name">The name of the uniform variable.</param>
