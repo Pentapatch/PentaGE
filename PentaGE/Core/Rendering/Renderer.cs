@@ -61,26 +61,26 @@ namespace PentaGE.Core.Rendering
             //new(new( 1.0f, -1.0f, -1.0f), new(0f, 0f, 0f), new(0.0f, 0.0f)),
             //new(new( 1.0f, -1.0f,  1.0f), new(0f, 0f, 0f), new(5.0f, 0.0f)),
             //new(new( 0.0f,  2.0f,  0.0f), new(0f, 0f, 0f), new(2.5f, 5.0f)),
-            new(new(-0.5f, 0.0f,  0.5f), new( 0.0f, -1.0f, 0.0f), new(0.0f, 0.0f)),      // Bottom side
-	        new(new(-0.5f, 0.0f, -0.5f), new( 0.0f, -1.0f, 0.0f), new(0.0f, 5.0f)),      // Bottom side
-	        new(new( 0.5f, 0.0f, -0.5f), new( 0.0f, -1.0f, 0.0f), new(5.0f, 5.0f)),     // Bottom side
-	        new(new( 0.5f, 0.0f,  0.5f), new( 0.0f, -1.0f, 0.0f), new(5.0f, 0.0f)),     // Bottom side
+            new(new(-0.5f, 0.0f,  0.5f), new( 0.0f, -1.0f, 0.0f), new(0.0f, 0.0f)), // Bottom side
+	        new(new(-0.5f, 0.0f, -0.5f), new( 0.0f, -1.0f, 0.0f), new(0.0f, 5.0f)), // Bottom side
+	        new(new( 0.5f, 0.0f, -0.5f), new( 0.0f, -1.0f, 0.0f), new(5.0f, 5.0f)), // Bottom side
+	        new(new( 0.5f, 0.0f,  0.5f), new( 0.0f, -1.0f, 0.0f), new(5.0f, 0.0f)), // Bottom side
 
-            new(new(-0.5f, 0.0f,  0.5f), new(-0.8f, 0.5f,  0.0f), new(0.0f, 0.0f)),     // Left Side
-	        new(new(-0.5f, 0.0f, -0.5f), new(-0.8f, 0.5f,  0.0f), new(5.0f, 0.0f)),     // Left Side
-	        new(new( 0.0f, 0.8f,  0.0f), new(-0.8f, 0.5f,  0.0f), new(2.5f, 5.0f)),     // Left Side
+            new(new(-0.5f, 0.0f,  0.5f), new(-0.8f, 0.5f,  0.0f), new(0.0f, 0.0f)), // Left Side
+	        new(new(-0.5f, 0.0f, -0.5f), new(-0.8f, 0.5f,  0.0f), new(5.0f, 0.0f)), // Left Side
+	        new(new( 0.0f, 0.8f,  0.0f), new(-0.8f, 0.5f,  0.0f), new(2.5f, 5.0f)), // Left Side
 
-	        new(new(-0.5f, 0.0f, -0.5f), new( 0.0f, 0.5f, -0.8f), new(5.0f, 0.0f)),     // Non-facing side
-	        new(new( 0.5f, 0.0f, -0.5f), new( 0.0f, 0.5f, -0.8f), new(0.0f, 0.0f)),     // Non-facing side
-	        new(new( 0.0f, 0.8f,  0.0f), new( 0.0f, 0.5f, -0.8f), new(2.5f, 5.0f)),     // Non-facing side
+	        new(new(-0.5f, 0.0f, -0.5f), new( 0.0f, 0.5f, -0.8f), new(5.0f, 0.0f)), // Non-facing side
+	        new(new( 0.5f, 0.0f, -0.5f), new( 0.0f, 0.5f, -0.8f), new(0.0f, 0.0f)), // Non-facing side
+	        new(new( 0.0f, 0.8f,  0.0f), new( 0.0f, 0.5f, -0.8f), new(2.5f, 5.0f)), // Non-facing side
 
-	        new(new( 0.5f, 0.0f, -0.5f), new( 0.8f, 0.5f,  0.0f), new(0.0f, 0.0f)),    // Right side
-	        new(new( 0.5f, 0.0f,  0.5f), new( 0.8f, 0.5f,  0.0f), new(5.0f, 0.0f)),     // Right side
-	        new(new( 0.0f, 0.8f,  0.0f), new( 0.8f, 0.5f,  0.0f), new(2.5f, 5.0f)),     // Right side
+	        new(new( 0.5f, 0.0f, -0.5f), new( 0.8f, 0.5f,  0.0f), new(0.0f, 0.0f)), // Right side
+	        new(new( 0.5f, 0.0f,  0.5f), new( 0.8f, 0.5f,  0.0f), new(5.0f, 0.0f)), // Right side
+	        new(new( 0.0f, 0.8f,  0.0f), new( 0.8f, 0.5f,  0.0f), new(2.5f, 5.0f)), // Right side
 
-	        new(new( 0.5f, 0.0f,  0.5f), new( 0.0f, 0.5f,  0.8f), new(5.0f, 0.0f)),     // Facing side
-	        new(new(-0.5f, 0.0f,  0.5f), new( 0.0f, 0.5f,  0.8f), new(0.0f, 0.0f)),     // Facing side
-	        new(new( 0.0f, 0.8f,  0.0f), new( 0.0f, 0.5f,  0.8f), new(2.5f, 5.0f))       // Facing side
+	        new(new( 0.5f, 0.0f,  0.5f), new( 0.0f, 0.5f,  0.8f), new(5.0f, 0.0f)), // Facing side
+	        new(new(-0.5f, 0.0f,  0.5f), new( 0.0f, 0.5f,  0.8f), new(0.0f, 0.0f)), // Facing side
+	        new(new( 0.0f, 0.8f,  0.0f), new( 0.0f, 0.5f,  0.8f), new(2.5f, 5.0f))  // Facing side
         };
 
         private readonly List<uint> indices = new()
@@ -256,7 +256,14 @@ namespace PentaGE.Core.Rendering
                     0) :
                     objectTransform.Rotation;//new(0, 0, 0);
 
+                // Animate the color and specular strength of the object
                 _engine.Scene[0].GetComponent<TransformComponent>()!.Transform = objectTransform;
+                float hue = MathF.Sin((float)_engine.Timing.TotalElapsedTime) * 0.5f + 0.5f; // Adjust the range to [0, 1]
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Material.Albedo = ColorFromHSL(hue, 1.0f, 0.5f);
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Material.SpecularStrength =
+                    ((MathF.Sin((float)_engine.Timing.TotalElapsedTime) + 1) / 2) * 2;
+
+
                 if (followTarget) testCamera.Rotation = Rotation.GetLookAt(new(0), testCamera.Position);
 
                 #endregion
@@ -286,6 +293,48 @@ namespace PentaGE.Core.Rendering
         }
 
         // This code does not belong here, but is here for testing purposes
+
+        private static Vector3 ColorFromHSL(float hue, float saturation, float lightness)
+        {
+            // Convert HSL to RGB
+            // Only for visuallisational purposes
+            // TODO: Remove this and use the actual color values
+            if (saturation == 0f)
+            {
+                return new Vector3(lightness, lightness, lightness);
+            }
+            else
+            {
+                float q = lightness < 0.5f ? lightness * (1 + saturation) : lightness + saturation - lightness * saturation;
+                float p = 2 * lightness - q;
+                float[] rgb = new float[3];
+                rgb[0] = hue + 1f / 3f;
+                rgb[1] = hue;
+                rgb[2] = hue - 1f / 3f;
+                for (int i = 0; i < 3; i++)
+                {
+                    if (rgb[i] < 0f) rgb[i]++;
+                    if (rgb[i] > 1f) rgb[i]--;
+                    if (6f * rgb[i] < 1f)
+                    {
+                        rgb[i] = p + ((q - p) * 6f * rgb[i]);
+                    }
+                    else if (2f * rgb[i] < 1f)
+                    {
+                        rgb[i] = q;
+                    }
+                    else if (3f * rgb[i] < 2f)
+                    {
+                        rgb[i] = p + ((q - p) * 6f * ((2f / 3f) - rgb[i]));
+                    }
+                    else
+                    {
+                        rgb[i] = p;
+                    }
+                }
+                return new Vector3(rgb[0], rgb[1], rgb[2]);
+            }
+        }
 
         #region Keyboard events
 
