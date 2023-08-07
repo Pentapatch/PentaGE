@@ -120,6 +120,31 @@ namespace PentaGE.Common
         #region Math
 
         /// <summary>
+        /// Determines whether the specified <see cref="Rotation"/> is approximately equal to another <see cref="Rotation"/>.<br />
+        /// <em>Note: This method uses a threshold of 0.001f.</em>
+        /// </summary>
+        /// <param name="source">The <see cref="Rotation"/> to compare.</param>
+        /// <param name="target">The <see cref="Rotation"/> to compare to.</param>
+        /// <param name="threshold">The threshold for determining equality. Default is 0.001f.</param>
+        /// <returns><c>true</c> if the specified <see cref="Rotation"/> is approximately equal to the other <see cref="Rotation"/>; otherwise, <c>false</c>.</returns>
+        public static bool IsApproximately(Rotation source, Rotation target, float threshold = 0.001f) =>
+            MathF.Abs(source.Yaw - target.Yaw) < threshold
+                && MathF.Abs(source.Pitch - target.Pitch) < threshold
+                && MathF.Abs(source.Roll - target.Roll) < threshold;
+
+        /// <summary>
+        /// Determines whether the specified <see cref="Rotation"/> is approximately equal to this <see cref="Rotation"/>.<br />
+        /// <em>Note: This method uses a threshold of 0.001f.</em>
+        /// </summary>
+        /// <param name="target">The <see cref="Rotation"/> to compare to.</param>
+        /// <param name="threshold">The threshold for determining equality. Default is 0.001f.</param>
+        /// <returns><c>true</c> if the specified <see cref="Rotation"/> is approximately equal to this <see cref="Rotation"/>; otherwise, <c>false</c>.</returns>
+        public bool IsApproximately(Rotation target, float threshold = 0.001f) =>
+            MathF.Abs(Yaw - target.Yaw) < threshold
+                && MathF.Abs(Pitch - target.Pitch) < threshold
+                && MathF.Abs(Roll - target.Roll) < threshold;
+
+        /// <summary>
         /// Linearly interpolates between this rotation and another rotation using the specified interpolation factor.
         /// </summary>
         /// <param name="rotation">The target rotation to interpolate towards.</param>
@@ -138,13 +163,13 @@ namespace PentaGE.Common
         public static Rotation Lerp(Rotation rotationA, Rotation rotationB, float t)
         {
             // Convert angles to radians
-            float yawRadA = MathHelper.DegreesToRadians(rotationA.Yaw);
-            float pitchRadA = MathHelper.DegreesToRadians(rotationA.Pitch);
-            float rollRadA = MathHelper.DegreesToRadians(rotationA.Roll);
+            float yawRadA = MathHelper.DegreesToRadians(rotationA.Yaw % 360);
+            float pitchRadA = MathHelper.DegreesToRadians(rotationA.Pitch % 360);
+            float rollRadA = MathHelper.DegreesToRadians(rotationA.Roll % 360);
 
-            float yawRadB = MathHelper.DegreesToRadians(rotationB.Yaw);
-            float pitchRadB = MathHelper.DegreesToRadians(rotationB.Pitch);
-            float rollRadB = MathHelper.DegreesToRadians(rotationB.Roll);
+            float yawRadB = MathHelper.DegreesToRadians(rotationB.Yaw % 360);
+            float pitchRadB = MathHelper.DegreesToRadians(rotationB.Pitch % 360);
+            float rollRadB = MathHelper.DegreesToRadians(rotationB.Roll % 360);
 
             // Interpolate each component separately
             float yawRadInterpolated = MathHelper.LerpF(yawRadA, yawRadB, t);
@@ -174,7 +199,7 @@ namespace PentaGE.Common
             float t,
             float curvePower,
             InterpolationCurve curveType) =>
-            Lerp(rotationA, rotationB, MathHelper.TransformInterpolationFactor(t, curvePower, curveType));
+                Lerp(rotationA, rotationB, MathHelper.TransformInterpolationFactor(t, curvePower, curveType));
 
         /// <summary>
         /// Interpolates between this rotation and a target rotation using the specified interpolation factor and curve type.
@@ -189,7 +214,7 @@ namespace PentaGE.Common
             float t,
             float curvePower,
             InterpolationCurve curveType) =>
-            Interpolate(this, rotation, t, curvePower, curveType);
+                Interpolate(this, rotation, t, curvePower, curveType);
 
         /// <summary>
         /// Normalizes the rotation angles to be within the range (0 - 360) degrees.
@@ -326,6 +351,9 @@ namespace PentaGE.Common
         /// <returns>A new <see cref="Rotation"/> representing the result of the multiplication.</returns>
         public static Rotation operator *(Rotation rotation, float scalar) =>
             new(rotation.Yaw * scalar, rotation.Pitch * scalar, rotation.Roll * scalar);
+
+        public static Rotation operator *(Rotation rotation, Vector3 scalars) =>
+            new(rotation.Yaw * scalars.X, rotation.Pitch * scalars.Y, rotation.Roll * scalars.Z);
 
         /// <summary>
         /// Multiplies a scalar value by a <see cref="Rotation"/>.

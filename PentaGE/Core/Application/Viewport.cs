@@ -1,4 +1,4 @@
-﻿using PentaGE.Core.Rendering;
+﻿using PentaGE.Core.Application;
 
 namespace PentaGE.Core
 {
@@ -12,10 +12,11 @@ namespace PentaGE.Core
 
         public int Height { get; set; }
 
-        public Camera? ActiveCamera { get; set; }
+        public CameraManager CameraManager { get; private set; }
 
-        public Viewport(int left, int top, int width, int height)
+        internal Viewport(PentaGameEngine engine, int left, int top, int width, int height)
         {
+            CameraManager = new(engine);
             Left = left;
             Top = top;
             Width = width;

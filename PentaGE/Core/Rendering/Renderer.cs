@@ -5,7 +5,6 @@ using PentaGE.Core.Entities;
 using PentaGE.Core.Graphics;
 using PentaGE.Core.Logging;
 using Serilog;
-using System.Drawing;
 using System.Numerics;
 using static OpenGL.GL;
 
@@ -25,7 +24,6 @@ namespace PentaGE.Core.Rendering
         private Mesh lightMesh1;
         private bool rotate = true;
         private bool wireframe = false;
-        private bool followTarget = false;
         private readonly Grid gridA = new(10, 10, new(1, 1, 1), 0.2f);
         private readonly Grid gridB = new(10, 20, new(0, 0, 0), 0.15f);
 
@@ -44,17 +42,6 @@ namespace PentaGE.Core.Rendering
             Position = new(0, 0, 0),    // in units
             Rotation = new(0, 0, 0),    // in degrees
             Scale = new(1, 1, 1),       // multipliers
-        };
-
-        private readonly Camera3d testCamera = new()
-        {
-            Position = new(0, 0, 2f),
-            FieldOfView = 90,
-            Rotation = new(
-                0,  // Yaw 
-                0,  // Pitch
-                0   // Roll
-            )
         };
 
         private readonly List<Vertex> vertices = new()
@@ -162,13 +149,9 @@ namespace PentaGE.Core.Rendering
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-            // Add engine events for moving the camera (during debug - remove later)
+            // Add engine events for moving the camera
+            // TODO: Only for debugging - remove later
             _engine.Events.KeyDown += Events_KeyDown;
-            _engine.Events.KeyUp += Events_KeyUp;
-            _engine.Events.KeyRepeat += Events_KeyDown;
-            _engine.Events.MouseDown += Events_MouseDown;
-            _engine.Events.MouseMoved += Events_MouseMoved;
-            _engine.Events.MouseUp += Events_MouseUp;
 
             #region Set up a test object to render
             // TODO: None of these should be here, it's just for testing
@@ -290,12 +273,7 @@ namespace PentaGE.Core.Rendering
                 _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Material.SpecularStrength =
                     ((MathF.Sin((float)_engine.Timing.TotalElapsedTime) + 1) / 2) * 2;
 
-
-                if (followTarget) testCamera.Rotation = Rotation.GetLookAt(new(0), testCamera.Position);
-
                 #endregion
-
-                UpdateCameraPosition();
 
                 // Update the current window's rendering context
                 window.RenderingContext.Use();
@@ -305,7 +283,8 @@ namespace PentaGE.Core.Rendering
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
                 // Draw the test mesh
-                _engine.Scene.Render(testCamera, window);
+                if (window.Viewport.CameraManager.ActiveController.ActiveCamera is not null)
+                    _engine.Scene.Render(window.Viewport.CameraManager.ActiveController.ActiveCamera, window);
             }
         }
 
@@ -320,7 +299,6 @@ namespace PentaGE.Core.Rendering
         }
 
         // This code does not belong here, but is here for testing purposes
-
         private static Vector3 ColorFromHSL(float hue, float saturation, float lightness)
         {
             // Convert HSL to RGB
@@ -363,39 +341,10 @@ namespace PentaGE.Core.Rendering
             }
         }
 
-        #region Keyboard events
-
-        private Vector3 _direction = Vector3.Zero;
-        private bool _modifierPressed = false;
-
+        // TODO: This code does not belong here, but is here for testing purposes
         private void Events_KeyDown(object? sender, Events.KeyDownEventArgs e)
         {
-            // For moving the camera (during debug - remove later)
-            if (e.Key == Key.W)
-            {
-                _direction = new(_direction.X, _direction.Y, 1);
-            }
-            else if (e.Key == Key.S)
-            {
-                _direction = new(_direction.X, _direction.Y, -1);
-            }
-            else if (e.Key == Key.A)
-            {
-                _direction = new(-1, _direction.Y, _direction.Z);
-            }
-            else if (e.Key == Key.D)
-            {
-                _direction = new(1, _direction.Y, _direction.Z);
-            }
-            else if (e.Key == Key.Q)
-            {
-                _direction = new(_direction.X, -1, _direction.Z);
-            }
-            else if (e.Key == Key.E)
-            {
-                _direction = new(_direction.X, 1, _direction.Z);
-            }
-            else if (e.Key == Key.Left)
+            if (e.Key == Key.Left)
             {
                 objectTransform.Rotation += new Rotation(-1, 0, 0) * 5;
                 Log.Information($"Object yaw left: {objectTransform.Rotation}");
@@ -415,16 +364,6 @@ namespace PentaGE.Core.Rendering
                 objectTransform.Rotation += new Rotation(0, -1, 0) * 5;
                 Log.Information($"Object pitch down: {objectTransform.Rotation}");
             }
-            else if (e.Key == Key.Z)
-            {
-                testCamera.FieldOfView += 5;
-                Log.Information($"Camera FoV increasing: {testCamera.FieldOfView}");
-            }
-            else if (e.Key == Key.C)
-            {
-                testCamera.FieldOfView -= 5;
-                Log.Information($"Camera FoV decreasing: {testCamera.FieldOfView}");
-            }
             else if (e.Key == Key.R)
             {
                 rotate = !rotate;
@@ -433,252 +372,7 @@ namespace PentaGE.Core.Rendering
             {
                 wireframe = !wireframe;
             }
-            else if (e.Key == Key.Alpha1)
-            {
-                testCamera.Rotation += new Rotation(0, 0, 1) * 5;
-                Log.Information($"Object roll left: {testCamera.Rotation}");
-            }
-            else if (e.Key == Key.Alpha2)
-            {
-                testCamera.Rotation += new Rotation(0, 0, -1) * 5;
-                Log.Information($"Object roll right: {testCamera.Rotation}");
-            }
-            else if (e.Key == Key.LeftShift)
-            {
-                _modifierPressed = true;
-            }
-            else if (e.Key == Key.Space)
-            {
-                testCamera.Position = new(0, 0, 2);
-                testCamera.Rotation = new();
-            }
-            else if (e.Key == Key.Backspace)
-            {
-                followTarget = !followTarget;
-            }
         }
-
-        private void Events_KeyUp(object? sender, Events.KeyUpEventArgs e)
-        {
-            if (e.Key == Key.W)
-                _direction = new(_direction.X, _direction.Y, 0);
-            else if (e.Key == Key.S)
-                _direction = new(_direction.X, _direction.Y, 0);
-            else if (e.Key == Key.A)
-                _direction = new(0, _direction.Y, _direction.Z);
-            else if (e.Key == Key.D)
-                _direction = new(0, _direction.Y, _direction.Z);
-            else if (e.Key == Key.Q)
-                _direction = new(_direction.X, 0, _direction.Z);
-            else if (e.Key == Key.E)
-                _direction = new(_direction.X, 0, _direction.Z);
-            else if (e.Key == Key.LeftShift)
-                _modifierPressed = false;
-        }
-
-        private void UpdateCameraPosition()
-        {
-            float increment = 5f;
-            Vector3 direction = Vector3.Zero;
-
-            Rotation originalRotation = testCamera.Rotation;
-            if (_modifierPressed)
-                testCamera.Rotation = new(testCamera.Rotation.Yaw, 0, testCamera.Rotation.Roll);
-
-            if (_direction.X == 1)
-                direction += testCamera.Rotation.GetRightVector();
-            else if (_direction.X == -1)
-                direction += testCamera.Rotation.GetLeftVector();
-            if (_direction.Y == 1)
-                direction += testCamera.Rotation.GetUpVector();
-            else if (_direction.Y == -1)
-                direction += testCamera.Rotation.GetDownVector();
-            if (_direction.Z == 1)
-                direction -= testCamera.Rotation.GetForwardVector();
-            else if (_direction.Z == -1)
-                direction -= testCamera.Rotation.GetBackwardVector();
-
-            testCamera.Position += direction * (increment * (float)_engine.Timing.CurrentFrame.DeltaTime);
-
-            if (_modifierPressed)
-                testCamera.Rotation = originalRotation;
-        }
-
-        #endregion
-
-        #region Mouse events
-
-        private int _mouseMode = 0;
-        private Point _mouseInitialLocation = new(0, 0);
-        private bool _mouseInitialLocationSet = false;
-        private Rotation _initialRotation = new(0, 0, 0);
-        private int _lastY = 0;
-        private int _lastX = 0;
-
-        private void Events_MouseMoved(object? sender, Events.MouseMovedEventArgs e)
-        {
-            // TODO: Needs serious refactoring
-            if (_mouseMode == 1)
-            {
-                if (!_mouseInitialLocationSet)
-                {
-                    _mouseInitialLocation = e.Position;
-                    _mouseInitialLocationSet = true;
-                    _initialRotation = testCamera.Rotation;
-                }
-
-                float sensitivity = 1f;
-
-                float xDiff = (e.Position.X - _mouseInitialLocation.X) / ((float)e.Window.Size.Width / 2) * sensitivity;
-                float yDiff = (e.Position.Y - _mouseInitialLocation.Y) / ((float)e.Window.Size.Height / 2) * sensitivity;
-
-                float yaw = _initialRotation.Yaw - (xDiff * 90);
-                float pitch = _initialRotation.Pitch - (yDiff * 90);
-
-                testCamera.Rotation = new(yaw, pitch, testCamera.Rotation.Roll);
-
-                // Reset the mouse position to the center of the screen
-                if (e.Position.X > e.Window.Size.Width || e.Position.X < 0 ||
-                    e.Position.Y > e.Window.Size.Height || e.Position.Y < 0)
-                {
-                    Glfw.SetCursorPosition(e.Window.Handle, e.Window.Size.Width / 2, e.Window.Size.Height / 2);
-                    _mouseInitialLocation = new(e.Window.Size.Width / 2, e.Window.Size.Height / 2);
-                    _initialRotation = testCamera.Rotation;
-                }
-            }
-            else if (_mouseMode == 2)
-            {
-                if (!_mouseInitialLocationSet)
-                {
-                    _mouseInitialLocation = e.Position;
-                    _mouseInitialLocationSet = true;
-                    _initialRotation = testCamera.Rotation;
-                    _lastY = e.Position.Y;
-                }
-
-                float sensitivityFactor = 1f;
-
-                float xDiff = (e.Position.X - _mouseInitialLocation.X) / ((float)e.Window.Size.Width / 2) * sensitivityFactor;
-
-                float yaw = _initialRotation.Yaw - (xDiff * 90);
-
-                testCamera.Rotation = new(yaw, testCamera.Rotation.Pitch, testCamera.Rotation.Roll);
-
-                // Temporarily set the pitch angle to zero
-                Rotation originalRotation = testCamera.Rotation;
-                testCamera.Rotation = new(testCamera.Rotation.Yaw, 0, testCamera.Rotation.Roll);
-
-                Vector3 direction = Vector3.Zero;
-
-                if (e.Position.Y > _lastY)
-                    direction += testCamera.Rotation.GetForwardVector();
-                else if (e.Position.Y < _lastY)
-                    direction += testCamera.Rotation.GetBackwardVector();
-
-                _lastY = e.Position.Y;
-
-                float increment = 50f;
-                testCamera.Position += direction * (increment * (float)_engine.Timing.CurrentFrame.DeltaTime);
-
-                testCamera.Rotation = originalRotation;
-
-                // Reset the mouse position to the center of the screen
-                if (e.Position.X > e.Window.Size.Width || e.Position.X < 0 ||
-                    e.Position.Y > e.Window.Size.Height || e.Position.Y < 0)
-                {
-                    Glfw.SetCursorPosition(e.Window.Handle, e.Window.Size.Width / 2, e.Window.Size.Height / 2);
-                    _mouseInitialLocation = new(e.Window.Size.Width / 2, e.Window.Size.Height / 2);
-                    _initialRotation = testCamera.Rotation;
-                }
-            }
-            else if (_mouseMode == 3)
-            {
-                if (!_mouseInitialLocationSet)
-                {
-                    _mouseInitialLocation = e.Position;
-                    _mouseInitialLocationSet = true;
-                    _initialRotation = testCamera.Rotation;
-                    _lastY = e.Position.Y;
-                    _lastX = e.Position.X;
-                }
-
-                // Temporarily set the pitch angle to zero
-                Rotation originalRotation = testCamera.Rotation;
-                testCamera.Rotation = new(testCamera.Rotation.Yaw, 0, testCamera.Rotation.Roll);
-
-                Vector3 direction = Vector3.Zero;
-
-                if (e.Position.X > _lastX)
-                    direction += testCamera.Rotation.GetRightVector();
-                else if (e.Position.X < _lastX)
-                    direction += testCamera.Rotation.GetLeftVector();
-
-                if (e.Position.Y > _lastY)
-                    direction -= testCamera.Rotation.GetUpVector();
-                else if (e.Position.Y < _lastY)
-                    direction -= testCamera.Rotation.GetDownVector();
-
-                testCamera.Rotation = originalRotation;
-
-                _lastX = e.Position.X;
-                _lastY = e.Position.Y;
-
-                float increment = 50f;
-                testCamera.Position += direction * (increment * (float)_engine.Timing.CurrentFrame.DeltaTime);
-
-                // Reset the mouse position to the center of the screen
-                if (e.Position.X > e.Window.Size.Width || e.Position.X < 0 ||
-                    e.Position.Y > e.Window.Size.Height || e.Position.Y < 0)
-                {
-                    Glfw.SetCursorPosition(e.Window.Handle, e.Window.Size.Width / 2, e.Window.Size.Height / 2);
-                    _mouseInitialLocation = new(e.Window.Size.Width / 2, e.Window.Size.Height / 2);
-                    _initialRotation = testCamera.Rotation;
-                }
-            }
-        }
-
-        private void Events_MouseDown(object? sender, Events.MouseButtonEventArgs e)
-        {
-            if (e.Button == Common.MouseButton.Left && _mouseMode == 0)
-            {
-                _mouseMode = 1;
-                Glfw.SetInputMode(e.Window.Handle, InputMode.Cursor, (int)CursorMode.Hidden);
-            }
-            else if (e.Button == Common.MouseButton.Right && _mouseMode == 0)
-            {
-                _mouseMode = 2;
-                Glfw.SetInputMode(e.Window.Handle, InputMode.Cursor, (int)CursorMode.Hidden);
-            }
-            else if (e.Button == Common.MouseButton.Middle)
-            {
-                _mouseMode = 3;
-                Glfw.SetInputMode(e.Window.Handle, InputMode.Cursor, (int)CursorMode.Hidden);
-            }
-        }
-
-        private void Events_MouseUp(object? sender, Events.MouseButtonEventArgs e)
-        {
-            if (e.Button == Common.MouseButton.Left && _mouseMode == 1)
-            {
-                _mouseMode = 0;
-                _mouseInitialLocationSet = false;
-                Glfw.SetInputMode(e.Window.Handle, InputMode.Cursor, (int)CursorMode.Normal);
-            }
-            else if (e.Button == Common.MouseButton.Right && _mouseMode == 2)
-            {
-                _mouseMode = 0;
-                _mouseInitialLocationSet = false;
-                Glfw.SetInputMode(e.Window.Handle, InputMode.Cursor, (int)CursorMode.Normal);
-            }
-            else if (e.Button == Common.MouseButton.Middle && _mouseMode == 3)
-            {
-                _mouseMode = 0;
-                _mouseInitialLocationSet = false;
-                Glfw.SetInputMode(e.Window.Handle, InputMode.Cursor, (int)CursorMode.Normal);
-            }
-        }
-
-        #endregion
 
     }
 }

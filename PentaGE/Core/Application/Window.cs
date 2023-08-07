@@ -49,6 +49,8 @@ namespace PentaGE.Core
             _title = title ?? DEFAULT_TITLE;
             _size = size ?? new(DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
+            Viewport = new(_engine, 0, 0, _size.Width, _size.Height);
+
             // Center the screen
             var screenSize = Glfw.PrimaryMonitor.WorkArea;
             var x = (screenSize.Width - Size.Width) / 2;
@@ -58,6 +60,8 @@ namespace PentaGE.Core
             _resizable = DEFAULT_RESIZABLE;
             _focused = true;
         }
+
+        public Viewport Viewport { get; private set; }
 
         /// <summary>
         /// Gets or sets the rendering context associated with this window.
@@ -276,6 +280,19 @@ namespace PentaGE.Core
             RegisterWindow();
 
             //_engine.Events.WindowClosing += Events_WindowClosing;
+
+            // Add default camera handler and camera
+            if (Viewport.CameraManager.ActiveController is EmptyCameraController)
+            {
+                Viewport.CameraManager.ActiveController = new EditorCameraController();
+            }
+            if (Viewport.CameraManager.ActiveController.ActiveCamera is null)
+            {
+                Viewport.CameraManager.ActiveController.ActiveCamera = new Camera3d()
+                {
+                    Position = new(0, 0, 2)
+                };
+            }
 
             return true;
         }

@@ -169,10 +169,7 @@ namespace PentaGE.Core
                 Events.Update();
 
                 // Update game state
-                Update();
-
-                // Update the scene
-                Scene.Update((float)Timing.CurrentFrame.DeltaTime);
+                OnUpdate();
 
                 // Render graphics
                 Renderer.Render();
@@ -182,6 +179,18 @@ namespace PentaGE.Core
             }
 
             if (State != GameState.Terminating) Stop();
+        }
+
+        private void OnUpdate()
+        {
+            Update(); // Let the concrete implementation update
+
+            // Update the scene
+            Scene.Update((float)Timing.CurrentFrame.DeltaTime);
+
+            // Update the camera controller
+            foreach (var window in Windows)
+                window.Viewport.CameraManager.ActiveController.OnUpdate((float)Timing.CurrentFrame.DeltaTime);
         }
 
     }
