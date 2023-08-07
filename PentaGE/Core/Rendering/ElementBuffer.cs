@@ -2,10 +2,17 @@
 
 namespace PentaGE.Core.Rendering
 {
+    /// <summary>
+    /// Represents an OpenGL element buffer (EBO).
+    /// </summary>
     internal class ElementBuffer : IDisposable
     {
         private readonly uint _id;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ElementBuffer"/> class.
+        /// </summary>
+        /// <param name="indices">An array of indices representing the elements.</param>
         public unsafe ElementBuffer(uint[] indices)
         {
             _id = glGenBuffer(); // Generate a buffer object and store its ID
@@ -20,24 +27,29 @@ namespace PentaGE.Core.Rendering
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ElementBuffer"/> class.
+        /// </summary>
+        /// <param name="indices">A list of indices representing the elements.</param>
         public ElementBuffer(List<uint> indices) : this(indices.ToArray())
         {
 
         }
 
-        public void Bind()
-        {
+        /// <summary>
+        /// Binds the element buffer for rendering.
+        /// </summary>
+        public void Bind() =>
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _id);
-        }
 
-        public static void Unbind()
-        {
+        /// <summary>
+        /// Unbinds the element buffer after rendering.
+        /// </summary>
+        public static void Unbind() =>
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        }
 
-        public void Dispose()
-        {
+        /// <inheritdoc />
+        public void Dispose() =>
             glDeleteBuffer(_id);
-        }
     }
 }

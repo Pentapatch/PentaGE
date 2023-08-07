@@ -11,6 +11,8 @@ namespace PentaGE.Core
     /// </summary>
     public class Window
     {
+        #region Fields and constants
+
         private const int DEFAULT_WIDTH = 1920;
         private const int DEFAULT_HEIGHT = 1080;
         private const string DEFAULT_TITLE = "Penta Game Engine";
@@ -29,6 +31,8 @@ namespace PentaGE.Core
         private bool _vSync;
 
         private readonly PentaGameEngine _engine;
+
+        #endregion
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Window"/> class with the specified parameters.

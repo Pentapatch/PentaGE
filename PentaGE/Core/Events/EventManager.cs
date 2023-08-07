@@ -21,6 +21,9 @@ namespace PentaGE.Core.Events
     /// </remarks>
     public sealed class EventManager
     {
+
+        #region Fields and event handler delegates
+
         private readonly Dictionary<GLFW.Window, Window> _registeredWindows = new();
         private readonly List<EngineEventArgs> _eventBuffer = new();
         private KeyCallback _keyCallback;
@@ -35,6 +38,8 @@ namespace PentaGE.Core.Events
         private SizeCallback _windowSizeCallback;
         private PositionCallback _windowPositionCallback;
         private ErrorCallback _glfwErrorCallback;
+
+        #endregion
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventManager"/> class. This constructor is marked as internal,

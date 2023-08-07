@@ -43,7 +43,7 @@ namespace PentaGE.Common
         /// <returns><c>true</c> if the specified <see cref="Vector3"/> is approximately equal to the other <see cref="Vector3"/>; otherwise, <c>false</c>.</returns>
         public static bool IsApproximately(this Vector3 source, Vector3 target, float threshold = 0.001f) =>
             MathF.Abs(source.X - target.X) < threshold
-                && MathF.Abs(source.Y - target.Y) < threshold
-                && MathF.Abs(source.Z - target.Z) < threshold;
+            && MathF.Abs(source.Y - target.Y) < threshold
+            && MathF.Abs(source.Z - target.Z) < threshold;
     }
 }

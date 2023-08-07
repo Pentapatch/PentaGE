@@ -4,11 +4,23 @@ using static OpenGL.GL;
 
 namespace PentaGE.Core.Rendering
 {
+    /// <summary>
+    /// Represents an OpenGL texture.
+    /// </summary>
     public sealed class Texture : IDisposable
     {
         private readonly uint _id;
         private readonly int _type;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Texture"/> class from an image file.
+        /// </summary>
+        /// <param name="filePath">The path to the image file.</param>
+        /// <param name="type">The type of the texture (e.g., <see cref="GL_TEXTURE_2D"/>, <see cref="GL_TEXTURE_CUBE_MAP"/>).</param>
+        /// <param name="slot">The texture slot to bind the texture to.</param>
+        /// <param name="format">The format of the texture.</param>
+        /// <param name="pixelType">The type of pixels in the texture.</param>
+        /// <exception cref="Exception">Thrown if the texture loading fails.</exception>
         public unsafe Texture(string filePath, int type, int slot, int format, int pixelType)
         {
             using var stream = File.OpenRead(filePath);
@@ -57,15 +69,28 @@ namespace PentaGE.Core.Rendering
             Unbind();
         }
 
+        /// <summary>
+        /// Sets the texture slot in a shader.
+        /// </summary>
+        /// <param name="shader">The shader program.</param>
+        /// <param name="uniformName">The name of the uniform variable in the shader.</param>
+        /// <param name="slot">The texture slot index.</param>
         public static void SetTextureSlot(Shader shader, string uniformName, int slot) =>
             shader.SetUniform(uniformName, slot);
 
+        /// <summary>
+        /// Binds the texture for rendering.
+        /// </summary>
         public void Bind() =>
             glBindTexture(_type, _id);
 
+        /// <summary>
+        /// Unbinds the texture after rendering.
+        /// </summary>
         public void Unbind() =>
             glBindTexture(_type, 0);
 
+        /// <inheritdoc />
         public void Dispose() =>
             glDeleteTexture(_id);
     }

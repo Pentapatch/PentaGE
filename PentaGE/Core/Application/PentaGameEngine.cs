@@ -181,6 +181,9 @@ namespace PentaGE.Core
             if (State != GameState.Terminating) Stop();
         }
 
+        /// <summary>
+        /// Handles the game's update logic, including updating the concrete implementation, the scene, and the active camera controller.
+        /// </summary>
         private void OnUpdate()
         {
             Update(); // Let the concrete implementation update

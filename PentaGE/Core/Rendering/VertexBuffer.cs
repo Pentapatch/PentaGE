@@ -3,10 +3,17 @@ using static OpenGL.GL;
 
 namespace PentaGE.Core.Rendering
 {
+    /// <summary>
+    /// Represents an OpenGL vertex buffer object (VBO) for storing vertex data.
+    /// </summary>
     internal class VertexBuffer : IDisposable
     {
         private readonly uint _id;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="VertexBuffer"/> class.
+        /// </summary>
+        /// <param name="vertices">An array of vertices to store in the buffer.</param>
         public unsafe VertexBuffer(Vertex[] vertices)
         {
             _id = glGenBuffer(); // Generate a buffer object and store its ID
@@ -25,24 +32,29 @@ namespace PentaGE.Core.Rendering
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="VertexBuffer"/> class.
+        /// </summary>
+        /// <param name="vertices">A list of vertices to store in the buffer.</param>
         public VertexBuffer(List<Vertex> vertices) : this(vertices.ToArray())
         {
 
         }
 
-        public void Bind()
-        {
+        /// <summary>
+        /// Binds the vertex buffer for rendering.
+        /// </summary>
+        public void Bind() =>
             glBindBuffer(GL_ARRAY_BUFFER, _id);
-        }
 
-        public static void Unbind()
-        {
+        /// <summary>
+        /// Unbinds the vertex buffer after rendering.
+        /// </summary>
+        public static void Unbind() =>
             glBindBuffer(GL_ARRAY_BUFFER, 0);
-        }
 
-        public void Dispose()
-        {
+        /// <inheritdoc />
+        public void Dispose() =>
             glDeleteBuffer(_id);
-        }
     }
 }

@@ -7,6 +7,9 @@ using static OpenGL.GL;
 
 namespace PentaGE.Core.Rendering
 {
+    /// <summary>
+    /// Represents a component for rendering a mesh using OpenGL.
+    /// </summary>
     public sealed class MeshRenderComponent : Component, IDisposable
     {
         private readonly VertexArray vao;
@@ -14,16 +17,38 @@ namespace PentaGE.Core.Rendering
         private readonly ElementBuffer? ebo = null;
 
         // TODO: Changing the mesh should update the VBO and EBO.
+        /// <summary>
+        /// Gets or sets the mesh to be rendered.
+        /// </summary>
         public Mesh Mesh { get; set; }
 
+        /// <summary>
+        /// Gets or sets the shader used for rendering the mesh.
+        /// </summary>
         public Shader Shader { get; set; }
 
+        /// <summary>
+        /// Gets the texture applied to the mesh (optional).
+        /// </summary>
         public Texture? Texture { get; }
 
+        /// <summary>
+        /// Gets or sets the PBR material applied to the mesh.
+        /// </summary>
         public PBRMaterial Material { get; set; }
 
+        /// <summary>
+        /// Gets or sets the draw mode used for rendering the mesh.
+        /// </summary>
         public DrawMode DrawMode { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MeshRenderComponent"/> class.
+        /// </summary>
+        /// <param name="mesh">The mesh to be rendered.</param>
+        /// <param name="shader">The shader used for rendering the mesh.</param>
+        /// <param name="texture">The texture applied to the mesh (optional).</param>
+        /// <param name="material">The PBR material applied to the mesh (optional).</param>
         public unsafe MeshRenderComponent(Mesh mesh, Shader shader, Texture? texture = null, PBRMaterial? material = null)
         {
             Mesh = mesh;
@@ -58,6 +83,12 @@ namespace PentaGE.Core.Rendering
             VertexArray.Unbind();   // Unbind the VAO
         }
 
+        /// <summary>
+        /// Renders the mesh using the specified camera and window.
+        /// </summary>
+        /// <param name="camera">The camera used for rendering.</param>
+        /// <param name="window">The window to render onto.</param>
+        /// <param name="wireframe">Whether to render the mesh in wireframe mode (optional, default is false).</param>
         internal unsafe void Render(Camera camera, Window window, bool wireframe = false)
         {
             // Use the shader program
@@ -129,6 +160,7 @@ namespace PentaGE.Core.Rendering
             ElementBuffer.Unbind(); // Unbind the EBO (not necessary, but good practice)
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             vao.Dispose();
@@ -136,6 +168,7 @@ namespace PentaGE.Core.Rendering
             ebo?.Dispose();
         }
 
+        /// <inheritdoc />
         public override void Update(float deltaTime)
         {
             // Do nothing

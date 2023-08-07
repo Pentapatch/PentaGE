@@ -5,6 +5,9 @@ using System.Numerics;
 
 namespace PentaGE.Core.Rendering
 {
+    /// <summary>
+    /// Represents a grid used for visual reference and alignment.
+    /// </summary>
     public sealed class Grid
     {
         private Mesh _mesh;
@@ -14,34 +17,55 @@ namespace PentaGE.Core.Rendering
         private Vector3 _color;
         private float _opacity;
 
+        /// <summary>
+        /// Gets the mesh representing the visual grid.
+        /// </summary>
         public Mesh Mesh => _mesh;
 
+        /// <summary>
+        /// Gets the material of the grid.
+        /// </summary>
         public PBRMaterial Material => _material;
 
+        /// <summary>
+        /// Gets or sets the number of major grid units.
+        /// </summary>
         public int MajorUnits
         {
             get => _majorUnits;
             set { _majorUnits = value; RegenerateMesh(); }
         }
 
+        /// <summary>
+        /// Gets or sets the number of minor grid units.
+        /// </summary>
         public int MinorUnits
         {
             get => _minorUnits;
             set { _minorUnits = value; RegenerateMesh(); }
         }
 
+        /// <summary>
+        /// Gets or sets the color of the grid lines.
+        /// </summary>
         public Vector3 Color
         {
             get => _color;
             set { _color = value; RegenerateMaterial(); }
         }
 
+        /// <summary>
+        /// Gets or sets the opacity of the grid lines.
+        /// </summary>
         public float Opacity
         {
             get => _opacity;
             set { _opacity = value; RegenerateMaterial(); }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Grid"/> class with default values.
+        /// </summary>
         public Grid()
         {
             _majorUnits = 10;
@@ -54,6 +78,13 @@ namespace PentaGE.Core.Rendering
             RegenerateMaterial();
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Grid"/> class with specified parameters.
+        /// </summary>
+        /// <param name="majorUnits">The number of major grid units.</param>
+        /// <param name="minorUnits">The number of minor grid units.</param>
+        /// <param name="color">The color of the grid lines.</param>
+        /// <param name="opacity">The opacity of the grid lines.</param>
         public Grid(int majorUnits, int minorUnits, Vector3? color = null, float? opacity = 1)
         {
             MajorUnits = majorUnits;
@@ -66,6 +97,9 @@ namespace PentaGE.Core.Rendering
             RegenerateMaterial();
         }
 
+        /// <summary>
+        /// Regenerates the material of the grid based on its color and opacity settings.
+        /// </summary>
         private void RegenerateMaterial()
         {
             _material = new()
@@ -75,6 +109,9 @@ namespace PentaGE.Core.Rendering
             };
         }
 
+        /// <summary>
+        /// Regenerates the mesh of the grid with updated vertices and indices.
+        /// </summary>
         private void RegenerateMesh()
         {
             List<Vertex> vertices = new();

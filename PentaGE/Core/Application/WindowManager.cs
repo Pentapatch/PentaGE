@@ -137,6 +137,5 @@ namespace PentaGE.Core
         /// <returns>An enumerator that can be used to iterate through the collection of windows.</returns>
         IEnumerator IEnumerable.GetEnumerator() =>
             _windows.GetEnumerator();
-
     }
 }

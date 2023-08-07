@@ -8,6 +8,9 @@ using System.Numerics;
 
 namespace PentaGE.Core
 {
+    /// <summary>
+    /// Provides camera control functionalities for an editor environment.
+    /// </summary>
     public sealed class EditorCameraController : CameraController
     {
         #region Fields
@@ -32,29 +35,73 @@ namespace PentaGE.Core
 
         #endregion
 
+        /// <summary>
+        /// Enumeration representing different modes of mouse interaction.
+        /// </summary>
         private enum MouseModeEnum
         {
+            /// <summary>
+            /// No mouse interaction is currently active.
+            /// </summary>
             None = -1,
+
+            /// <summary>
+            /// The camera is being rotated around the yaw and pitch axes based on mouse movement.
+            /// </summary>
             YawAndPitch = 0,
+
+            /// <summary>
+            /// The camera is being moved along the Z-axis (forward/backward) and rotated around the yaw axis based on mouse movement.
+            /// </summary>
             MoveZAndYaw = 1,
+
+            /// <summary>
+            /// The camera is being moved along the X and Y axes (left/right and up/down) based on mouse movement.
+            /// </summary>
             MoveXAndY = 2,
         }
 
+        /// <summary>
+        /// Gets or sets the movement speed of the camera.
+        /// </summary>
         public float Speed { get; set; } = 5f;
 
+        /// <summary>
+        /// Gets or sets the sensitivity factor for mouse movement, which influences the rate at which the camera responds to mouse input.
+        /// </summary>
+        /// <remarks>
+        /// The mouse sensitivity is used in conjunction with the <see cref="Speed"/> property to calculate the movement speed of the camera
+        /// when using the mouse for camera control. Higher values of mouse sensitivity result in faster camera movement in response to mouse input.
+        /// </remarks>
         public float MouseSpeedFactor { get; set; } = 0.002f;
 
+        /// <summary>
+        /// Gets or sets the rotation speed of the camera.
+        /// </summary>
         public float RotationSpeed { get; set; } = 90f;
 
+        /// <summary>
+        /// Gets or sets the field of view change speed of the camera.
+        /// </summary>
         public float FieldOfViewSpeed { get; set; } = 50f;
 
+        /// <summary>
+        /// Gets or sets the sensitivity of the mouse movement.
+        /// </summary>
         public float MouseSensitivity { get; set; } = 1f;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EditorCameraController"/> class.
+        /// </summary>
         public EditorCameraController()
         {
 
         }
 
+        /// <summary>
+        /// Updates the editor camera's behavior based on user input and target values.
+        /// </summary>
+        /// <param name="deltaTime">The time elapsed since the last update.</param>
         protected override void Update(float deltaTime)
         {
             if (ActiveCamera is not Camera3d camera) return;
@@ -149,10 +196,13 @@ namespace PentaGE.Core
             {
                 camera.FieldOfView += _fieldOfViewDirection * deltaTime * FieldOfViewSpeed;
             }
-
-            
         }
 
+        /// <summary>
+        /// Handles the key down event by interpreting the pressed key and modifying camera behavior accordingly.
+        /// </summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments containing information about the pressed key.</param>
         protected override void KeyDown(object? sender, KeyDownEventArgs e)
         {
             if (e.Key == Key.W)
@@ -198,6 +248,11 @@ namespace PentaGE.Core
             }
         }
 
+        /// <summary>
+        /// Handles the key up event by interpreting the released key and reverting camera behavior changes.
+        /// </summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments containing information about the released key.</param>
         protected override void KeyUp(object? sender, KeyUpEventArgs e)
         {
             if (e.Key == Key.W || e.Key == Key.S)
@@ -214,6 +269,11 @@ namespace PentaGE.Core
                 _alternateMode = false;
         }
 
+        /// <summary>
+        /// Handles the mouse button down event by interpreting the pressed mouse button and initiating camera control modes.
+        /// </summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments containing information about the pressed mouse button.</param>
         protected override void MouseDown(object? sender, Events.MouseButtonEventArgs e)
         {
             if (e.Button == Common.MouseButton.Left && _mouseMode == MouseModeEnum.None)
@@ -236,6 +296,11 @@ namespace PentaGE.Core
             }
         }
 
+        /// <summary>
+        /// Handles the mouse button up event by interpreting the released mouse button and ending camera control modes.
+        /// </summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments containing information about the released mouse button.</param>
         protected override void MouseUp(object? sender, Events.MouseButtonEventArgs e)
         {
             if (e.Button == Common.MouseButton.Left && _mouseMode == MouseModeEnum.YawAndPitch)
@@ -255,6 +320,11 @@ namespace PentaGE.Core
             }
         }
 
+        /// <summary>
+        /// Handles the mouse moved event by updating the camera's orientation and position based on mouse movement.
+        /// </summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments containing information about the mouse movement.</param>
         protected override void MouseMoved(object? sender, MouseMovedEventArgs e)
         {
             if (ActiveCamera is not Camera3d camera) return;
@@ -289,6 +359,11 @@ namespace PentaGE.Core
             }
         }
 
+        /// <summary>
+        /// Updates the camera's orientation based on yaw and pitch angles.
+        /// </summary>
+        /// <param name="e">The mouse movement event arguments.</param>
+        /// <param name="camera">The camera to be updated.</param>
         private void YawAndPitch(MouseMovedEventArgs e, Camera3d camera)
         {
             // Calculate the yaw and pitch angles
@@ -299,6 +374,11 @@ namespace PentaGE.Core
             camera.Rotation = new(yaw, pitch, camera.Rotation.Roll);
         }
 
+        /// <summary>
+        /// Moves the camera along the Z-axis and updates its yaw angle.
+        /// </summary>
+        /// <param name="e">The mouse movement event arguments.</param>
+        /// <param name="camera">The camera to be updated.</param>
         private void MoveZAndYaw(MouseMovedEventArgs e, Camera3d camera)
         {
             // Calculate the yaw angle
@@ -331,6 +411,11 @@ namespace PentaGE.Core
             _mouseLastY = e.Position.Y;
         }
 
+        /// <summary>
+        /// Moves the camera along the X and Y axes based on mouse movement.
+        /// </summary>
+        /// <param name="e">The mouse movement event arguments.</param>
+        /// <param name="camera">The camera to be updated.</param>
         private void MoveXAndY(MouseMovedEventArgs e, Camera3d camera)
         {
             // Temporarily set the pitch angle to zero since this
@@ -363,12 +448,22 @@ namespace PentaGE.Core
             _mouseLastY = e.Position.Y;
         }
 
+        /// <summary>
+        /// Calculates the yaw angle based on mouse movement.
+        /// </summary>
+        /// <param name="e">The mouse movement event arguments.</param>
+        /// <returns>The calculated yaw angle.</returns>
         private float CalculateYaw(MouseMovedEventArgs e)
         {
             float xDiff = (e.Position.X - _mouseInitialLocation.X) / (e.Window.Size.Width / 2f) * MouseSensitivity;
             return _initialRotation.Yaw - (xDiff * 90);
         }
 
+        /// <summary>
+        /// Calculates the pitch angle based on mouse movement.
+        /// </summary>
+        /// <param name="e">The mouse movement event arguments.</param>
+        /// <returns>The calculated pitch angle.</returns>
         private float CalculatePitch(MouseMovedEventArgs e)
         {
             float yDiff = (e.Position.Y - _mouseInitialLocation.Y) / (e.Window.Size.Height / 2f) * MouseSensitivity;

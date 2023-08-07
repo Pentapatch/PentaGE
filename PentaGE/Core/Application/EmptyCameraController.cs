@@ -2,6 +2,10 @@
 
 namespace PentaGE.Core
 {
+    /// <summary>
+    /// Represents an implementation of <see cref="CameraController"/> that does not perform any action
+    /// for input events and updates. This class can be used as a placeholder or default camera controller.
+    /// </summary>
     public sealed class EmptyCameraController : CameraController
     {
         protected override void KeyDown(object? sender, KeyDownEventArgs e) { }
