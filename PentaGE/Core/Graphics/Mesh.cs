@@ -142,5 +142,16 @@ namespace PentaGE.Core.Graphics
         /// <param name="z">The z-coordinate of the rotation axis.</param>
         public void Rotate(float angle, float x, float y, float z) =>
             Rotate(angle, new Vector3(x, y, z));
+
+        public void TileTexture(float x, float y)
+        {
+            for (int i = 0; i < Vertices.Count; i++)
+            {
+                Vertices[i] = new(
+                    Vertices[i].Coordinates,
+                    Vertices[i].Normal,
+                    new Vector2(Vertices[i].TextureCoordinates.X * x, Vertices[i].TextureCoordinates.Y * y));
+            }
+        }
     }
 }

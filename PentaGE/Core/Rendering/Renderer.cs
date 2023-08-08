@@ -213,8 +213,9 @@ namespace PentaGE.Core.Rendering
             }
 
             // Initialize test mesh
-            testMesh1 = new(vertices, indices);
-            testMesh1.Offset(0, -0.25f, 0);
+            testMesh1 = MeshFactory.CreatePyramid(0.8f, 1.2f, 0.8f);//new(vertices, indices);
+            testMesh1.TileTexture(3, 6);
+            //testMesh1.Offset(0, -0.25f, 0);
             //testMesh1.Rotate(45, 45, 45);
             var transform = new Transform(new(0, 0, 0), new(0, 0, 0), new(1f, 1f, 1f));
             var renderableMesh = new RenderableMeshEntity(testMesh1, shader, texture);
