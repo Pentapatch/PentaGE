@@ -32,18 +32,19 @@ uniform mat4 view;
 
 void main()
 {
-    float scale = 0.2f; // Adjust the length of the normal line
-    vec3 lineColor = vec3(1.0f, 0.0f, 0.0f); // Adjust the color for the normal line
+    float scale = 0.2f; //                       Adjust the length of the normal line
+    vec3 startColor = vec3(0.0f, 0.0f, 0.0f); // Adjust the color at the origin
+    vec3 endColor = vec3(1.0f, 0.0f, 0.0f); //   Adjust the color at the end
     vec3 normal = normalize(Normal[0]);
     vec3 midpoint = (FragPos[0] + FragPos[1] + FragPos[2]) / 3.0;
     vec3 endpoint = midpoint + normal * scale;
 
     gl_Position = projection * view * vec4(midpoint, 1.0);
-    color = lineColor;
+    color = startColor;
     EmitVertex();
 
     gl_Position = projection * view * vec4(endpoint, 1.0);
-    color = lineColor;
+    color = endColor;
     EmitVertex();
 
     EndPrimitive();

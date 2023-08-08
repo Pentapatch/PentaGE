@@ -16,13 +16,16 @@ namespace PentaGE.Core.Rendering
     internal class Renderer
     {
         private readonly PentaGameEngine _engine;
+        private bool cullingEnabled = false;
         private Shader shader;
+        private Shader faceShader;
         private Shader lightShader;
         private Shader gridShader;
         private Texture texture;
         private Mesh testMesh1;
         private Mesh lightMesh1;
         private bool rotate = true;
+        private bool materialTest = true;
         private bool wireframe = false;
         private readonly Grid gridA = new(10, 10, new(1, 1, 1), 0.2f);
         private readonly Grid gridB = new(10, 20, new(0, 0, 0), 0.15f);
@@ -70,11 +73,6 @@ namespace PentaGE.Core.Rendering
                 return false;
             }
 
-            // Enable face culling
-            //glEnable(GL_CULL_FACE);
-            //glCullFace(GL_BACK);
-            //glFrontFace(GL_CCW);
-
             // Enable depth testing
             glEnable(GL_DEPTH_TEST);
 
@@ -89,13 +87,26 @@ namespace PentaGE.Core.Rendering
             #region Set up a test object to render
             // TODO: None of these should be here, it's just for testing
 
-            // Initializing test shader
+            // Initializing test shaders
             using (var logger = Log.Logger.BeginPerfLogger("Loading default shader"))
             {
                 try
                 {
                     shader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Default.shader");
                     shader.Load();
+                }
+                catch (System.Exception ex)
+                {
+                    Log.Error($"Error loading shader: {ex}");
+                }
+            }
+
+            using (var logger = Log.Logger.BeginPerfLogger("Loading face shader"))
+            {
+                try
+                {
+                    faceShader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Face.shader");
+                    faceShader.Load();
                 }
                 catch (System.Exception ex)
                 {
@@ -147,7 +158,9 @@ namespace PentaGE.Core.Rendering
 
             // Initialize test mesh
             testMesh1 = MeshFactory.CreatePyramid(1f, 0.6f, 1f);
+            //testMesh1 = MeshFactory.CreatePlane(10f, new(0, -90f, 0));
             testMesh1.TileTexture(5, 6);
+            testMesh1.Subdivide(1);
             //testMesh1.Offset(0, 0.25f, 0);
             //testMesh1.Rotate(45, 0, 0);
             var transform = new Transform(new(0, 0, 0), new(0, 0, 0), new(1f, 1f, 1f));
@@ -198,14 +211,19 @@ namespace PentaGE.Core.Rendering
                     MathF.Sin((float)_engine.Timing.TotalElapsedTime) * 180,
                     0,
                     0) :
-                    objectTransform.Rotation;//new(0, 0, 0);
+                    new(0, 0, 0); // objectTransform.Rotation;
 
                 // Animate the color and specular strength of the object
                 _engine.Scene[0].GetComponent<TransformComponent>()!.Transform = objectTransform;
                 float hue = MathF.Sin((float)_engine.Timing.TotalElapsedTime) * 0.5f + 0.5f; // Adjust the range to [0, 1]
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Material.Albedo = ColorFromHSL(hue, 1.0f, 0.5f);
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Material.SpecularStrength =
-                    ((MathF.Sin((float)_engine.Timing.TotalElapsedTime) + 1) / 2) * 2;
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Material.Albedo = 
+                    materialTest ? 
+                    ColorFromHSL(hue, 1.0f, 0.5f) :
+                    new(1, 1, 1);
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Material.SpecularStrength = 
+                    materialTest ? 
+                    (MathF.Sin((float)_engine.Timing.TotalElapsedTime) + 1) / 2 * 2 :
+                    2;
 
                 #endregion
 
@@ -218,7 +236,7 @@ namespace PentaGE.Core.Rendering
 
                 // Draw the test mesh
                 if (window.Viewport.CameraManager.ActiveController.ActiveCamera is not null)
-                    _engine.Scene.Render(window.Viewport.CameraManager.ActiveController.ActiveCamera, window);
+                    _engine.Scene.Render(window.Viewport.CameraManager.ActiveController.ActiveCamera, window, wireframe);
             }
         }
 
@@ -298,13 +316,39 @@ namespace PentaGE.Core.Rendering
                 objectTransform.Rotation += new Rotation(0, -1, 0) * 5;
                 Log.Information($"Object pitch down: {objectTransform.Rotation}");
             }
-            else if (e.Key == Key.R)
-            {
-                rotate = !rotate;
-            }
             else if (e.Key == Key.F1)
             {
                 wireframe = !wireframe;
+            }
+            else if (e.Key == Key.F2)
+            {
+                if (!cullingEnabled)
+                {
+                    glEnable(GL_CULL_FACE);
+                    glCullFace(GL_BACK);
+                    glFrontFace(GL_CCW);
+                }
+                else
+                {
+                    glDisable(GL_CULL_FACE);
+                }
+                cullingEnabled = !cullingEnabled;
+            }
+            else if (e.Key == Key.F3)
+            {
+                rotate = !rotate;
+            }
+            else if (e.Key == Key.F4)
+            {
+                materialTest = !materialTest;
+            }
+            else if (e.Key == Key.F5)
+            {
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = shader;
+            }
+            else if (e.Key == Key.F6)
+            {
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = faceShader;
             }
         }
 

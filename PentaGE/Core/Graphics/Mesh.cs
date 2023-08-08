@@ -2,6 +2,22 @@
 using PentaGE.Maths;
 using System.Numerics;
 
+//       0          CLOCKWISE               0-------1 
+//      / \         WINDING ORDER _v        | \     |
+//     / A \        Triangle A: 0, 3, 5     |  \    |  PLANE
+//  5 /-----\ 3     Triangle B: 3, 1, 4     | A \ B |  Triangle A: 0, 1, 2
+//   / \ C / \      Triangle C: 5, 3, 4     |    \  |  Triangle B: 2, 3, 0
+//  / D \ / B \     Triangle D: 5, 4, 2     |     \ |  
+// 2 ----4-----1    -------------------     3-------2
+
+//       2          COUNTER CLOCKWISE       3-------2 
+//      / \         WINDING ORDER _^        | \     |
+//     / D \        Triangle A: 0, 3, 5     |  \    |  PLANE
+//  5 /-----\ 4     Triangle B: 3, 4, 5     | A \ B |  Triangle A: 0, 1, 3
+//   / \ B / \      Triangle C: 3, 1, 4     |    \  |  Triangle B: 1, 2, 3
+//  / A \ / C \     Triangle D: 5, 4, 2     |     \ |  
+// 0 ----3-----1    -------------------     0-------1
+
 namespace PentaGE.Core.Graphics
 {
     /// <summary>
@@ -98,15 +114,15 @@ namespace PentaGE.Core.Graphics
                     Vector3.Transform(
                         Vertices[i].Coordinates,
                         Matrix4x4.CreateFromYawPitchRoll(
-                            MathHelper.DegreesToRadians(rotation.Yaw),
-                            MathHelper.DegreesToRadians(rotation.Pitch),
-                            MathHelper.DegreesToRadians(rotation.Roll))),
+                            MathHelper.DegreesToRadians(rotation.Yaw % 360),
+                            MathHelper.DegreesToRadians(rotation.Pitch % 360),
+                            MathHelper.DegreesToRadians(rotation.Roll % 360))),
                     Vector3.Transform(
                         Vertices[i].Normal,
                         Matrix4x4.CreateFromYawPitchRoll(
-                            MathHelper.DegreesToRadians(rotation.Yaw),
-                            MathHelper.DegreesToRadians(rotation.Pitch),
-                            MathHelper.DegreesToRadians(rotation.Roll))),
+                            MathHelper.DegreesToRadians(rotation.Yaw % 360),
+                            MathHelper.DegreesToRadians(-rotation.Pitch % 360),
+                            MathHelper.DegreesToRadians(rotation.Roll % 360))),
                     Vertices[i].TextureCoordinates);
             }
         }
@@ -169,6 +185,81 @@ namespace PentaGE.Core.Graphics
                     Vertices[i].Normal,
                     new Vector2(Vertices[i].TextureCoordinates.X * x, Vertices[i].TextureCoordinates.Y * y));
             }
+        }
+
+        public void Subdivide(int subdivisionLevels)
+        {
+            if (subdivisionLevels < 1)
+                throw new ArgumentOutOfRangeException(nameof(subdivisionLevels), "The number of subdivisions must be greater than zero.");
+
+            for (int level = 0; level < subdivisionLevels; level++)
+            {
+                List<Vertex> newVertices = new();
+                List<uint> newIndices = new();
+
+                if (Indices is not null)
+                {
+                    // Mesh has indices, so we can use them to subdivide
+                    for (int i = 0; i < Indices.Count; i += 3)
+                    {
+                        // Get the original vertices
+                        Vertex vertex0 = Vertices[(int)Indices[i]];
+                        Vertex vertex1 = Vertices[(int)Indices[i + 1]];
+                        Vertex vertex2 = Vertices[(int)Indices[i + 2]];
+
+                        // Calculate midpoints for each edge
+                        Vertex vertex3 = CalculateMidpoint(vertex0, vertex1);
+                        Vertex vertex4 = CalculateMidpoint(vertex1, vertex2);
+                        Vertex vertex5 = CalculateMidpoint(vertex2, vertex0);
+
+                        // Add the new vertices
+                        newVertices.Add(vertex0);
+                        newVertices.Add(vertex1);
+                        newVertices.Add(vertex2);
+                        newVertices.Add(vertex3);
+                        newVertices.Add(vertex4);
+                        newVertices.Add(vertex5);
+
+                        // Triangle A
+                        newIndices.Add((uint)newVertices.IndexOf(vertex0));
+                        newIndices.Add((uint)newVertices.IndexOf(vertex3));
+                        newIndices.Add((uint)newVertices.IndexOf(vertex5));
+
+                        // Triangle B
+                        newIndices.Add((uint)newVertices.IndexOf(vertex3));
+                        newIndices.Add((uint)newVertices.IndexOf(vertex4));
+                        newIndices.Add((uint)newVertices.IndexOf(vertex5));
+
+                        // Triangle C
+                        newIndices.Add((uint)newVertices.IndexOf(vertex3));
+                        newIndices.Add((uint)newVertices.IndexOf(vertex1));
+                        newIndices.Add((uint)newVertices.IndexOf(vertex4));
+
+                        // Triangle D
+                        newIndices.Add((uint)newVertices.IndexOf(vertex5));
+                        newIndices.Add((uint)newVertices.IndexOf(vertex4));
+                        newIndices.Add((uint)newVertices.IndexOf(vertex2));
+                    }
+                }
+                else
+                {
+                    // Mesh has no indices, so we need to create them
+
+                }
+
+                // Replace the old vertices and indices with the new ones
+                Vertices = newVertices;
+                Indices = newIndices;
+            }
+        }
+
+        private static Vertex CalculateMidpoint(Vertex vertexA, Vertex vertexB)
+        {
+            Vector3 midpointPosition = (vertexA.Coordinates + vertexB.Coordinates) * 0.5f;
+            Vector3 midpointNormal = (vertexA.Normal + vertexB.Normal) * 0.5f;
+            Vector2 midpointTexCoord = (vertexA.TextureCoordinates + vertexB.TextureCoordinates) * 0.5f;
+
+            return new Vertex(midpointPosition, midpointNormal, midpointTexCoord);
         }
     }
 }

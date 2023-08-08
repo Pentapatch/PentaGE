@@ -179,20 +179,28 @@ namespace PentaGE.Core.Graphics
             float halfWidth = width * 0.5f;
             float halfHeight = height * 0.5f;
 
+            //       2          COUNTER CLOCKWISE       3-------2 
+            //      / \         WINDING ORDER _^        | \     |
+            //     / D \        Triangle A: 0, 3, 5     |  \    |  PLANE
+            //  5 /-----\ 4     Triangle B: 3, 4, 5     | A \ B |  Triangle A: 0, 1, 3
+            //   / \ B / \      Triangle C: 3, 1, 4     |    \  |  Triangle B: 1, 2, 3
+            //  / A \ / C \     Triangle D: 5, 4, 2     |     \ |  
+            // 0 ----3-----1    -------------------     0-------1
+
             // Define vertices of the plane
             List<Vertex> vertices = new()
             {
-                new Vertex(new Vector3(-halfWidth, 0f, halfHeight), World.UpVector, BottomLeft),
-                new Vertex(new Vector3(-halfWidth, 0f, -halfHeight), World.UpVector, TopLeft),
-                new Vertex(new Vector3(halfWidth, 0f, -halfHeight), World.UpVector, TopRight),
-                new Vertex(new Vector3(halfWidth, 0f, halfHeight), World.UpVector, BottomRight),
+                new Vertex(new Vector3(-halfWidth, 0f, -halfHeight), World.UpVector, BottomLeft),
+                new Vertex(new Vector3(halfWidth, 0f, -halfHeight), World.UpVector, BottomRight),
+                new Vertex(new Vector3(halfWidth, 0f, halfHeight), World.UpVector, TopRight),
+                new Vertex(new Vector3(-halfWidth, 0f, halfHeight), World.UpVector, TopLeft),
             };
 
             // Define indices for the plane
             List<uint> indices = new()
             {
-                0, 1, 2,
-                2, 3, 0
+                0, 1, 3,
+                1, 2, 3
             };
 
             Mesh mesh = new(vertices, indices);
