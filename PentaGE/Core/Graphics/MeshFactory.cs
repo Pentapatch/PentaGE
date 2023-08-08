@@ -82,22 +82,26 @@ namespace PentaGE.Core.Graphics
             float halfHeight = height * 0.5f;
             float halfDepth = depth * 0.5f;
 
+            Vector3 upVector = new(0f, 1f, 0f);
+
             // Define vertices of the pyramid
             List<Vertex> vertices = new()
             {
                 new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.ForwardVector, BottomLeft),
+                new Vertex(upVector, World.ForwardVector, TopCenter),
                 new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.ForwardVector, BottomRight),
 
-                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.BackwardVector, BottomLeft),
-                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.BackwardVector, BottomRight),
+                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.BackwardVector, BottomLeft),
+                new Vertex(upVector, World.BackwardVector, TopCenter),
+                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.BackwardVector, BottomRight),
 
                 new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.LeftVector, BottomLeft),
+                new Vertex(upVector, World.LeftVector, TopCenter),
                 new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.LeftVector, BottomRight),
 
-                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.RightVector, BottomLeft),
-                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.RightVector, BottomRight),
-
-                new Vertex(new Vector3(0f, halfHeight, 0f), World.UpVector, TopCenter),
+                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.RightVector, BottomLeft),
+                new Vertex(upVector, World.RightVector, TopCenter),
+                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.RightVector, BottomRight),
 
                 new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.DownVector, BottomLeft),
                 new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.DownVector, TopLeft),
@@ -106,22 +110,26 @@ namespace PentaGE.Core.Graphics
             };
 
             // Recalculate the normals for the front, back, left and right faces
-            for (int i = 0; i < 8; i += 2)
+            for (int i = 0; i < 12; i += 3)
             {
-                Vector3 normal = Vector3.Normalize(Vector3.Cross(vertices[i].Coordinates, vertices[8].Coordinates));
+                Vector3 a = vertices[i].Coordinates;
+                Vector3 b = vertices[i + 1].Coordinates;
+                Vector3 c = vertices[i + 2].Coordinates;
+                Vector3 normal = Vector3.Cross(c - a, b - a).Normalize();
                 vertices[i] = new Vertex(vertices[i].Coordinates, normal, vertices[i].TextureCoordinates);
                 vertices[i + 1] = new Vertex(vertices[i + 1].Coordinates, normal, vertices[i + 1].TextureCoordinates);
+                vertices[i + 2] = new Vertex(vertices[i + 2].Coordinates, normal, vertices[i + 2].TextureCoordinates);
             }
 
             // Define indices for the pyramid
             List<uint> indices = new()
             {
-                0, 1, 8,    // Front face
-                2, 3, 8,    // Back face
-                4, 5, 8,    // Left face
-                6, 7, 8,    // Right face
-                9, 10, 11,  // Bottom face
-                11, 12, 9,  // Bottom face
+                0, 1, 2,    // Front face
+                3, 4, 5,    // Back face
+                6, 7, 8,    // Left face
+                9, 10, 11,  // Right face
+                12, 13, 14, // Bottom face
+                14, 15, 12, // Bottom face
             };
 
             return new Mesh(vertices, indices);

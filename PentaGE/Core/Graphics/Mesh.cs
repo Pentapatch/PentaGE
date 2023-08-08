@@ -143,6 +143,16 @@ namespace PentaGE.Core.Graphics
         public void Rotate(float angle, float x, float y, float z) =>
             Rotate(angle, new Vector3(x, y, z));
 
+
+        /// <summary>
+        /// Tiles the texture coordinates of the mesh vertices by the given factors along the X and Y axes.
+        /// </summary>
+        /// <param name="x">The tiling factor along the X axis.</param>
+        /// <param name="y">The tiling factor along the Y axis.</param>
+        /// <remarks>
+        /// This method adjusts the texture coordinates of each vertex in the mesh by multiplying them with the provided factors.
+        /// The result is a tiled texture appearance on the mesh.
+        /// </remarks>
         public void TileTexture(float x, float y)
         {
             for (int i = 0; i < Vertices.Count; i++)

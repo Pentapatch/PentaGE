@@ -44,73 +44,6 @@ namespace PentaGE.Core.Rendering
             Scale = new(1, 1, 1),       // multipliers
         };
 
-        private readonly List<Vertex> vertices = new()
-        {
-            //new(new(-1.0f, -1.0f,  1.0f), new(0f, 0f, 0f), new(0.0f, 0.0f)),
-            //new(new(-1.0f, -1.0f, -1.0f), new(0f, 0f, 0f), new(5.0f, 0.0f)),
-            //new(new( 1.0f, -1.0f, -1.0f), new(0f, 0f, 0f), new(0.0f, 0.0f)),
-            //new(new( 1.0f, -1.0f,  1.0f), new(0f, 0f, 0f), new(5.0f, 0.0f)),
-            //new(new( 0.0f,  2.0f,  0.0f), new(0f, 0f, 0f), new(2.5f, 5.0f)),
-            new(new(-0.5f, 0.0f,  0.5f), new( 0.0f, -1.0f, 0.0f), new(0.0f, 0.0f)), // Bottom side
-	        new(new(-0.5f, 0.0f, -0.5f), new( 0.0f, -1.0f, 0.0f), new(0.0f, 5.0f)), // Bottom side
-	        new(new( 0.5f, 0.0f, -0.5f), new( 0.0f, -1.0f, 0.0f), new(5.0f, 5.0f)), // Bottom side
-	        new(new( 0.5f, 0.0f,  0.5f), new( 0.0f, -1.0f, 0.0f), new(5.0f, 0.0f)), // Bottom side
-
-            new(new(-0.5f, 0.0f,  0.5f), new(-0.8f, 0.5f,  0.0f), new(0.0f, 0.0f)), // Left Side
-	        new(new(-0.5f, 0.0f, -0.5f), new(-0.8f, 0.5f,  0.0f), new(5.0f, 0.0f)), // Left Side
-	        new(new( 0.0f, 0.8f,  0.0f), new(-0.8f, 0.5f,  0.0f), new(2.5f, 5.0f)), // Left Side
-
-	        new(new(-0.5f, 0.0f, -0.5f), new( 0.0f, 0.5f, -0.8f), new(5.0f, 0.0f)), // Non-facing side
-	        new(new( 0.5f, 0.0f, -0.5f), new( 0.0f, 0.5f, -0.8f), new(0.0f, 0.0f)), // Non-facing side
-	        new(new( 0.0f, 0.8f,  0.0f), new( 0.0f, 0.5f, -0.8f), new(2.5f, 5.0f)), // Non-facing side
-
-	        new(new( 0.5f, 0.0f, -0.5f), new( 0.8f, 0.5f,  0.0f), new(0.0f, 0.0f)), // Right side
-	        new(new( 0.5f, 0.0f,  0.5f), new( 0.8f, 0.5f,  0.0f), new(5.0f, 0.0f)), // Right side
-	        new(new( 0.0f, 0.8f,  0.0f), new( 0.8f, 0.5f,  0.0f), new(2.5f, 5.0f)), // Right side
-
-	        new(new( 0.5f, 0.0f,  0.5f), new( 0.0f, 0.5f,  0.8f), new(5.0f, 0.0f)), // Facing side
-	        new(new(-0.5f, 0.0f,  0.5f), new( 0.0f, 0.5f,  0.8f), new(0.0f, 0.0f)), // Facing side
-	        new(new( 0.0f, 0.8f,  0.0f), new( 0.0f, 0.5f,  0.8f), new(2.5f, 5.0f))  // Facing side
-        };
-
-        private readonly List<uint> indices = new()
-        {
-            0, 1, 2, // Bottom side
-	        0, 2, 3, // Bottom side
-	        4, 6, 5, // Left side
-	        7, 9, 8, // Non-facing side
-	        10, 12, 11, // Right side
-	        13, 15, 14 // Facing side
-        };
-
-        private readonly List<Vertex> lightVertices = new()
-        {
-            new(new(-0.1f, -0.1f,  0.1f)),
-            new(new(-0.1f, -0.1f, -0.1f)),
-            new(new( 0.1f, -0.1f, -0.1f)),
-            new(new( 0.1f, -0.1f,  0.1f)),
-            new(new(-0.1f,  0.1f,  0.1f)),
-            new(new(-0.1f,  0.1f, -0.1f)),
-            new(new( 0.1f,  0.1f, -0.1f)),
-            new(new( 0.1f,  0.1f,  0.1f))
-        };
-
-        private readonly List<uint> lightIndices = new()
-        {
-            0, 1, 2,
-            0, 2, 3,
-            0, 4, 7,
-            0, 7, 3,
-            3, 7, 6,
-            3, 6, 2,
-            2, 6, 5,
-            2, 5, 1,
-            1, 5, 4,
-            1, 4, 0,
-            4, 5, 6,
-            4, 6, 7
-        };
-
         /// <summary>
         /// Initializes GLFW and sets up the necessary context hints for rendering.
         /// </summary>
@@ -213,10 +146,10 @@ namespace PentaGE.Core.Rendering
             }
 
             // Initialize test mesh
-            testMesh1 = MeshFactory.CreatePyramid(0.8f, 1.2f, 0.8f);//new(vertices, indices);
-            testMesh1.TileTexture(3, 6);
-            //testMesh1.Offset(0, -0.25f, 0);
-            //testMesh1.Rotate(45, 45, 45);
+            testMesh1 = MeshFactory.CreatePyramid(1f, 0.6f, 1f);//new(vertices, indices);
+            testMesh1.TileTexture(5, 6);
+            //testMesh1.Offset(0, 0.25f, 0);
+            //testMesh1.Rotate(45, 0, 0);
             var transform = new Transform(new(0, 0, 0), new(0, 0, 0), new(1f, 1f, 1f));
             var renderableMesh = new RenderableMeshEntity(testMesh1, shader, texture);
 
@@ -225,7 +158,7 @@ namespace PentaGE.Core.Rendering
             renderableMesh.GetComponent<MeshRenderComponent>()!.Material.SpecularStrength = 1f;
 
             // Initialize test light
-            lightMesh1 = new(lightVertices, lightIndices);
+            lightMesh1 = MeshFactory.CreateCube(0.2f);
             var transform2 = new Transform(new(0.75f, 0.75f, 0.75f), new(0, 0, 0), new(1f, 1f, 1f));
             var renderableLight = new RenderableMeshEntity(lightMesh1, lightShader);
 
