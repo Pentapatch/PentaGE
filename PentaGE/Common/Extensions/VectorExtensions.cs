@@ -32,5 +32,18 @@ namespace PentaGE.Common
 
             return $"X{x} Y{y} Z{z}";
         }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="Vector3"/> is approximately equal to another <see cref="Vector3"/>.<br />
+        /// <em>Note: This method uses a threshold of 0.001f.</em>
+        /// </summary>
+        /// <param name="source">The <see cref="Vector3"/> to compare.</param>
+        /// <param name="target">The <see cref="Vector3"/> to compare to.</param>
+        /// <param name="threshold">The threshold for determining equality. Default is 0.001f.</param>
+        /// <returns><c>true</c> if the specified <see cref="Vector3"/> is approximately equal to the other <see cref="Vector3"/>; otherwise, <c>false</c>.</returns>
+        public static bool IsApproximately(this Vector3 source, Vector3 target, float threshold = 0.001f) =>
+            MathF.Abs(source.X - target.X) < threshold
+            && MathF.Abs(source.Y - target.Y) < threshold
+            && MathF.Abs(source.Z - target.Z) < threshold;
     }
 }

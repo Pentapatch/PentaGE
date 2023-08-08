@@ -44,6 +44,5 @@ namespace PentaGE.Common
 
             return matrixArray;
         }
-
     }
 }

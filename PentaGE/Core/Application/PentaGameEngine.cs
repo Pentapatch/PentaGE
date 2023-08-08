@@ -1,7 +1,8 @@
 ﻿using GLFW;
 using PentaGE.Core.Events;
 using PentaGE.Core.Logging;
-using PentaGE.Rendering;
+using PentaGE.Core.Rendering;
+using PentaGE.Core.Scenes;
 using Serilog;
 
 namespace PentaGE.Core
@@ -17,6 +18,8 @@ namespace PentaGE.Core
         private readonly WindowManager _windowManager;
         private readonly EventManager _eventManager = new();
         private GameState _state = GameState.Initializing;
+
+        public Scene Scene { get; } = new();
 
         /// <summary>
         /// Gets the timing manager for the game engine, responsible for handling frame timing and delta time calculation.
@@ -101,6 +104,10 @@ namespace PentaGE.Core
             // Update the game state
             _state = GameState.Terminating;
 
+            // Terminate the Renderer
+            Log.Information("Terminating the Renderer.");
+            _renderer.Terminate();
+
             // Terminate Glfw
             Log.Information("Terminating GLFW.");
             Glfw.Terminate();
@@ -162,7 +169,7 @@ namespace PentaGE.Core
                 Events.Update();
 
                 // Update game state
-                Update();
+                OnUpdate();
 
                 // Render graphics
                 Renderer.Render();
@@ -172,6 +179,21 @@ namespace PentaGE.Core
             }
 
             if (State != GameState.Terminating) Stop();
+        }
+
+        /// <summary>
+        /// Handles the game's update logic, including updating the concrete implementation, the scene, and the active camera controller.
+        /// </summary>
+        private void OnUpdate()
+        {
+            Update(); // Let the concrete implementation update
+
+            // Update the scene
+            Scene.Update((float)Timing.CurrentFrame.DeltaTime);
+
+            // Update the camera controller
+            foreach (var window in Windows)
+                window.Viewport.CameraManager.ActiveController.OnUpdate((float)Timing.CurrentFrame.DeltaTime);
         }
 
     }

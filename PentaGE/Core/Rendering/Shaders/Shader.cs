@@ -4,15 +4,16 @@ using System.Numerics;
 using System.Text;
 using static OpenGL.GL;
 
-namespace PentaGE.Rendering.Shaders
+namespace PentaGE.Core.Rendering
 {
     /// <summary>
     /// Represents a shader program used for rendering graphics on the GPU.
     /// </summary>
-    public class Shader : IDisposable
+    public sealed class Shader : IDisposable
     {
         private string _vertexSourceCode = string.Empty;
         private string _fragmentSourceCode = string.Empty;
+        private string _geometrySourceCode = string.Empty;
         private readonly string _filePath = string.Empty;
 
         public uint ProgramId { get; private set; } = 0u;
@@ -22,10 +23,12 @@ namespace PentaGE.Rendering.Shaders
         /// </summary>
         /// <param name="vertexSourceCode">The source code of the vertex shader written in GLSL (OpenGL Shading Language).</param>
         /// <param name="fragmentSourceCode">The source code of the fragment shader written in GLSL (OpenGL Shading Language).</param>
-        public Shader(string vertexSourceCode, string fragmentSourceCode)
+        /// <param name="geometrySourceCode">The source code of the geometry shader written in GLSL (OpenGL Shading Language).</param>
+        public Shader(string vertexSourceCode, string fragmentSourceCode, string? geometrySourceCode = null)
         {
             _vertexSourceCode = vertexSourceCode;
             _fragmentSourceCode = fragmentSourceCode;
+            _geometrySourceCode = geometrySourceCode ?? string.Empty;
         }
 
         /// <summary>
@@ -52,22 +55,36 @@ namespace PentaGE.Rendering.Shaders
             }
 
             uint vertexShader, fragmentShader;
+            uint? geometryShader = null;
             bool hasError = false;
 
             // Compile and create the vertex and fragment shaders
             vertexShader = CompileShader(GL_VERTEX_SHADER, _vertexSourceCode, ref hasError);
             fragmentShader = CompileShader(GL_FRAGMENT_SHADER, _fragmentSourceCode, ref hasError);
+            if (_geometrySourceCode != string.Empty)
+            {
+                geometryShader = CompileShader(GL_GEOMETRY_SHADER, _geometrySourceCode, ref hasError);
+            }
 
             // Create and link the shader program with the vertex and fragment shaders
-            LinkShaderProgram(vertexShader, fragmentShader, ref hasError);
+            LinkShaderProgram(vertexShader, fragmentShader, geometryShader, ref hasError);
 
             // Detach and delete the shaders after they have been linked into the program
             // This is safe because the shader program has its own copy of the shader source code
             // The linked program no longer requires the individual shaders once they are linked
             glDetachShader(ProgramId, vertexShader);
             glDetachShader(ProgramId, fragmentShader);
+            if (geometryShader.HasValue)
+            {
+                glDetachShader(ProgramId, geometryShader.Value);
+            }
+
             glDeleteShader(vertexShader);
             glDeleteShader(fragmentShader);
+            if (geometryShader.HasValue)
+            {
+                glDeleteShader(geometryShader.Value);
+            }
 
             return !hasError;
         }
@@ -147,10 +164,21 @@ namespace PentaGE.Rendering.Shaders
         /// </summary>
         /// <param name="name">The name of the uniform variable.</param>
         /// <param name="value">The integer value to set.</param>
-        public void SetInt(string name, int value)
+        public void SetUniform(string name, int value)
         {
             int location = glGetUniformLocation(ProgramId, name);
             glUniform1i(location, value);
+        }
+
+        /// <summary>
+        /// Sets a boolean uniform in the shader program. The boolean value will be converted to an integer (1 for true, 0 for false).
+        /// </summary>
+        /// <param name="name">The name of the uniform variable.</param>
+        /// <param name="value">The boolean value to set.</param>
+        public void SetUniform(string name, bool value)
+        {
+            int location = glGetUniformLocation(ProgramId, name);
+            glUniform1i(location, value ? 1 : 0);
         }
 
         /// <summary>
@@ -158,7 +186,7 @@ namespace PentaGE.Rendering.Shaders
         /// </summary>
         /// <param name="name">The name of the uniform variable.</param>
         /// <param name="value">The floating-point value to set.</param>
-        public void SetFloat(string name, float value)
+        public void SetUniform(string name, float value)
         {
             int location = glGetUniformLocation(ProgramId, name);
             glUniform1f(location, value);
@@ -169,7 +197,7 @@ namespace PentaGE.Rendering.Shaders
         /// </summary>
         /// <param name="name">The name of the uniform variable.</param>
         /// <param name="value">The 2D vector (Vec2) value to set.</param>
-        public void SetVec2(string name, Vector2 value)
+        public void SetUniform(string name, Vector2 value)
         {
             int location = glGetUniformLocation(ProgramId, name);
             glUniform2f(location, value.X, value.Y);
@@ -180,7 +208,7 @@ namespace PentaGE.Rendering.Shaders
         /// </summary>
         /// <param name="name">The name of the uniform variable.</param>
         /// <param name="value">The 3D vector (Vec3) value to set.</param>
-        public void SetVec3(string name, Vector3 value)
+        public void SetUniform(string name, Vector3 value)
         {
             int location = glGetUniformLocation(ProgramId, name);
             glUniform3f(location, value.X, value.Y, value.Z);
@@ -191,7 +219,7 @@ namespace PentaGE.Rendering.Shaders
         /// </summary>
         /// <param name="name">The name of the uniform variable.</param>
         /// <param name="value">The 4D vector (Vec4) value to set.</param>
-        public void SetVec4(string name, Vector4 value)
+        public void SetUniform(string name, Vector4 value)
         {
             int location = glGetUniformLocation(ProgramId, name);
             glUniform4f(location, value.X, value.Y, value.Z, value.W);
@@ -202,7 +230,7 @@ namespace PentaGE.Rendering.Shaders
         /// </summary>
         /// <param name="name">The name of the uniform variable.</param>
         /// <param name="value">The 3x2 matrix value to set.</param>
-        public void SetMatrix3x2(string name, Matrix3x2 value)
+        public void SetUniform(string name, Matrix3x2 value)
         {
             int location = glGetUniformLocation(ProgramId, name);
             glUniformMatrix3x2fv(location, 1, false, value.ToArray());
@@ -213,10 +241,28 @@ namespace PentaGE.Rendering.Shaders
         /// </summary>
         /// <param name="name">The name of the uniform variable.</param>
         /// <param name="value">The 4x4 matrix value to set.</param>
-        public void SetMatrix4(string name, Matrix4x4 value)
+        public void SetUniform(string name, Matrix4x4 value)
         {
             int location = glGetUniformLocation(ProgramId, name);
             glUniformMatrix4fv(location, 1, false, value.ToArray());
+        }
+
+        public void SetVec2Array(string name, float[] values)
+        {
+            int location = glGetUniformLocation(ProgramId, name);
+            int length = values.Length / 2; // Divide by 2 since each vector has 2 components (X, Y)
+
+            // Set the uniform data using glUniform3fv
+            glUniform2fv(location, length, values);
+        }
+
+        public void SetVec3Array(string name, float[] values)
+        {
+            int location = glGetUniformLocation(ProgramId, name);
+            int length = values.Length / 3; // Divide by 3 since each vector has 3 components (RGB/XYZ)
+
+            // Set the uniform data using glUniform3fv
+            glUniform3fv(location, length, values);
         }
 
         /// <summary>
@@ -249,13 +295,15 @@ namespace PentaGE.Rendering.Shaders
         /// </summary>
         /// <param name="vertexShader">The ID of the compiled vertex shader.</param>
         /// <param name="fragmentShader">The ID of the compiled fragment shader.</param>
+        /// <param name="geometryShader">The ID of the compiled geometry shader, or null if there is no geometry shader.</param>
         /// <param name="error">A reference to a boolean flag that will be set to true if there is an error in the linking process.</param>
-        private void LinkShaderProgram(uint vertexShader, uint fragmentShader, ref bool error)
+        private void LinkShaderProgram(uint vertexShader, uint fragmentShader, uint? geometryShader, ref bool error)
         {
             // Create the shader program and attach the shaders to it
             ProgramId = glCreateProgram();
             glAttachShader(ProgramId, vertexShader);
             glAttachShader(ProgramId, fragmentShader);
+            if (geometryShader.HasValue) glAttachShader(ProgramId, geometryShader.Value);
 
             // Link the shader program, creating an executable that runs on the GPU
             glLinkProgram(ProgramId);
@@ -284,6 +332,7 @@ namespace PentaGE.Rendering.Shaders
             // Create string builders to store the vertex and fragment shader source code
             StringBuilder vertexShaderSource = new();
             StringBuilder fragmentShaderSource = new();
+            StringBuilder geometryShaderSource = new();
 
             // Set the parsing mode
             ShaderType parsingMode = ShaderType.Unknown;
@@ -299,6 +348,10 @@ namespace PentaGE.Rendering.Shaders
                 {
                     parsingMode = ShaderType.Fragment;
                 }
+                else if (line.StartsWith("#shader geometry"))
+                {
+                    parsingMode = ShaderType.Geometry;
+                }
                 else if (parsingMode == ShaderType.Vertex)
                 {
                     vertexShaderSource.AppendLine(line);
@@ -307,11 +360,16 @@ namespace PentaGE.Rendering.Shaders
                 {
                     fragmentShaderSource.AppendLine(line);
                 }
+                else if (parsingMode == ShaderType.Geometry)
+                {
+                    geometryShaderSource.AppendLine(line);
+                }
             }
 
             // Set the source code values
             _vertexSourceCode = vertexShaderSource.ToString();
             _fragmentSourceCode = fragmentShaderSource.ToString();
+            _geometrySourceCode = geometryShaderSource.ToString();
         }
 
         /// <summary>
@@ -323,6 +381,7 @@ namespace PentaGE.Rendering.Shaders
         {
             GL_VERTEX_SHADER => "vertex",
             GL_FRAGMENT_SHADER => "fragment",
+            GL_GEOMETRY_SHADER => "geometry",
             _ => throw new NotSupportedException()
         };
 

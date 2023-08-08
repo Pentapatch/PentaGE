@@ -9,17 +9,17 @@ namespace PentaGE.Common
     public struct Rotation
     {
         /// <summary>
-        /// Gets or sets the yaw angle (rotation around the vertical axis, positive Z).
+        /// Gets or sets the yaw angle (rotation around the vertical axis, positive Y).
         /// </summary>
         public float Yaw { get; set; }
 
         /// <summary>
-        /// Gets or sets the pitch angle (rotation around the lateral axis, positive Y).
+        /// Gets or sets the pitch angle (rotation around the lateral axis, positive X).
         /// </summary>
         public float Pitch { get; set; }
 
         /// <summary>
-        /// Gets or sets the roll angle (rotation around the longitudinal axis, positive X).
+        /// Gets or sets the roll angle (rotation around the longitudinal axis, positive Z).
         /// </summary>
         public float Roll { get; set; }
 
@@ -44,17 +44,18 @@ namespace PentaGE.Common
         /// <returns>The normalized forward vector as a <see cref="Vector3"/> object.</returns>
         public Vector3 GetForwardVector()
         {
-            // Convert the yaw and pitch angles to radians
-            float yawRad = MathHelper.DegreesToRadians(Yaw);
-            float pitchRad = MathHelper.DegreesToRadians(Pitch);
+            // Create the rotation matrix from the yaw, pitch, and roll angles
+            Matrix4x4 rotationMatrix = Matrix4x4.CreateFromYawPitchRoll(
+                MathHelper.DegreesToRadians(Yaw),
+                MathHelper.DegreesToRadians(Pitch),
+                MathHelper.DegreesToRadians(Roll)
+            );
 
-            // Calculate the forward vector using spherical coordinate conversions
-            float x = MathF.Cos(pitchRad) * MathF.Sin(yawRad);
-            float y = MathF.Sin(pitchRad);
-            float z = MathF.Cos(pitchRad) * MathF.Cos(yawRad);
+            // Extract the right, up, and forward vectors from the rotation matrix
+            Vector3 forward = new(rotationMatrix.M31, rotationMatrix.M32, rotationMatrix.M33);
 
-            // Normalize the vector to ensure unit length
-            return Vector3.Normalize(new Vector3(x, y, z));
+            // Normalize the vectors to ensure unit length
+            return Vector3.Normalize(forward);
         }
 
         /// <summary>
@@ -63,12 +64,18 @@ namespace PentaGE.Common
         /// <returns>The normalized up vector as a <see cref="Vector3"/> object.</returns>
         public Vector3 GetUpVector()
         {
-            // Calculate the forward and right vectors
-            Vector3 forward = GetForwardVector();
-            Vector3 right = GetRightVector();
+            // Create the rotation matrix from the yaw, pitch, and roll angles
+            Matrix4x4 rotationMatrix = Matrix4x4.CreateFromYawPitchRoll(
+                MathHelper.DegreesToRadians(Yaw),
+                MathHelper.DegreesToRadians(Pitch),
+                MathHelper.DegreesToRadians(Roll)
+            );
 
-            // Calculate the up vector by taking the cross product of forward and right
-            return Vector3.Cross(forward, right);
+            // Extract the right, up, and forward vectors from the rotation matrix
+            Vector3 up = new(rotationMatrix.M21, rotationMatrix.M22, rotationMatrix.M23);
+
+            // Normalize the vectors to ensure unit length
+            return Vector3.Normalize(up);
         }
 
         /// <summary>
@@ -77,16 +84,17 @@ namespace PentaGE.Common
         /// <returns>The normalized right vector as a <see cref="Vector3"/> object.</returns>
         public Vector3 GetRightVector()
         {
-            // Convert the yaw angle to radians
-            float yawRad = MathHelper.DegreesToRadians(Yaw);
+            Matrix4x4 rotationMatrix = Matrix4x4.CreateFromYawPitchRoll(
+                MathHelper.DegreesToRadians(Yaw),
+                MathHelper.DegreesToRadians(Pitch),
+                MathHelper.DegreesToRadians(Roll)
+            );
 
-            // Calculate the right vector using spherical coordinate conversions
-            float x = MathF.Cos(yawRad);
-            float y = 0;
-            float z = -MathF.Sin(yawRad);
+            // Extract the right, up, and forward vectors from the rotation matrix
+            Vector3 rightVector = new(rotationMatrix.M11, rotationMatrix.M12, rotationMatrix.M13);
 
-            // Normalize the vector to ensure unit length
-            return Vector3.Normalize(new Vector3(x, y, z));
+            // Normalize the vectors to ensure unit length
+            return Vector3.Normalize(rightVector);
         }
 
         /// <summary>
@@ -112,6 +120,31 @@ namespace PentaGE.Common
         #region Math
 
         /// <summary>
+        /// Determines whether the specified <see cref="Rotation"/> is approximately equal to another <see cref="Rotation"/>.<br />
+        /// <em>Note: This method uses a threshold of 0.001f.</em>
+        /// </summary>
+        /// <param name="source">The <see cref="Rotation"/> to compare.</param>
+        /// <param name="target">The <see cref="Rotation"/> to compare to.</param>
+        /// <param name="threshold">The threshold for determining equality. Default is 0.001f.</param>
+        /// <returns><c>true</c> if the specified <see cref="Rotation"/> is approximately equal to the other <see cref="Rotation"/>; otherwise, <c>false</c>.</returns>
+        public static bool IsApproximately(Rotation source, Rotation target, float threshold = 0.001f) =>
+            MathF.Abs(source.Yaw - target.Yaw) < threshold
+            && MathF.Abs(source.Pitch - target.Pitch) < threshold
+            && MathF.Abs(source.Roll - target.Roll) < threshold;
+
+        /// <summary>
+        /// Determines whether the specified <see cref="Rotation"/> is approximately equal to this <see cref="Rotation"/>.<br />
+        /// <em>Note: This method uses a threshold of 0.001f.</em>
+        /// </summary>
+        /// <param name="target">The <see cref="Rotation"/> to compare to.</param>
+        /// <param name="threshold">The threshold for determining equality. Default is 0.001f.</param>
+        /// <returns><c>true</c> if the specified <see cref="Rotation"/> is approximately equal to this <see cref="Rotation"/>; otherwise, <c>false</c>.</returns>
+        public bool IsApproximately(Rotation target, float threshold = 0.001f) =>
+            MathF.Abs(Yaw - target.Yaw) < threshold
+            && MathF.Abs(Pitch - target.Pitch) < threshold
+            && MathF.Abs(Roll - target.Roll) < threshold;
+
+        /// <summary>
         /// Linearly interpolates between this rotation and another rotation using the specified interpolation factor.
         /// </summary>
         /// <param name="rotation">The target rotation to interpolate towards.</param>
@@ -129,14 +162,14 @@ namespace PentaGE.Common
         /// <returns>A new <see cref="Rotation"/> instance representing the interpolated rotation.</returns>
         public static Rotation Lerp(Rotation rotationA, Rotation rotationB, float t)
         {
-            // Convert angles to radians
-            float yawRadA = MathHelper.DegreesToRadians(rotationA.Yaw);
-            float pitchRadA = MathHelper.DegreesToRadians(rotationA.Pitch);
-            float rollRadA = MathHelper.DegreesToRadians(rotationA.Roll);
+            // Convert angles to radians and ensure they are in the range (0 - 360)
+            float yawRadA = MathHelper.DegreesToRadians(rotationA.Yaw % 360);
+            float pitchRadA = MathHelper.DegreesToRadians(rotationA.Pitch % 360);
+            float rollRadA = MathHelper.DegreesToRadians(rotationA.Roll % 360);
 
-            float yawRadB = MathHelper.DegreesToRadians(rotationB.Yaw);
-            float pitchRadB = MathHelper.DegreesToRadians(rotationB.Pitch);
-            float rollRadB = MathHelper.DegreesToRadians(rotationB.Roll);
+            float yawRadB = MathHelper.DegreesToRadians(rotationB.Yaw % 360);
+            float pitchRadB = MathHelper.DegreesToRadians(rotationB.Pitch % 360);
+            float rollRadB = MathHelper.DegreesToRadians(rotationB.Roll % 360);
 
             // Interpolate each component separately
             float yawRadInterpolated = MathHelper.LerpF(yawRadA, yawRadB, t);
@@ -166,7 +199,7 @@ namespace PentaGE.Common
             float t,
             float curvePower,
             InterpolationCurve curveType) =>
-            Lerp(rotationA, rotationB, MathHelper.TransformInterpolationFactor(t, curvePower, curveType));
+                Lerp(rotationA, rotationB, MathHelper.TransformInterpolationFactor(t, curvePower, curveType));
 
         /// <summary>
         /// Interpolates between this rotation and a target rotation using the specified interpolation factor and curve type.
@@ -181,7 +214,7 @@ namespace PentaGE.Common
             float t,
             float curvePower,
             InterpolationCurve curveType) =>
-            Interpolate(this, rotation, t, curvePower, curveType);
+                Interpolate(this, rotation, t, curvePower, curveType);
 
         /// <summary>
         /// Normalizes the rotation angles to be within the range (0 - 360) degrees.
@@ -208,13 +241,14 @@ namespace PentaGE.Common
         /// Sets the rotation to face a target position.
         /// </summary>
         /// <param name="targetPosition">The position of the target to look at.</param>
+        /// <param name="sourcePosition">The position of the source to look from.</param>
         /// <remarks>
         /// The rotation will be adjusted to face the <paramref name="targetPosition"/> in the X-Z plane,
         /// and the pitch angle will be adjusted to look at the <paramref name="targetPosition"/> in the Y direction.
         /// </remarks>
-        public void LookAt(Vector3 targetPosition)
+        public void LookAt(Vector3 targetPosition, Vector3 sourcePosition)
         {
-            Vector3 direction = Vector3.Normalize(targetPosition - Vector3.Zero);
+            Vector3 direction = Vector3.Normalize(sourcePosition - targetPosition);
 
             // Calculate and set the rotation angles
             Yaw = MathHelper.RadiansToDegrees(MathF.Atan2(direction.X, direction.Z));
@@ -225,14 +259,15 @@ namespace PentaGE.Common
         /// Calculates the rotation needed to face a target position.
         /// </summary>
         /// <param name="targetPosition">The position of the target to look at.</param>
+        /// <param name="sourcePosition">The position of the source to look from.</param>
         /// <returns>A new <see cref="Rotation"/> instance representing the rotation needed to face the target position.</returns>
         /// <remarks>
         /// The rotation will be adjusted to face the <paramref name="targetPosition"/> in the X-Z plane,
         /// and the pitch angle will be adjusted to look at the <paramref name="targetPosition"/> in the Y direction.
         /// </remarks>
-        public static Rotation GetLookAt(Vector3 targetPosition)
+        public static Rotation GetLookAt(Vector3 targetPosition, Vector3 sourcePosition)
         {
-            Vector3 direction = Vector3.Normalize(targetPosition - Vector3.Zero);
+            Vector3 direction = Vector3.Normalize(sourcePosition - targetPosition);
 
             // Calculate the rotation angles
             float yaw = MathHelper.RadiansToDegrees(MathF.Atan2(direction.X, direction.Z));
@@ -318,6 +353,15 @@ namespace PentaGE.Common
             new(rotation.Yaw * scalar, rotation.Pitch * scalar, rotation.Roll * scalar);
 
         /// <summary>
+        /// Multiplies a <see cref="Rotation"/> by scalar values.
+        /// </summary>
+        /// <param name="rotation">The <see cref="Rotation"/> to multiply.</param>
+        /// <param name="scalars">The scalar values to multiply the rotation by.</param>
+        /// <returns>A new <see cref="Rotation"/> representing the result of the multiplication.</returns>
+        public static Rotation operator *(Rotation rotation, Vector3 scalars) =>
+            new(rotation.Yaw * scalars.X, rotation.Pitch * scalars.Y, rotation.Roll * scalars.Z);
+
+        /// <summary>
         /// Multiplies a scalar value by a <see cref="Rotation"/>.
         /// </summary>
         /// <param name="scalar">The scalar value to multiply.</param>
@@ -338,12 +382,34 @@ namespace PentaGE.Common
 
         #endregion
 
+        #region Conversations
+
+        /// <summary>
+        /// Converts this <see cref="Rotation"/> to a <see cref="Matrix4x4"/> representing the rotation.
+        /// </summary>
+        /// <returns>A <see cref="Matrix4x4"/> representing this rotation.</returns>
+        public Matrix4x4 ToMatrix4x4()
+        {
+            Quaternion q = Quaternion.CreateFromYawPitchRoll(
+                MathHelper.DegreesToRadians(Yaw),
+                MathHelper.DegreesToRadians(Pitch),
+                MathHelper.DegreesToRadians(Roll));
+            return Matrix4x4.CreateFromQuaternion(q);
+        }
+
         /// <summary>
         /// Returns a string representation of the <see cref="Rotation"/> in the format "Y{Yaw} P{Pitch} R{Roll}".
         /// </summary>
         /// <returns>A string representing the <see cref="Rotation"/>.</returns>
         public override readonly string ToString() => $"Y{Yaw} P{Pitch} R{Roll}";
 
+        #endregion
+
+        /// <summary>
+        /// Normalizes an angle to the range (0, 360).
+        /// </summary>
+        /// <param name="angle"></param>
+        /// <returns></returns>
         private static float NormalizeAngle(float angle)
         {
             angle %= 360f;

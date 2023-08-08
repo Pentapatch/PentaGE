@@ -66,7 +66,7 @@ namespace PentaGE.Core
         internal Timing()
         {
             _timingManager = new();
-            TargetFps = 120;
+            TargetFps = 0;
             _gameSpeedFactor = NORMAL_GAME_SPEED;
         }
 

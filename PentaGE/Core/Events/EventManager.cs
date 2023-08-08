@@ -21,8 +21,25 @@ namespace PentaGE.Core.Events
     /// </remarks>
     public sealed class EventManager
     {
+
+        #region Fields and event handler delegates
+
         private readonly Dictionary<GLFW.Window, Window> _registeredWindows = new();
         private readonly List<EngineEventArgs> _eventBuffer = new();
+        private KeyCallback _keyCallback;
+        private MouseCallback _mousePositionCallback;
+        private MouseButtonCallback _mouseButtonCallback;
+        private MouseEnterCallback _mouseEnterCallback;
+        private MouseCallback _mouseScrollCallback;
+        private WindowCallback _windowClosingCallback;
+        private FocusCallback _windowFocusCallback;
+        private IconifyCallback _windowIconifyCallback;
+        private WindowMaximizedCallback _windowMaximizeCallback;
+        private SizeCallback _windowSizeCallback;
+        private PositionCallback _windowPositionCallback;
+        private ErrorCallback _glfwErrorCallback;
+
+        #endregion
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventManager"/> class. This constructor is marked as internal,
@@ -56,19 +73,35 @@ namespace PentaGE.Core.Events
         /// </remarks>
         internal void AddCallbacks(Window window)
         {
-            Glfw.SetKeyCallback(window.Handle, KeyCallback);
-            Glfw.SetCursorPositionCallback(window.Handle, MousePositionCallback);
-            Glfw.SetMouseButtonCallback(window.Handle, MouseButtonCallback);
-            Glfw.SetCursorEnterCallback(window.Handle, MouseEnterCallback);
-            Glfw.SetScrollCallback(window.Handle, MouseScrollCallback);
-            Glfw.SetCloseCallback(window.Handle, WindowClosingCallback);
-            Glfw.SetWindowFocusCallback(window.Handle, WindowFocusCallback);
-            Glfw.SetWindowIconifyCallback(window.Handle, WindowIconifyCallback);
-            Glfw.SetWindowMaximizeCallback(window.Handle, WindowMaximizeCallback);
-            Glfw.SetWindowSizeCallback(window.Handle, WindowSizeCallback);
-            Glfw.SetWindowPositionCallback(window.Handle, WindowPositionCallback);
-            Glfw.SetErrorCallback(ErrorCallback);
+            // We need to keep a reference to the callbacks to prevent them from being garbage collected.
+            _keyCallback = KeyCallback;
+            _mousePositionCallback = MousePositionCallback;
+            _mouseButtonCallback = MouseButtonCallback;
+            _mouseEnterCallback = MouseEnterCallback;
+            _mouseScrollCallback = MouseScrollCallback;
+            _windowClosingCallback = WindowClosingCallback;
+            _windowFocusCallback = WindowFocusCallback;
+            _windowIconifyCallback = WindowIconifyCallback;
+            _windowMaximizeCallback = WindowMaximizeCallback;
+            _windowSizeCallback = WindowSizeCallback;
+            _windowPositionCallback = WindowPositionCallback;
+            _glfwErrorCallback = ErrorCallback;
 
+            // Add the callbacks to the window.
+            Glfw.SetKeyCallback(window.Handle, _keyCallback);
+            Glfw.SetCursorPositionCallback(window.Handle, _mousePositionCallback);
+            Glfw.SetMouseButtonCallback(window.Handle, _mouseButtonCallback);
+            Glfw.SetCursorEnterCallback(window.Handle, _mouseEnterCallback);
+            Glfw.SetScrollCallback(window.Handle, _mouseScrollCallback);
+            Glfw.SetCloseCallback(window.Handle, _windowClosingCallback);
+            Glfw.SetWindowFocusCallback(window.Handle, _windowFocusCallback);
+            Glfw.SetWindowIconifyCallback(window.Handle, _windowIconifyCallback);
+            Glfw.SetWindowMaximizeCallback(window.Handle, _windowMaximizeCallback);
+            Glfw.SetWindowSizeCallback(window.Handle, _windowSizeCallback);
+            Glfw.SetWindowPositionCallback(window.Handle, _windowPositionCallback);
+            Glfw.SetErrorCallback(_glfwErrorCallback);
+
+            // Add the window to the registered windows dictionary.
             _registeredWindows.Add(window.Handle, window);
         }
 

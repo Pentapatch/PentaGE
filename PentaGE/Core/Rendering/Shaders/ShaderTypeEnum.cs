@@ -1,4 +1,4 @@
-﻿namespace PentaGE.Rendering.Shaders
+﻿namespace PentaGE.Core.Rendering
 {
     /// <summary>
     /// Represents the type of shader used in the <see cref="Shader"/> class.
@@ -19,5 +19,10 @@
         /// Indicates a fragment shader, responsible for processing fragments (pixels) after rasterization.
         /// </summary>
         Fragment = 2,
+
+        /// <summary>
+        /// Indicates a geometry shader, responsible for processing primitives.
+        /// </summary>
+        Geometry = 3,
     }
 }
