@@ -146,7 +146,7 @@ namespace PentaGE.Core.Rendering
             }
 
             // Initialize test mesh
-            testMesh1 = MeshFactory.CreatePyramid(1f, 0.6f, 1f);//new(vertices, indices);
+            testMesh1 = MeshFactory.CreatePyramid(1f, 0.6f, 1f);
             testMesh1.TileTexture(5, 6);
             //testMesh1.Offset(0, 0.25f, 0);
             //testMesh1.Rotate(45, 0, 0);

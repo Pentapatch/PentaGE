@@ -124,6 +124,7 @@ namespace PentaGE.Core.Rendering
             // Set the light color uniforms
             Shader.SetUniform("lightColor", new Vector4(1.0f, 1.0f, 1.0f, 1.0f));
             Shader.SetUniform("lightPosition", new Vector3(0.5f, 0.5f, 0.5f));
+            //Shader.SetUniform("lightPosition", camera.Position); // If you want the light to follow the camera
             Shader.SetUniform("cameraPosition", camera.Position);
 
             // Set the material properties as uniforms in the shader

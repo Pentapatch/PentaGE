@@ -3,6 +3,9 @@ using System.Numerics;
 
 namespace PentaGE.Core.Graphics
 {
+    /// <summary>
+    /// Provides methods for creating various types of mesh geometries.
+    /// </summary>
     public static class MeshFactory
     {
         private static Vector2 TopLeft => new(0f, 1f);
@@ -11,9 +14,21 @@ namespace PentaGE.Core.Graphics
         private static Vector2 BottomRight => new(1f, 0f);
         private static Vector2 TopCenter => new(0.5f, 1f);
 
+        /// <summary>
+        /// Creates a cube mesh with the specified diameter.
+        /// </summary>
+        /// <param name="diameter">The diameter of the cube.</param>
+        /// <returns>A cube mesh with the specified diameter.</returns>
         public static Mesh CreateCube(float diameter) =>
             CreateCuboid(diameter, diameter, diameter);
 
+        /// <summary>
+        /// Creates a cuboid mesh with the specified dimensions.
+        /// </summary>
+        /// <param name="width">The width of the cuboid.</param>
+        /// <param name="height">The height of the cuboid.</param>
+        /// <param name="depth">The depth of the cuboid.</param>
+        /// <returns>A cuboid mesh with the specified dimensions.</returns>
         public static Mesh CreateCuboid(float width, float height, float depth)
         {
             // Calculate half extents for each dimension
@@ -75,6 +90,13 @@ namespace PentaGE.Core.Graphics
             return new Mesh(vertices, indices);
         }
 
+        /// <summary>
+        /// Creates a pyramid mesh with the specified dimensions.
+        /// </summary>
+        /// <param name="width">The width of the pyramid base.</param>
+        /// <param name="height">The height of the pyramid.</param>
+        /// <param name="depth">The depth of the pyramid base.</param>
+        /// <returns>A pyramid mesh with the specified dimensions.</returns>
         public static Mesh CreatePyramid(float width, float height, float depth)
         {
             // Calculate half extents for each dimension
@@ -135,9 +157,22 @@ namespace PentaGE.Core.Graphics
             return new Mesh(vertices, indices);
         }
 
+        /// <summary>
+        /// Creates a plane mesh with a square shape and the specified size.
+        /// </summary>
+        /// <param name="size">The size of the plane (both width and height).</param>
+        /// <param name="rotation">Optional rotation applied to the plane.</param>
+        /// <returns>A plane mesh with the specified size.</returns>
         public static Mesh CreatePlane(float size, Rotation? rotation = null) => 
             CreatePlane(size, size, rotation);
 
+        /// <summary>
+        /// Creates a plane mesh with the specified width and height.
+        /// </summary>
+        /// <param name="width">The width of the plane.</param>
+        /// <param name="height">The height of the plane.</param>
+        /// <param name="rotation">Optional rotation applied to the plane.</param>
+        /// <returns>A plane mesh with the specified width and height.</returns>
         public static Mesh CreatePlane(float width, float height, Rotation? rotation = null)
         {
             // Calculate half extents for each dimension
@@ -169,9 +204,102 @@ namespace PentaGE.Core.Graphics
             return mesh;
         }
 
-        //public static Mesh CreateCylinder(float width, float height)
-        //{
+        /// <summary>
+        /// Creates a cylinder mesh with the specified radius and height.
+        /// </summary>
+        /// <param name="radius">The radius of the cylinder.</param>
+        /// <param name="height">The height of the cylinder.</param>
+        /// <param name="segments">The number of segments used to approximate the cylinder's sides.</param>
+        /// <param name="textureAspectRatio">The aspect ratio to adjust the texture mapping.</param>
+        /// <returns>A cylinder mesh.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when radius, height, segments, or textureAspectRatio is out of valid range.</exception>
+        public static Mesh CreateCylinder(float radius, float height, int segments = 16, float textureAspectRatio = 1f)
+        {
+            if (radius <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(radius), "Radius must be greater than zero.");
 
-        //}
+            if (height <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(height), "Height must be greater than zero.");
+
+            if (segments < 3)
+                throw new ArgumentOutOfRangeException(nameof(segments), "Segments must be greater than or equal to three.");
+
+            if (textureAspectRatio <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(textureAspectRatio), "Texture aspect ratio must be greater than zero.");
+
+            // Calculate half height
+            float halfHeight = height * 0.5f;
+
+            // Define vertices of the cylinder
+            List<Vertex> vertices = new();
+
+            // Add vertices for the sides of the cylinder
+            Vector3 topCenter = new(0f, halfHeight, 0f);
+            Vector3 bottomCenter = new(0f, -halfHeight, 0f);
+            for (int i = 0; i <= segments; i++)
+            {
+                float angle = 2 * MathF.PI * i / segments;
+                float x = radius * MathF.Cos(angle);
+                float z = radius * MathF.Sin(angle);
+
+                // Calculate texture coordinates based on vertex position
+                Vector2 yTexCoord = new(x / (radius * 2) + 0.5f, z / (radius * 2) + 0.5f);
+
+                // Adjust the x texture coordinate for the sides
+                float u = x / radius * 0.5f + 0.5f;
+
+                // Adjust for texture aspect ratio
+                u *= textureAspectRatio;
+
+                // Bottom side face vertex
+                Vector3 bottomSidePosition = new(x, -halfHeight, z);
+                Vector3 bottomSideNormal = new Vector3(x, 0f, z).Normalize();
+                Vector2 bottomSideTexCoord = new(u, 0f);
+                vertices.Add(new Vertex(bottomSidePosition, bottomSideNormal, bottomSideTexCoord));
+
+                // Top side face vertex
+                Vector3 topSidePosition = new(x, halfHeight, z);
+                Vector3 topSideNormal = new Vector3(x, 0f, z).Normalize();
+                Vector2 topSideTexCoord = new(u, 1f);
+                vertices.Add(new Vertex(topSidePosition, topSideNormal, topSideTexCoord));
+
+                // Top face vertices
+                vertices.Add(new Vertex(new Vector3(x, halfHeight, z), World.UpVector, yTexCoord));
+                vertices.Add(new Vertex(topCenter, World.UpVector, new Vector2(0.5f, 0.5f)));
+
+                // Bottom face vertices
+                vertices.Add(new Vertex(new Vector3(x, -halfHeight, z), World.DownVector, yTexCoord));
+                vertices.Add(new Vertex(bottomCenter, World.DownVector, new Vector2(0.5f, 0.5f)));
+            }
+
+            // Define indices for the cylinder
+            List<uint> indices = new();
+
+            int stride = 6;
+            for (int i = 0; i < segments * stride; i += stride)
+            {
+                // Bottom side face
+                indices.Add((uint)i);                   // BS1  |    x
+                indices.Add((uint)(i + 1));             // TS1  |   xx
+                indices.Add((uint)(i + stride));        // BS2  |  xxx
+
+                // Top side face
+                indices.Add((uint)(i + stride));        // BS2  |  xxx
+                indices.Add((uint)(i + 1));             // TS1  |  xx
+                indices.Add((uint)(i + stride + 1));    // TS2  |  x
+
+                // Top face
+                indices.Add((uint)(i + 2));             // TF1  |  xxxxx
+                indices.Add((uint)(i + 3));             // TC   |   xxx
+                indices.Add((uint)(i + stride + 2));    // TF2  |    x  
+
+                // Bottom face
+                indices.Add((uint)(i + 4));             // BF1  |  xxxxx
+                indices.Add((uint)(i + 5));             // BC   |   xxx
+                indices.Add((uint)(i + stride + 4));    // BF2  |    x
+            }
+
+            return new Mesh(vertices, indices);
+        }
     }
 }
