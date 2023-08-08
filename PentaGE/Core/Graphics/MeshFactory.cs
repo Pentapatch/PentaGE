@@ -134,5 +134,44 @@ namespace PentaGE.Core.Graphics
 
             return new Mesh(vertices, indices);
         }
+
+        public static Mesh CreatePlane(float size, Rotation? rotation = null) => 
+            CreatePlane(size, size, rotation);
+
+        public static Mesh CreatePlane(float width, float height, Rotation? rotation = null)
+        {
+            // Calculate half extents for each dimension
+            float halfWidth = width * 0.5f;
+            float halfHeight = height * 0.5f;
+
+            // Define vertices of the plane
+            List<Vertex> vertices = new()
+            {
+                new Vertex(new Vector3(-halfWidth, 0f, halfHeight), World.UpVector, BottomLeft),
+                new Vertex(new Vector3(-halfWidth, 0f, -halfHeight), World.UpVector, TopLeft),
+                new Vertex(new Vector3(halfWidth, 0f, -halfHeight), World.UpVector, TopRight),
+                new Vertex(new Vector3(halfWidth, 0f, halfHeight), World.UpVector, BottomRight),
+            };
+
+            // Define indices for the plane
+            List<uint> indices = new()
+            {
+                0, 1, 2,
+                2, 3, 0
+            };
+
+            Mesh mesh = new(vertices, indices);
+            if (rotation is not null)
+            {
+                mesh.Rotate(rotation.Value);
+            }
+
+            return mesh;
+        }
+
+        //public static Mesh CreateCylinder(float width, float height)
+        //{
+
+        //}
     }
 }

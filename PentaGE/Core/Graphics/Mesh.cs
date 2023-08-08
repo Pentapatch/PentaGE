@@ -1,4 +1,5 @@
 ﻿using PentaGE.Common;
+using PentaGE.Maths;
 using System.Numerics;
 
 namespace PentaGE.Core.Graphics
@@ -96,10 +97,16 @@ namespace PentaGE.Core.Graphics
                 Vertices[i] = new(
                     Vector3.Transform(
                         Vertices[i].Coordinates,
-                        Matrix4x4.CreateFromYawPitchRoll(rotation.Yaw, rotation.Pitch, rotation.Roll)),
+                        Matrix4x4.CreateFromYawPitchRoll(
+                            MathHelper.DegreesToRadians(rotation.Yaw),
+                            MathHelper.DegreesToRadians(rotation.Pitch),
+                            MathHelper.DegreesToRadians(rotation.Roll))),
                     Vector3.Transform(
                         Vertices[i].Normal,
-                        Matrix4x4.CreateFromYawPitchRoll(rotation.Yaw, rotation.Pitch, rotation.Roll)),
+                        Matrix4x4.CreateFromYawPitchRoll(
+                            MathHelper.DegreesToRadians(rotation.Yaw),
+                            MathHelper.DegreesToRadians(rotation.Pitch),
+                            MathHelper.DegreesToRadians(rotation.Roll))),
                     Vertices[i].TextureCoordinates);
             }
         }
