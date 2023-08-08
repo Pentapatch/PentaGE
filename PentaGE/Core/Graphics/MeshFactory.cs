@@ -232,8 +232,6 @@ namespace PentaGE.Core.Graphics
 
             // Define vertices of the cylinder
             List<Vertex> vertices = new();
-
-            // Add vertices for the sides of the cylinder
             Vector3 topCenter = new(0f, halfHeight, 0f);
             Vector3 bottomCenter = new(0f, -halfHeight, 0f);
             for (int i = 0; i <= segments; i++)
@@ -297,6 +295,71 @@ namespace PentaGE.Core.Graphics
                 indices.Add((uint)(i + 4));             // BF1  |  xxxxx
                 indices.Add((uint)(i + 5));             // BC   |   xxx
                 indices.Add((uint)(i + stride + 4));    // BF2  |    x
+            }
+
+            return new Mesh(vertices, indices);
+        }
+
+        /// <summary>
+        /// Creates a sphere mesh with the specified diameter using spherical coordinates mapping.
+        /// </summary>
+        /// <param name="diameter">The diameter of the sphere.</param>
+        /// <param name="latitudeSegments">The number of segments used to approximate the sphere's latitude.</param>
+        /// <param name="longitudeSegments">The number of segments used to approximate the sphere's longitude.</param>
+        /// <returns>A sphere mesh with the specified diameter.</returns>
+        public static Mesh CreateSphere(float diameter, int latitudeSegments = 16, int longitudeSegments = 32)
+        {
+            // Calculate radius
+            float radius = diameter * 0.5f;
+
+            // Define vertices of the sphere
+            List<Vertex> vertices = new();
+
+            for (int lat = 0; lat <= latitudeSegments; lat++)
+            {
+                // Calculate the angle of latitude
+                float theta = lat * MathF.PI / latitudeSegments;
+                float sinTheta = MathF.Sin(theta);
+                float cosTheta = MathF.Cos(theta);
+
+                for (int lon = 0; lon <= longitudeSegments; lon++)
+                {
+                    // Calculate the angle of longitude
+                    float phi = lon * 2 * MathF.PI / longitudeSegments;
+                    float sinPhi = MathF.Sin(phi);
+                    float cosPhi = MathF.Cos(phi);
+
+                    // Calculate vertex position
+                    float x = cosPhi * sinTheta;
+                    float y = cosTheta;
+                    float z = sinPhi * sinTheta;
+
+                    Vector3 position = new(x * radius, y * radius, z * radius);
+                    Vector3 normal = new(x, y, z);
+                    Vector2 texCoord = new((float)lon / longitudeSegments, (float)lat / latitudeSegments);
+
+                    vertices.Add(new Vertex(position, normal, -texCoord));
+                }
+            }
+
+            // Define indices for the sphere
+            List<uint> indices = new();
+
+            for (int lat = 0; lat < latitudeSegments; lat++)
+            {
+                for (int lon = 0; lon < longitudeSegments; lon++)
+                {
+                    int first = lat * (longitudeSegments + 1) + lon;
+                    int second = first + longitudeSegments + 1;
+
+                    indices.Add((uint)first);
+                    indices.Add((uint)second);
+                    indices.Add((uint)(first + 1));
+
+                    indices.Add((uint)second);
+                    indices.Add((uint)(second + 1));
+                    indices.Add((uint)(first + 1));
+                }
             }
 
             return new Mesh(vertices, indices);

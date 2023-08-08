@@ -158,7 +158,7 @@ namespace PentaGE.Core.Rendering
             renderableMesh.GetComponent<MeshRenderComponent>()!.Material.SpecularStrength = 1f;
 
             // Initialize test light
-            lightMesh1 = MeshFactory.CreateCube(0.2f);
+            lightMesh1 = MeshFactory.CreateSphere(0.2f);
             var transform2 = new Transform(new(0.75f, 0.75f, 0.75f), new(0, 0, 0), new(1f, 1f, 1f));
             var renderableLight = new RenderableMeshEntity(lightMesh1, lightShader);
 
