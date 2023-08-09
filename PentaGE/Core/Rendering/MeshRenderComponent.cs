@@ -12,15 +12,24 @@ namespace PentaGE.Core.Rendering
     /// </summary>
     public sealed class MeshRenderComponent : Component, IDisposable
     {
-        private readonly VertexArray vao;
-        private readonly VertexBuffer vbo;
-        private readonly ElementBuffer? ebo = null;
+        private Mesh _mesh;
+        private VertexArray _vao;
+        private VertexBuffer _vbo;
+        private ElementBuffer? _ebo = null;
 
         // TODO: Changing the mesh should update the VBO and EBO.
         /// <summary>
         /// Gets or sets the mesh to be rendered.
         /// </summary>
-        public Mesh Mesh { get; set; }
+        public Mesh Mesh
+        {
+            get => _mesh;
+            set
+            {
+                _mesh = value;
+                InitializeBuffers();
+            }
+        }
 
         /// <summary>
         /// Gets or sets the shader used for rendering the mesh.
@@ -57,19 +66,29 @@ namespace PentaGE.Core.Rendering
             Material = material ?? new();
             DrawMode = DrawMode.Triangles;
 
+            InitializeBuffers();
+        }
+
+        private unsafe void InitializeBuffers()
+        {
+            // Dispose of the old buffers (if applicable)
+            _vao?.Dispose();
+            _vbo?.Dispose();
+            _ebo?.Dispose();
+
             // Create a VAO, VBO, and (optionally) EBO
-            vao = new();
-            vbo = new(Mesh.Vertices);
+            _vao = new();
+            _vbo = new(Mesh.Vertices);
 
             if (Mesh.Indices is not null)
             {
-                ebo = new(Mesh.Indices);
+                _ebo = new(Mesh.Indices);
             }
 
             // Bind the VAO, VBO, and EBO to the current context
-            vao.Bind();
-            vbo.Bind();
-            ebo?.Bind();
+            _vao.Bind();
+            _vbo.Bind();
+            _ebo?.Bind();
 
             // Specify how the vertex attributes should be interpreted.
             int vertexSize = sizeof(Vertex);
@@ -140,14 +159,14 @@ namespace PentaGE.Core.Rendering
 
             // Bind the Vertex Array Object (VAO) to use the configuration
             // of vertex attributes stored in it.
-            vao.Bind();
+            _vao.Bind();
 
             // Draw the object using the indices of the EBO or the vertices of the VBO.
             glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
 
-            if (ebo is not null && Mesh.Indices is not null)
+            if (_ebo is not null && Mesh.Indices is not null)
             {
-                ebo.Bind();
+                _ebo.Bind();
                 glDrawElements((int)DrawMode, Mesh.Indices.Count, GL_UNSIGNED_INT, null);
             }
             else
@@ -164,9 +183,9 @@ namespace PentaGE.Core.Rendering
         /// <inheritdoc />
         public void Dispose()
         {
-            vao.Dispose();
-            vbo.Dispose();
-            ebo?.Dispose();
+            _vao.Dispose();
+            _vbo.Dispose();
+            _ebo?.Dispose();
         }
 
         /// <inheritdoc />

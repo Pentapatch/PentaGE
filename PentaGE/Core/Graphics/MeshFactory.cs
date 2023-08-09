@@ -109,6 +109,14 @@ namespace PentaGE.Core.Graphics
             // Define vertices of the pyramid
             List<Vertex> vertices = new()
             {
+                //       2          COUNTER CLOCKWISE       3-------2                          -1:1 ------- 1:1
+                //      / \         WINDING ORDER _^        | \     |                            |     |     |
+                //     / D \        Triangle A: 0, 3, 5     |  \    |  PLANE                     |     |     |
+                //  5 /-----\ 4     Triangle B: 3, 4, 5     | A \ B |  Triangle A: 0, 1, 3       |----0:0----|
+                //   / \ B / \      Triangle C: 3, 1, 4     |    \  |  Triangle B: 1, 2, 3       |     |     |
+                //  / A \ / C \     Triangle D: 5, 4, 2     |     \ |                            |     |     |
+                // 0 ----3-----1    -------------------     0-------1                          -1:-1 ------ 1:-1
+
                 new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.ForwardVector, BottomLeft),
                 new Vertex(upVector, World.ForwardVector, TopCenter),
                 new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.ForwardVector, BottomRight),
@@ -178,14 +186,6 @@ namespace PentaGE.Core.Graphics
             // Calculate half extents for each dimension
             float halfWidth = width * 0.5f;
             float halfHeight = height * 0.5f;
-
-            //       2          COUNTER CLOCKWISE       3-------2 
-            //      / \         WINDING ORDER _^        | \     |
-            //     / D \        Triangle A: 0, 3, 5     |  \    |  PLANE
-            //  5 /-----\ 4     Triangle B: 3, 4, 5     | A \ B |  Triangle A: 0, 1, 3
-            //   / \ B / \      Triangle C: 3, 1, 4     |    \  |  Triangle B: 1, 2, 3
-            //  / A \ / C \     Triangle D: 5, 4, 2     |     \ |  
-            // 0 ----3-----1    -------------------     0-------1
 
             // Define vertices of the plane
             List<Vertex> vertices = new()

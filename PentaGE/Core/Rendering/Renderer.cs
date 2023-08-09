@@ -19,6 +19,7 @@ namespace PentaGE.Core.Rendering
         private bool cullingEnabled = false;
         private Shader shader;
         private Shader faceShader;
+        private Shader normalShader;
         private Shader lightShader;
         private Shader gridShader;
         private Texture texture;
@@ -95,7 +96,6 @@ namespace PentaGE.Core.Rendering
             testMesh1 = MeshFactory.CreatePyramid(1f, 0.6f, 1f);
             //testMesh1 = MeshFactory.CreatePlane(10f, new(0, -90f, 0));
             testMesh1.TileTexture(5, 6);
-            testMesh1.Subdivide(1);
             //testMesh1.Offset(0, 0.25f, 0);
             //testMesh1.Rotate(45, 0, 0);
             var transform = new Transform(new(0, 0, 0), new(0, 0, 0), new(1f, 1f, 1f));
@@ -137,11 +137,6 @@ namespace PentaGE.Core.Rendering
                 #region Test rotation
 
                 // Rotate the object based on the current time
-                //objectTransform.Rotation = rotate ? new(
-                //    MathF.Sin((float)_engine.Timing.TotalElapsedTime) * 90,
-                //    MathF.Cos((float)_engine.Timing.TotalElapsedTime) * 90,
-                //    0) :
-                //    new(0, 0, 0);
                 objectTransform.Rotation = rotate ? new(
                     MathF.Sin((float)_engine.Timing.TotalElapsedTime) * 180,
                     0,
@@ -153,12 +148,12 @@ namespace PentaGE.Core.Rendering
                 float hue = MathF.Sin((float)_engine.Timing.TotalElapsedTime) * 0.5f + 0.5f; // Adjust the range to [0, 1]
                 _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Material.Albedo =
                     materialTest ?
-                    ColorFromHSL(hue, 1.0f, 0.5f) :
-                    new(1, 1, 1);
+                        ColorFromHSL(hue, 1.0f, 0.5f) :
+                        new(1, 1, 1);
                 _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Material.SpecularStrength =
                     materialTest ?
-                    (MathF.Sin((float)_engine.Timing.TotalElapsedTime) + 1) / 2 * 2 :
-                    2;
+                        (MathF.Sin((float)_engine.Timing.TotalElapsedTime) + 1) / 2 * 2 :
+                        2;
 
                 #endregion
 
@@ -289,6 +284,15 @@ namespace PentaGE.Core.Rendering
             {
                 _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = faceShader;
             }
+            else if (e.Key == Key.F7)
+            {
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = normalShader;
+            }
+            else if (e.Key == Key.F10)
+            {
+                testMesh1.Subdivide(1);
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = testMesh1;
+            }
         }
 
         private void InitializeShadersAndTextures()
@@ -313,6 +317,19 @@ namespace PentaGE.Core.Rendering
                 {
                     faceShader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Face.shader");
                     faceShader.Load();
+                }
+                catch (System.Exception ex)
+                {
+                    Log.Error($"Error loading shader: {ex}");
+                }
+            }
+
+            using (var logger = Log.Logger.BeginPerfLogger("Loading normal shader"))
+            {
+                try
+                {
+                    normalShader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Normal.shader");
+                    normalShader.Load();
                 }
                 catch (System.Exception ex)
                 {
