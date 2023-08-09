@@ -1,6 +1,34 @@
 ﻿using PentaGE.Common;
 using System.Numerics;
 
+//   __________    +
+//  /_________/|   ^
+// |         | |   | Y
+// |         | |   v
+// |         | |   -
+// |_________|/   /
+//               / Z
+// - <-- X --> +
+
+//       2          COUNTER CLOCKWISE       3 ----- 2                          -1:1 ------- 1:1
+//      / \         WINDING ORDER _^        | \     |                            |     |     |   OpenGL
+//     / D \        Triangle A: 0, 3, 5     |  \    |  PLANE                     |     |     |   Right
+//  5 /-----\ 4     Triangle B: 3, 4, 5     | A \ B |  Triangle A: 0, 1, 3       |----0:0----|   Handed
+//   / \ B / \      Triangle C: 3, 1, 4     |    \  |  Triangle B: 1, 2, 3       |     |     |   Coordinate
+//  / A \ / C \     Triangle D: 5, 4, 2     |     \ |                            |     |     |   System
+// 0 ----3---- 1    -------------------     0 ----- 1                          -1:-1 ------ 1:-1
+
+//       2          CLOCKWISE               3 ----- 2                          -1:1 ------- 1:1
+//      / \         WINDING ORDER _v        | \     |                            |     |     |   OpenGL
+//     / A \        Triangle A: 0, 5, 3     |  \    |  PLANE                     |     |     |   Right
+//  5 /-----\ 4     Triangle B: 3, 5, 4     | A \ B |  Triangle A: 0, 3, 1       |----0:0----|   Handed
+//   / \ C / \      Triangle C: 3, 4, 1     |    \  |  Triangle B: 1, 3, 2       |     |     |   Coordinate
+//  / D \ / B \     Triangle D: 5, 2, 4     |     \ |                            |     |     |   System
+// 0 ----3-----1    -------------------     0 ----- 1                          -1:-1 ------ 1:-1
+
+// Front, Left, Top    = Counter Clockwise Winding
+// Back, Right, Bottom = Clockwise Winding
+
 namespace PentaGE.Core.Graphics
 {
     /// <summary>
@@ -39,52 +67,52 @@ namespace PentaGE.Core.Graphics
             // Define vertices of the cuboid
             List<Vertex> vertices = new()
             {
-                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.ForwardVector, BottomLeft),
-                new Vertex(new Vector3(-halfWidth, halfHeight, halfDepth), World.ForwardVector, TopLeft),
-                new Vertex(new Vector3(halfWidth, halfHeight, halfDepth), World.ForwardVector, TopRight),
-                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.ForwardVector, BottomRight),
+                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.ForwardVector, BottomLeft),   // 0
+                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.ForwardVector, BottomRight),   // 1
+                new Vertex(new Vector3(halfWidth, halfHeight, halfDepth), World.ForwardVector, TopRight),       // 2
+                new Vertex(new Vector3(-halfWidth, halfHeight, halfDepth), World.ForwardVector, TopLeft),       // 3
 
-                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.BackwardVector, BottomLeft),
-                new Vertex(new Vector3(-halfWidth, halfHeight, -halfDepth), World.BackwardVector, TopLeft),
-                new Vertex(new Vector3(halfWidth, halfHeight, -halfDepth), World.BackwardVector, TopRight),
-                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.BackwardVector, BottomRight),
+                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.BackwardVector, BottomLeft), // 4
+                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.BackwardVector, BottomRight), // 5
+                new Vertex(new Vector3(halfWidth, halfHeight, -halfDepth), World.BackwardVector, TopRight),     // 6
+                new Vertex(new Vector3(-halfWidth, halfHeight, -halfDepth), World.BackwardVector, TopLeft),     // 7
 
-                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.LeftVector, BottomLeft),
-                new Vertex(new Vector3(-halfWidth, halfHeight, -halfDepth), World.LeftVector, TopLeft),
-                new Vertex(new Vector3(-halfWidth, halfHeight, halfDepth), World.LeftVector, TopRight),
-                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.LeftVector, BottomRight),
+                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.LeftVector, BottomLeft),     // 8
+                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.LeftVector, BottomRight),     // 9
+                new Vertex(new Vector3(-halfWidth, halfHeight, halfDepth), World.LeftVector, TopRight),         // 10
+                new Vertex(new Vector3(-halfWidth, halfHeight, -halfDepth), World.LeftVector, TopLeft),         // 11
 
-                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.RightVector, BottomLeft),
-                new Vertex(new Vector3(halfWidth, halfHeight, -halfDepth), World.RightVector, TopLeft),
-                new Vertex(new Vector3(halfWidth, halfHeight, halfDepth), World.RightVector, TopRight),
-                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.RightVector, BottomRight),
+                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.RightVector, BottomLeft), // 12
+                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.RightVector, BottomRight), // 13
+                new Vertex(new Vector3(halfWidth, halfHeight, halfDepth), World.RightVector, TopRight),     // 14
+                new Vertex(new Vector3(halfWidth, halfHeight, -halfDepth), World.RightVector, TopLeft),     // 15
 
-                new Vertex(new Vector3(-halfWidth, halfHeight, -halfDepth), World.UpVector, BottomLeft),
-                new Vertex(new Vector3(-halfWidth, halfHeight, halfDepth), World.UpVector, TopLeft),
-                new Vertex(new Vector3(halfWidth, halfHeight, halfDepth), World.UpVector, TopRight),
-                new Vertex(new Vector3(halfWidth, halfHeight, -halfDepth), World.UpVector, BottomRight),
+                new Vertex(new Vector3(-halfWidth, halfHeight, halfDepth), World.UpVector, BottomLeft),     // 16
+                new Vertex(new Vector3(halfWidth, halfHeight, halfDepth), World.UpVector, BottomRight),     // 17
+                new Vertex(new Vector3(halfWidth, halfHeight, -halfDepth), World.UpVector, TopRight),       // 18
+                new Vertex(new Vector3(-halfWidth, halfHeight, -halfDepth), World.UpVector, TopLeft),       // 19
 
-                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.DownVector, BottomLeft),
-                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.DownVector, TopLeft),
-                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.DownVector, TopRight),
-                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.DownVector, BottomRight),
+                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.DownVector, BottomLeft),  // 20
+                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.DownVector, BottomRight),  // 21
+                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.DownVector, TopRight),    // 22
+                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.DownVector, TopLeft),    // 23
             };
 
             // Define indices for the cuboid
             List<uint> indices = new()
             {
-                0, 1, 2,    // Front face
-                2, 3, 0,
-                4, 5, 6,    // Back face
-                6, 7, 4,
-                8, 9, 10,   // Left face
-                10, 11, 8,
-                12, 13, 14, // Right face
-                14, 15, 12,
-                16, 17, 18, // Top face
-                18, 19, 16,
-                20, 21, 22, // Bottom face
-                22, 23, 20
+                0, 1, 3,    // Front face
+                1, 2, 3,
+                4, 7, 5,    // Back face
+                5, 7, 6,
+                8, 9, 11,   // Left face
+                9, 10, 11,
+                12, 15, 13, // Right face
+                13, 15, 14,
+                16, 17, 19, // Top face
+                17, 18, 19,
+                20, 23, 21, // Bottom face
+                21, 23, 22
             };
 
             return new Mesh(vertices, indices);
@@ -115,7 +143,7 @@ namespace PentaGE.Core.Graphics
                 //  5 /-----\ 4     Triangle B: 3, 4, 5     | A \ B |  Triangle A: 0, 1, 3       |----0:0----|
                 //   / \ B / \      Triangle C: 3, 1, 4     |    \  |  Triangle B: 1, 2, 3       |     |     |
                 //  / A \ / C \     Triangle D: 5, 4, 2     |     \ |                            |     |     |
-                // 0 ----3-----1    -------------------     0-------1                          -1:-1 ------ 1:-1
+                // 0 ----3---- 1    -------------------     0-------1                          -1:-1 ------ 1:-1
 
                 new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.ForwardVector, BottomLeft),
                 new Vertex(upVector, World.ForwardVector, TopCenter),

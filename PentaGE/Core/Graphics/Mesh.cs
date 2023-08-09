@@ -2,22 +2,6 @@
 using PentaGE.Maths;
 using System.Numerics;
 
-//       0          CLOCKWISE               0-------1 
-//      / \         WINDING ORDER _v        | \     |
-//     / A \        Triangle A: 0, 3, 5     |  \    |  PLANE
-//  5 /-----\ 3     Triangle B: 3, 1, 4     | A \ B |  Triangle A: 0, 1, 2
-//   / \ C / \      Triangle C: 5, 3, 4     |    \  |  Triangle B: 2, 3, 0
-//  / D \ / B \     Triangle D: 5, 4, 2     |     \ |  
-// 2 ----4-----1    -------------------     3-------2
-
-//       2          COUNTER CLOCKWISE       3-------2 
-//      / \         WINDING ORDER _^        | \     |
-//     / D \        Triangle A: 0, 3, 5     |  \    |  PLANE
-//  5 /-----\ 4     Triangle B: 3, 4, 5     | A \ B |  Triangle A: 0, 1, 3
-//   / \ B / \      Triangle C: 3, 1, 4     |    \  |  Triangle B: 1, 2, 3
-//  / A \ / C \     Triangle D: 5, 4, 2     |     \ |  
-// 0 ----3-----1    -------------------     0-------1
-
 namespace PentaGE.Core.Graphics
 {
     /// <summary>
