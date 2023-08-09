@@ -78,7 +78,7 @@ namespace PentaGE.Core
         /// <summary>
         /// Starts the game engine, initializing the engine and entering the game loop.
         /// </summary>
-        /// <returns><c>true</c> if the engine starts successfully; otherwise, <c>false</c>.</returns>
+        /// <returns><c>true</c> if the engine started successfully; otherwise, <c>false</c>.</returns>
         public bool Start()
         {
             // Initialize Serilog
@@ -90,6 +90,8 @@ namespace PentaGE.Core
             Log.Information("Starting PentaGE.");
             var state = InitializeGameEngine();
             Log.Information("Terminated PentaGE.");
+
+            _state = GameState.Terminated;
 
             return state;
         }
@@ -117,6 +119,8 @@ namespace PentaGE.Core
             {
                 Shutdown();
             }
+
+            Windows.Dispose();
         }
 
         /// <summary>
