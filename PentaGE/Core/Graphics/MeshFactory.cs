@@ -82,20 +82,20 @@ namespace PentaGE.Core.Graphics
                 new Vertex(new Vector3(-halfWidth, halfHeight, halfDepth), World.LeftVector, TopRight),         // 10
                 new Vertex(new Vector3(-halfWidth, halfHeight, -halfDepth), World.LeftVector, TopLeft),         // 11
 
-                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.RightVector, BottomLeft), // 12
-                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.RightVector, BottomRight), // 13
-                new Vertex(new Vector3(halfWidth, halfHeight, halfDepth), World.RightVector, TopRight),     // 14
-                new Vertex(new Vector3(halfWidth, halfHeight, -halfDepth), World.RightVector, TopLeft),     // 15
+                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.RightVector, BottomLeft),     // 12
+                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.RightVector, BottomRight),     // 13
+                new Vertex(new Vector3(halfWidth, halfHeight, halfDepth), World.RightVector, TopRight),         // 14
+                new Vertex(new Vector3(halfWidth, halfHeight, -halfDepth), World.RightVector, TopLeft),         // 15
 
-                new Vertex(new Vector3(-halfWidth, halfHeight, halfDepth), World.UpVector, BottomLeft),     // 16
-                new Vertex(new Vector3(halfWidth, halfHeight, halfDepth), World.UpVector, BottomRight),     // 17
-                new Vertex(new Vector3(halfWidth, halfHeight, -halfDepth), World.UpVector, TopRight),       // 18
-                new Vertex(new Vector3(-halfWidth, halfHeight, -halfDepth), World.UpVector, TopLeft),       // 19
+                new Vertex(new Vector3(-halfWidth, halfHeight, halfDepth), World.UpVector, BottomLeft),         // 16
+                new Vertex(new Vector3(halfWidth, halfHeight, halfDepth), World.UpVector, BottomRight),         // 17
+                new Vertex(new Vector3(halfWidth, halfHeight, -halfDepth), World.UpVector, TopRight),           // 18
+                new Vertex(new Vector3(-halfWidth, halfHeight, -halfDepth), World.UpVector, TopLeft),           // 19
 
-                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.DownVector, BottomLeft),  // 20
-                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.DownVector, BottomRight),  // 21
-                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.DownVector, TopRight),    // 22
-                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.DownVector, TopLeft),    // 23
+                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.DownVector, BottomLeft),      // 20
+                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.DownVector, BottomRight),      // 21
+                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.DownVector, TopRight),        // 22
+                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.DownVector, TopLeft),        // 23
             };
 
             // Define indices for the cuboid
@@ -137,14 +137,6 @@ namespace PentaGE.Core.Graphics
             // Define vertices of the pyramid
             List<Vertex> vertices = new()
             {
-                //       2          COUNTER CLOCKWISE       3-------2                          -1:1 ------- 1:1
-                //      / \         WINDING ORDER _^        | \     |                            |     |     |
-                //     / D \        Triangle A: 0, 3, 5     |  \    |  PLANE                     |     |     |
-                //  5 /-----\ 4     Triangle B: 3, 4, 5     | A \ B |  Triangle A: 0, 1, 3       |----0:0----|
-                //   / \ B / \      Triangle C: 3, 1, 4     |    \  |  Triangle B: 1, 2, 3       |     |     |
-                //  / A \ / C \     Triangle D: 5, 4, 2     |     \ |                            |     |     |
-                // 0 ----3---- 1    -------------------     0-------1                          -1:-1 ------ 1:-1
-
                 new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.ForwardVector, BottomLeft),
                 new Vertex(upVector, World.ForwardVector, TopCenter),
                 new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.ForwardVector, BottomRight),
@@ -161,10 +153,10 @@ namespace PentaGE.Core.Graphics
                 new Vertex(upVector, World.RightVector, TopCenter),
                 new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.RightVector, BottomRight),
 
-                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.DownVector, BottomLeft),
-                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.DownVector, TopLeft),
-                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.DownVector, TopRight),
-                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.DownVector, BottomRight),
+                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.DownVector, BottomLeft),
+                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.DownVector, BottomRight),
+                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.DownVector, TopRight),
+                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.DownVector, TopLeft),
             };
 
             // Recalculate the normals for the front, back, left and right faces
@@ -182,12 +174,12 @@ namespace PentaGE.Core.Graphics
             // Define indices for the pyramid
             List<uint> indices = new()
             {
-                0, 1, 2,    // Front face
-                3, 4, 5,    // Back face
-                6, 7, 8,    // Left face
-                9, 10, 11,  // Right face
-                12, 13, 14, // Bottom face
-                14, 15, 12, // Bottom face
+                2, 1, 0,    // Front face
+                3, 5, 4,    // Back face
+                8, 7, 6,    // Left face
+                11, 10, 9,  // Right face
+                12, 15, 13, // Bottom face
+                13, 15, 14, // Bottom face
             };
 
             return new Mesh(vertices, indices);

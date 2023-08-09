@@ -19,6 +19,7 @@ namespace PentaGE.Core.Rendering
         private bool cullingEnabled = false;
         private Shader shader;
         private Shader faceShader;
+        private Shader faceShader2;
         private Shader normalShader;
         private Shader lightShader;
         private Shader gridShader;
@@ -95,6 +96,7 @@ namespace PentaGE.Core.Rendering
             // Initialize test mesh
             testMesh1 = MeshFactory.CreatePyramid(1f, 0.6f, 1f);
             //testMesh1 = MeshFactory.CreatePlane(10f, new(0, -90f, 0));
+            //testMesh1 = MeshFactory.CreateCube(1f);
             testMesh1.TileTexture(5, 6);
             //testMesh1.Offset(0, 0.25f, 0);
             //testMesh1.Rotate(45, 0, 0);
@@ -282,7 +284,10 @@ namespace PentaGE.Core.Rendering
             }
             else if (e.Key == Key.F6)
             {
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = faceShader;
+                if (e.ModifierKeys == ModifierKey.Shift)
+                    _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = faceShader2;
+                else
+                    _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = faceShader;
             }
             else if (e.Key == Key.F7)
             {
@@ -311,12 +316,25 @@ namespace PentaGE.Core.Rendering
                 }
             }
 
-            using (var logger = Log.Logger.BeginPerfLogger("Loading face shader"))
+            using (var logger = Log.Logger.BeginPerfLogger("Loading face shader 1"))
             {
                 try
                 {
                     faceShader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Face.shader");
                     faceShader.Load();
+                }
+                catch (System.Exception ex)
+                {
+                    Log.Error($"Error loading shader: {ex}");
+                }
+            }
+
+            using (var logger = Log.Logger.BeginPerfLogger("Loading face shader 2"))
+            {
+                try
+                {
+                    faceShader2 = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Face2.shader");
+                    faceShader2.Load();
                 }
                 catch (System.Exception ex)
                 {
