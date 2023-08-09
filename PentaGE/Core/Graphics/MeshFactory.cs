@@ -320,9 +320,9 @@ namespace PentaGE.Core.Graphics
                 indices.Add((uint)(i + stride + 2));    // TF2  |    x  
 
                 // Bottom face
-                indices.Add((uint)(i + 4));             // BF1  |  xxxxx
-                indices.Add((uint)(i + 5));             // BC   |   xxx
                 indices.Add((uint)(i + stride + 4));    // BF2  |    x
+                indices.Add((uint)(i + 5));             // BC   |   xxx
+                indices.Add((uint)(i + 4));             // BF1  |  xxxxx
             }
 
             return new Mesh(vertices, indices);
