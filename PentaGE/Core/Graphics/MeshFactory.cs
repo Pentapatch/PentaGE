@@ -380,13 +380,13 @@ namespace PentaGE.Core.Graphics
                     int first = lat * (longitudeSegments + 1) + lon;
                     int second = first + longitudeSegments + 1;
 
+                    indices.Add((uint)(first + 1));
+                    indices.Add((uint)second);
                     indices.Add((uint)first);
-                    indices.Add((uint)second);
-                    indices.Add((uint)(first + 1));
 
-                    indices.Add((uint)second);
-                    indices.Add((uint)(second + 1));
                     indices.Add((uint)(first + 1));
+                    indices.Add((uint)(second + 1));
+                    indices.Add((uint)second);
                 }
             }
 
