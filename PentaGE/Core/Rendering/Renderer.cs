@@ -16,13 +16,20 @@ namespace PentaGE.Core.Rendering
     internal class Renderer
     {
         private readonly PentaGameEngine _engine;
+        private bool cullingEnabled = false;
         private Shader shader;
+        private Shader faceShader;
+        private Shader faceShader2;
+        private Shader normalShader;
         private Shader lightShader;
         private Shader gridShader;
+        private Shader axesShader;
         private Texture texture;
         private Mesh testMesh1;
         private Mesh lightMesh1;
+        private Mesh axesGizmoMesh;
         private bool rotate = true;
+        private bool materialTest = true;
         private bool wireframe = false;
         private readonly Grid gridA = new(10, 10, new(1, 1, 1), 0.2f);
         private readonly Grid gridB = new(10, 20, new(0, 0, 0), 0.15f);
@@ -42,73 +49,6 @@ namespace PentaGE.Core.Rendering
             Position = new(0, 0, 0),    // in units
             Rotation = new(0, 0, 0),    // in degrees
             Scale = new(1, 1, 1),       // multipliers
-        };
-
-        private readonly List<Vertex> vertices = new()
-        {
-            //new(new(-1.0f, -1.0f,  1.0f), new(0f, 0f, 0f), new(0.0f, 0.0f)),
-            //new(new(-1.0f, -1.0f, -1.0f), new(0f, 0f, 0f), new(5.0f, 0.0f)),
-            //new(new( 1.0f, -1.0f, -1.0f), new(0f, 0f, 0f), new(0.0f, 0.0f)),
-            //new(new( 1.0f, -1.0f,  1.0f), new(0f, 0f, 0f), new(5.0f, 0.0f)),
-            //new(new( 0.0f,  2.0f,  0.0f), new(0f, 0f, 0f), new(2.5f, 5.0f)),
-            new(new(-0.5f, 0.0f,  0.5f), new( 0.0f, -1.0f, 0.0f), new(0.0f, 0.0f)), // Bottom side
-	        new(new(-0.5f, 0.0f, -0.5f), new( 0.0f, -1.0f, 0.0f), new(0.0f, 5.0f)), // Bottom side
-	        new(new( 0.5f, 0.0f, -0.5f), new( 0.0f, -1.0f, 0.0f), new(5.0f, 5.0f)), // Bottom side
-	        new(new( 0.5f, 0.0f,  0.5f), new( 0.0f, -1.0f, 0.0f), new(5.0f, 0.0f)), // Bottom side
-
-            new(new(-0.5f, 0.0f,  0.5f), new(-0.8f, 0.5f,  0.0f), new(0.0f, 0.0f)), // Left Side
-	        new(new(-0.5f, 0.0f, -0.5f), new(-0.8f, 0.5f,  0.0f), new(5.0f, 0.0f)), // Left Side
-	        new(new( 0.0f, 0.8f,  0.0f), new(-0.8f, 0.5f,  0.0f), new(2.5f, 5.0f)), // Left Side
-
-	        new(new(-0.5f, 0.0f, -0.5f), new( 0.0f, 0.5f, -0.8f), new(5.0f, 0.0f)), // Non-facing side
-	        new(new( 0.5f, 0.0f, -0.5f), new( 0.0f, 0.5f, -0.8f), new(0.0f, 0.0f)), // Non-facing side
-	        new(new( 0.0f, 0.8f,  0.0f), new( 0.0f, 0.5f, -0.8f), new(2.5f, 5.0f)), // Non-facing side
-
-	        new(new( 0.5f, 0.0f, -0.5f), new( 0.8f, 0.5f,  0.0f), new(0.0f, 0.0f)), // Right side
-	        new(new( 0.5f, 0.0f,  0.5f), new( 0.8f, 0.5f,  0.0f), new(5.0f, 0.0f)), // Right side
-	        new(new( 0.0f, 0.8f,  0.0f), new( 0.8f, 0.5f,  0.0f), new(2.5f, 5.0f)), // Right side
-
-	        new(new( 0.5f, 0.0f,  0.5f), new( 0.0f, 0.5f,  0.8f), new(5.0f, 0.0f)), // Facing side
-	        new(new(-0.5f, 0.0f,  0.5f), new( 0.0f, 0.5f,  0.8f), new(0.0f, 0.0f)), // Facing side
-	        new(new( 0.0f, 0.8f,  0.0f), new( 0.0f, 0.5f,  0.8f), new(2.5f, 5.0f))  // Facing side
-        };
-
-        private readonly List<uint> indices = new()
-        {
-            0, 1, 2, // Bottom side
-	        0, 2, 3, // Bottom side
-	        4, 6, 5, // Left side
-	        7, 9, 8, // Non-facing side
-	        10, 12, 11, // Right side
-	        13, 15, 14 // Facing side
-        };
-
-        private readonly List<Vertex> lightVertices = new()
-        {
-            new(new(-0.1f, -0.1f,  0.1f)),
-            new(new(-0.1f, -0.1f, -0.1f)),
-            new(new( 0.1f, -0.1f, -0.1f)),
-            new(new( 0.1f, -0.1f,  0.1f)),
-            new(new(-0.1f,  0.1f,  0.1f)),
-            new(new(-0.1f,  0.1f, -0.1f)),
-            new(new( 0.1f,  0.1f, -0.1f)),
-            new(new( 0.1f,  0.1f,  0.1f))
-        };
-
-        private readonly List<uint> lightIndices = new()
-        {
-            0, 1, 2,
-            0, 2, 3,
-            0, 4, 7,
-            0, 7, 3,
-            3, 7, 6,
-            3, 6, 2,
-            2, 6, 5,
-            2, 5, 1,
-            1, 5, 4,
-            1, 4, 0,
-            4, 5, 6,
-            4, 6, 7
         };
 
         /// <summary>
@@ -137,11 +77,6 @@ namespace PentaGE.Core.Rendering
                 return false;
             }
 
-            // Enable face culling
-            //glEnable(GL_CULL_FACE);
-            //glCullFace(GL_BACK);
-            //glFrontFace(GL_CCW);
-
             // Enable depth testing
             glEnable(GL_DEPTH_TEST);
 
@@ -156,66 +91,19 @@ namespace PentaGE.Core.Rendering
             #region Set up a test object to render
             // TODO: None of these should be here, it's just for testing
 
-            // Initializing test shader
-            using (var logger = Log.Logger.BeginPerfLogger("Loading default shader"))
-            {
-                try
-                {
-                    shader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Default.shader");
-                    shader.Load();
-                }
-                catch (System.Exception ex)
-                {
-                    Log.Error($"Error loading shader: {ex}");
-                }
-            }
-
-            using (var logger = Log.Logger.BeginPerfLogger("Loading light shader"))
-            {
-                try
-                {
-                    lightShader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Light.shader");
-                    lightShader.Load();
-                }
-                catch (System.Exception ex)
-                {
-                    Log.Error($"Error loading shader: {ex}");
-                }
-            }
-
-            using (var logger = Log.Logger.BeginPerfLogger("Loading grid shader"))
-            {
-                try
-                {
-                    gridShader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Grid.shader");
-                    gridShader.Load();
-                }
-                catch (System.Exception ex)
-                {
-                    Log.Error($"Error loading shader: {ex}");
-                }
-            }
-
-            // Initialize test texture
-            using (var logger = Log.Logger.BeginPerfLogger("Loading test texture"))
-            {
-                try
-                {
-                    texture = new(
-                    @"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Textures\SourceFiles\TestTexture.jpg",
-                    GL_TEXTURE_2D,
-                    GL_TEXTURE0,
-                    GL_RGBA,
-                    GL_UNSIGNED_BYTE);
-                    Texture.SetTextureSlot(shader, "tex0", 0); // Set the texture slot to 0
-                }
-                catch { /* Gets logged in the constructor */ }
-            }
+            // Initializing test shaders
+            // TODO: Move this to a shader manager
+            InitializeShadersAndTextures();
 
             // Initialize test mesh
-            testMesh1 = new(vertices, indices);
-            testMesh1.Offset(0, -0.25f, 0);
-            //testMesh1.Rotate(45, 45, 45);
+            testMesh1 = MeshFactory.CreatePyramid(1f, 0.6f, 1f);
+            //testMesh1 = MeshFactory.CreatePlane(10f, new(0, -90f, 0));
+            //testMesh1 = MeshFactory.CreateCube(1f);
+            //testMesh1 = MeshFactory.CreateSphere(1f);
+            //testMesh1 = MeshFactory.CreateCylinder(0.5f, 1f);
+            testMesh1.TileTexture(5, 6);
+            //testMesh1.Offset(0, 0.25f, 0);
+            //testMesh1.Rotate(45, 0, 0);
             var transform = new Transform(new(0, 0, 0), new(0, 0, 0), new(1f, 1f, 1f));
             var renderableMesh = new RenderableMeshEntity(testMesh1, shader, texture);
 
@@ -224,7 +112,7 @@ namespace PentaGE.Core.Rendering
             renderableMesh.GetComponent<MeshRenderComponent>()!.Material.SpecularStrength = 1f;
 
             // Initialize test light
-            lightMesh1 = new(lightVertices, lightIndices);
+            lightMesh1 = MeshFactory.CreateSphere(0.2f);
             var transform2 = new Transform(new(0.75f, 0.75f, 0.75f), new(0, 0, 0), new(1f, 1f, 1f));
             var renderableLight = new RenderableMeshEntity(lightMesh1, lightShader);
 
@@ -235,10 +123,16 @@ namespace PentaGE.Core.Rendering
             var renderableGridMajor = new RenderableGridEntity(gridA, gridShader);
             var renderableGridMinor = new RenderableGridEntity(gridB, gridShader);
 
+            // Initialize axes gizmo
+            axesGizmoMesh = MeshFactory.CreateAxesGizmo(0.1f);
+            var renderableAxesGizmo = new RenderableMeshEntity(axesGizmoMesh, axesShader);
+            renderableAxesGizmo.GetComponent<MeshRenderComponent>()!.DrawMode = DrawMode.Lines;
+
             _engine.Scene.AddEntity(renderableMesh);
             _engine.Scene.AddEntity(renderableLight);
             _engine.Scene.AddEntity(renderableGridMajor);
             _engine.Scene.AddEntity(renderableGridMinor);
+            _engine.Scene.AddEntity(renderableAxesGizmo);
 
             #endregion
 
@@ -255,23 +149,23 @@ namespace PentaGE.Core.Rendering
                 #region Test rotation
 
                 // Rotate the object based on the current time
-                //objectTransform.Rotation = rotate ? new(
-                //    MathF.Sin((float)_engine.Timing.TotalElapsedTime) * 90,
-                //    MathF.Cos((float)_engine.Timing.TotalElapsedTime) * 90,
-                //    0) :
-                //    new(0, 0, 0);
                 objectTransform.Rotation = rotate ? new(
                     MathF.Sin((float)_engine.Timing.TotalElapsedTime) * 180,
                     0,
                     0) :
-                    objectTransform.Rotation;//new(0, 0, 0);
+                    new(0, 0, 0); // objectTransform.Rotation;
 
                 // Animate the color and specular strength of the object
                 _engine.Scene[0].GetComponent<TransformComponent>()!.Transform = objectTransform;
                 float hue = MathF.Sin((float)_engine.Timing.TotalElapsedTime) * 0.5f + 0.5f; // Adjust the range to [0, 1]
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Material.Albedo = ColorFromHSL(hue, 1.0f, 0.5f);
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Material.Albedo =
+                    materialTest ?
+                        ColorFromHSL(hue, 1.0f, 0.5f) :
+                        new(1, 1, 1);
                 _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Material.SpecularStrength =
-                    ((MathF.Sin((float)_engine.Timing.TotalElapsedTime) + 1) / 2) * 2;
+                    materialTest ?
+                        (MathF.Sin((float)_engine.Timing.TotalElapsedTime) + 1) / 2 * 2 :
+                        2;
 
                 #endregion
 
@@ -284,13 +178,17 @@ namespace PentaGE.Core.Rendering
 
                 // Draw the test mesh
                 if (window.Viewport.CameraManager.ActiveController.ActiveCamera is not null)
-                    _engine.Scene.Render(window.Viewport.CameraManager.ActiveController.ActiveCamera, window);
+                    _engine.Scene.Render(window.Viewport.CameraManager.ActiveController.ActiveCamera, window, wireframe);
             }
         }
 
         internal void Terminate()
         {
-
+            Glfw.Terminate();
+            shader.Dispose();
+            lightShader.Dispose();
+            gridShader.Dispose();
+            texture.Dispose();
         }
 
         private void Events_GlfwError(object? sender, Events.GlfwErrorEventArgs e)
@@ -298,9 +196,9 @@ namespace PentaGE.Core.Rendering
             Log.Error($"GLFW Error: {e.ErrorCode} - {e.Message}");
         }
 
-        // This code does not belong here, but is here for testing purposes
         private static Vector3 ColorFromHSL(float hue, float saturation, float lightness)
         {
+            // TODO: This code does not belong here, but is here for testing purposes
             // Convert HSL to RGB
             // Only for visuallisational purposes
             // TODO: Remove this and use the actual color values
@@ -341,9 +239,9 @@ namespace PentaGE.Core.Rendering
             }
         }
 
-        // TODO: This code does not belong here, but is here for testing purposes
         private void Events_KeyDown(object? sender, Events.KeyDownEventArgs e)
         {
+            // TODO: This code does not belong here, but is here for testing purposes
             if (e.Key == Key.Left)
             {
                 objectTransform.Rotation += new Rotation(-1, 0, 0) * 5;
@@ -364,15 +262,170 @@ namespace PentaGE.Core.Rendering
                 objectTransform.Rotation += new Rotation(0, -1, 0) * 5;
                 Log.Information($"Object pitch down: {objectTransform.Rotation}");
             }
-            else if (e.Key == Key.R)
-            {
-                rotate = !rotate;
-            }
             else if (e.Key == Key.F1)
             {
                 wireframe = !wireframe;
             }
+            else if (e.Key == Key.F2)
+            {
+                if (!cullingEnabled)
+                {
+                    glEnable(GL_CULL_FACE);
+                    glCullFace(GL_BACK);
+                    glFrontFace(GL_CCW);
+                }
+                else
+                {
+                    glDisable(GL_CULL_FACE);
+                }
+                cullingEnabled = !cullingEnabled;
+            }
+            else if (e.Key == Key.F3)
+            {
+                rotate = !rotate;
+            }
+            else if (e.Key == Key.F4)
+            {
+                materialTest = !materialTest;
+            }
+            else if (e.Key == Key.F5)
+            {
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = shader;
+            }
+            else if (e.Key == Key.F6)
+            {
+                if (e.ModifierKeys == ModifierKey.Shift)
+                    _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = faceShader2;
+                else
+                    _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = faceShader;
+            }
+            else if (e.Key == Key.F7)
+            {
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = normalShader;
+            }
+            else if (e.Key == Key.F10)
+            {
+                testMesh1.Subdivide(1);
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = testMesh1;
+            }
+            else if (e.Key == Key.F11)
+            {
+                if (_engine.Windows[0].Viewport.CameraManager.ActiveController is EditorCameraController cameraController)
+                {
+                    cameraController.SetOrbitTarget(_engine.Scene[1], 1.5f); // Orbit around the light
+                }
+            }
         }
 
+        private void InitializeShadersAndTextures()
+        {
+            // NOTE: This is just for testing, this should be moved to a shader manager
+            using (var logger = Log.Logger.BeginPerfLogger("Loading default shader"))
+            {
+                try
+                {
+                    shader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Default.shader");
+                    shader.Load();
+                }
+                catch (System.Exception ex)
+                {
+                    Log.Error($"Error loading shader: {ex}");
+                }
+            }
+
+            using (var logger = Log.Logger.BeginPerfLogger("Loading face shader 1"))
+            {
+                try
+                {
+                    faceShader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Face.shader");
+                    faceShader.Load();
+                }
+                catch (System.Exception ex)
+                {
+                    Log.Error($"Error loading shader: {ex}");
+                }
+            }
+
+            using (var logger = Log.Logger.BeginPerfLogger("Loading face shader 2"))
+            {
+                try
+                {
+                    faceShader2 = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Face2.shader");
+                    faceShader2.Load();
+                }
+                catch (System.Exception ex)
+                {
+                    Log.Error($"Error loading shader: {ex}");
+                }
+            }
+
+            using (var logger = Log.Logger.BeginPerfLogger("Loading normal shader"))
+            {
+                try
+                {
+                    normalShader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Normal.shader");
+                    normalShader.Load();
+                }
+                catch (System.Exception ex)
+                {
+                    Log.Error($"Error loading shader: {ex}");
+                }
+            }
+
+            using (var logger = Log.Logger.BeginPerfLogger("Loading light shader"))
+            {
+                try
+                {
+                    lightShader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Light.shader");
+                    lightShader.Load();
+                }
+                catch (System.Exception ex)
+                {
+                    Log.Error($"Error loading shader: {ex}");
+                }
+            }
+
+            using (var logger = Log.Logger.BeginPerfLogger("Loading grid shader"))
+            {
+                try
+                {
+                    gridShader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Grid.shader");
+                    gridShader.Load();
+                }
+                catch (System.Exception ex)
+                {
+                    Log.Error($"Error loading shader: {ex}");
+                }
+            }
+
+            using (var logger = Log.Logger.BeginPerfLogger("Loading axes shader"))
+            {
+                try
+                {
+                    axesShader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Axes.shader");
+                    axesShader.Load();
+                }
+                catch (System.Exception ex)
+                {
+                    Log.Error($"Error loading shader: {ex}");
+                }
+            }
+
+            // Initialize test texture
+            using (var logger = Log.Logger.BeginPerfLogger("Loading test texture"))
+            {
+                try
+                {
+                    texture = new(
+                    @"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Textures\SourceFiles\TestTexture.jpg",
+                    GL_TEXTURE_2D,
+                    GL_TEXTURE0,
+                    GL_RGBA,
+                    GL_UNSIGNED_BYTE);
+                    Texture.SetTextureSlot(shader, "tex0", 0); // Set the texture slot to 0
+                }
+                catch { /* Gets logged in the constructor */ }
+            }
+        }
     }
 }

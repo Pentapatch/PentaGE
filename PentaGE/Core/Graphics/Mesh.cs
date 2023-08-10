@@ -1,4 +1,5 @@
 ﻿using PentaGE.Common;
+using PentaGE.Maths;
 using System.Numerics;
 
 namespace PentaGE.Core.Graphics
@@ -96,10 +97,16 @@ namespace PentaGE.Core.Graphics
                 Vertices[i] = new(
                     Vector3.Transform(
                         Vertices[i].Coordinates,
-                        Matrix4x4.CreateFromYawPitchRoll(rotation.Yaw, rotation.Pitch, rotation.Roll)),
+                        Matrix4x4.CreateFromYawPitchRoll(
+                            MathHelper.DegreesToRadians(rotation.Yaw % 360),
+                            MathHelper.DegreesToRadians(rotation.Pitch % 360),
+                            MathHelper.DegreesToRadians(rotation.Roll % 360))),
                     Vector3.Transform(
                         Vertices[i].Normal,
-                        Matrix4x4.CreateFromYawPitchRoll(rotation.Yaw, rotation.Pitch, rotation.Roll)),
+                        Matrix4x4.CreateFromYawPitchRoll(
+                            MathHelper.DegreesToRadians(rotation.Yaw % 360),
+                            MathHelper.DegreesToRadians(-rotation.Pitch % 360),
+                            MathHelper.DegreesToRadians(rotation.Roll % 360))),
                     Vertices[i].TextureCoordinates);
             }
         }
@@ -142,5 +149,101 @@ namespace PentaGE.Core.Graphics
         /// <param name="z">The z-coordinate of the rotation axis.</param>
         public void Rotate(float angle, float x, float y, float z) =>
             Rotate(angle, new Vector3(x, y, z));
+
+
+        /// <summary>
+        /// Tiles the texture coordinates of the mesh vertices by the given factors along the X and Y axes.
+        /// </summary>
+        /// <param name="x">The tiling factor along the X axis.</param>
+        /// <param name="y">The tiling factor along the Y axis.</param>
+        /// <remarks>
+        /// This method adjusts the texture coordinates of each vertex in the mesh by multiplying them with the provided factors.
+        /// The result is a tiled texture appearance on the mesh.
+        /// </remarks>
+        public void TileTexture(float x, float y)
+        {
+            for (int i = 0; i < Vertices.Count; i++)
+            {
+                Vertices[i] = new(
+                    Vertices[i].Coordinates,
+                    Vertices[i].Normal,
+                    new Vector2(Vertices[i].TextureCoordinates.X * x, Vertices[i].TextureCoordinates.Y * y));
+            }
+        }
+
+        public void Subdivide(int subdivisionLevels)
+        {
+            if (subdivisionLevels < 1)
+                throw new ArgumentOutOfRangeException(nameof(subdivisionLevels), "The number of subdivisions must be greater than zero.");
+
+            for (int level = 0; level < subdivisionLevels; level++)
+            {
+                List<Vertex> newVertices = new();
+                List<uint> newIndices = new();
+
+                if (Indices is not null)
+                {
+                    // Mesh has indices, so we can use them to subdivide
+                    for (int i = 0; i < Indices.Count; i += 3)
+                    {
+                        // Get the original vertices
+                        Vertex vertex0 = Vertices[(int)Indices[i]];
+                        Vertex vertex1 = Vertices[(int)Indices[i + 1]];
+                        Vertex vertex2 = Vertices[(int)Indices[i + 2]];
+
+                        // Calculate midpoints for each edge
+                        Vertex vertex3 = CalculateMidpoint(vertex0, vertex1);
+                        Vertex vertex4 = CalculateMidpoint(vertex1, vertex2);
+                        Vertex vertex5 = CalculateMidpoint(vertex2, vertex0);
+
+                        // Add the new vertices
+                        newVertices.Add(vertex0);
+                        newVertices.Add(vertex1);
+                        newVertices.Add(vertex2);
+                        newVertices.Add(vertex3);
+                        newVertices.Add(vertex4);
+                        newVertices.Add(vertex5);
+
+                        // Triangle A
+                        newIndices.Add((uint)newVertices.IndexOf(vertex0));
+                        newIndices.Add((uint)newVertices.IndexOf(vertex3));
+                        newIndices.Add((uint)newVertices.IndexOf(vertex5));
+
+                        // Triangle B
+                        newIndices.Add((uint)newVertices.IndexOf(vertex3));
+                        newIndices.Add((uint)newVertices.IndexOf(vertex4));
+                        newIndices.Add((uint)newVertices.IndexOf(vertex5));
+
+                        // Triangle C
+                        newIndices.Add((uint)newVertices.IndexOf(vertex3));
+                        newIndices.Add((uint)newVertices.IndexOf(vertex1));
+                        newIndices.Add((uint)newVertices.IndexOf(vertex4));
+
+                        // Triangle D
+                        newIndices.Add((uint)newVertices.IndexOf(vertex5));
+                        newIndices.Add((uint)newVertices.IndexOf(vertex4));
+                        newIndices.Add((uint)newVertices.IndexOf(vertex2));
+                    }
+                }
+                else
+                {
+                    // Mesh has no indices, so we need to create them
+
+                }
+
+                // Replace the old vertices and indices with the new ones
+                Vertices = newVertices;
+                Indices = newIndices;
+            }
+        }
+
+        private static Vertex CalculateMidpoint(Vertex vertexA, Vertex vertexB)
+        {
+            Vector3 midpointPosition = (vertexA.Coordinates + vertexB.Coordinates) * 0.5f;
+            Vector3 midpointNormal = (vertexA.Normal + vertexB.Normal) * 0.5f;
+            Vector2 midpointTexCoord = (vertexA.TextureCoordinates + vertexB.TextureCoordinates) * 0.5f;
+
+            return new Vertex(midpointPosition, midpointNormal, midpointTexCoord);
+        }
     }
 }

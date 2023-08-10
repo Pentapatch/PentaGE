@@ -8,7 +8,7 @@ namespace PentaGE.Core
     /// <summary>
     /// Represents a manager class for handling windows in the game engine.
     /// </summary>
-    public sealed class WindowManager : IEnumerable<Window>
+    public sealed class WindowManager : IEnumerable<Window>, IDisposable
     {
         private readonly List<Window> _windows = new();
         private readonly PentaGameEngine _engine;
@@ -137,5 +137,14 @@ namespace PentaGE.Core
         /// <returns>An enumerator that can be used to iterate through the collection of windows.</returns>
         IEnumerator IEnumerable.GetEnumerator() =>
             _windows.GetEnumerator();
+
+        public void Dispose()
+        {
+            foreach (var window in _windows)
+                window.Dispose();
+
+            _windows.Clear();
+            _isInitialized = false;
+        }
     }
 }

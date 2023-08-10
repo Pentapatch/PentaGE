@@ -23,6 +23,11 @@
         /// <summary>
         /// The game engine is terminating, shutting down, or unloading resources.
         /// </summary>
-        Terminating = 3
+        Terminating = 3,
+
+        /// <summary>
+        /// The game engine has terminated.
+        /// </summary>
+        Terminated = 4
     }
 }

@@ -45,5 +45,13 @@ namespace PentaGE.Common
             MathF.Abs(source.X - target.X) < threshold
             && MathF.Abs(source.Y - target.Y) < threshold
             && MathF.Abs(source.Z - target.Z) < threshold;
+
+        /// <summary>
+        /// Returns a vector with the same direction as the specified vector, but with a length of one.
+        /// </summary>
+        /// <param name="value">The vector to normalize.</param>
+        /// <returns>The normalized vector.</returns>
+        public static Vector3 Normalize(this Vector3 source) =>
+            Vector3.Normalize(source);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using PentaGE.Core.Entities;
 using PentaGE.Core.Rendering;
 using System.Collections;
+using System.Runtime.InteropServices;
 
 namespace PentaGE.Core.Scenes
 {
@@ -66,13 +67,13 @@ namespace PentaGE.Core.Scenes
         /// </summary>
         /// <param name="camera">The camera used for rendering.</param>
         /// <param name="window">The window used for rendering.</param>
-        public void Render(Camera camera, Window window)
+        public void Render(Camera camera, Window window, bool wireframe = false)
         {
             // Loop through entities and render entities with a MeshRendererComponent.
             foreach (var entity in _entities)
             {
                 var meshRenderer = entity.GetComponent<MeshRenderComponent>();
-                meshRenderer?.Render(camera, window);
+                meshRenderer?.Render(camera, window, wireframe);
             }
         }
 

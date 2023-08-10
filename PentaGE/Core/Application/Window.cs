@@ -9,7 +9,7 @@ namespace PentaGE.Core
     /// <summary>
     /// Represents a window in the application.
     /// </summary>
-    public class Window
+    public class Window : IDisposable
     {
         #region Fields and constants
 
@@ -362,5 +362,8 @@ namespace PentaGE.Core
 
             _engine.Events.RemoveCallbacks(this);
         }
+
+        public void Dispose() =>
+            Terminate();
     }
 }
