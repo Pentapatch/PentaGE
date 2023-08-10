@@ -1,8 +1,11 @@
 ﻿using GLFW;
 using PentaGE.Common;
+using PentaGE.Core.Components;
+using PentaGE.Core.Entities;
 using PentaGE.Core.Events;
 using PentaGE.Core.Rendering;
 using PentaGE.Maths;
+using Serilog;
 using System.Drawing;
 using System.Numerics;
 
@@ -13,7 +16,10 @@ namespace PentaGE.Core
     /// </summary>
     public sealed class EditorCameraController : CameraController
     {
-        #region Fields
+        #region Fields and constants
+
+        public const float MinFieldOfView = 10;
+        public const float MaxFieldOfView = 170;
 
         private Vector3 _positionAxes = Vector3.Zero;
         private Vector3 _rotationAxes = Vector3.Zero;
@@ -27,9 +33,10 @@ namespace PentaGE.Core
         private bool _alternateMode = false;
 
         private MouseModeEnum _mouseMode = MouseModeEnum.None;
-        private Point _mouseInitialLocation = new(0, 0);
-        private bool _mouseInitialLocationSet = false;
-        private Rotation _initialRotation = new(0, 0, 0);
+        private Point _mouseInitialPosition = new(0, 0);
+        private Point _mouseOffsetPosition = new(0, 0);
+        private bool _mouseOffsetPositionSet = false;
+        private Rotation _cameraRotationOffset = new(0, 0, 0);
         private int _mouseLastY = 0;
         private int _mouseLastX = 0;
 
@@ -96,6 +103,93 @@ namespace PentaGE.Core
         public EditorCameraController()
         {
 
+        }
+
+        /// <summary>
+        /// Sets the field of view of the camera.
+        /// </summary>
+        /// <param name="fieldOfView">The new field of view in degrees.</param>
+        public void SetFieldOfView(float? fieldOfView)
+        {
+            if (fieldOfView > MaxFieldOfView)
+            {
+                Log.Warning($"Field of view cannot be greater than {MaxFieldOfView} degrees");
+                fieldOfView = MaxFieldOfView;
+            }
+            else if (fieldOfView < MinFieldOfView)
+            {
+                Log.Warning($"Field of view cannot be less than {MinFieldOfView} degrees");
+                fieldOfView = MinFieldOfView;
+            }
+
+            _targetFieldOfView = fieldOfView;
+        }
+
+        /// <summary>
+        /// Sets the position of the camera in world space.
+        /// </summary>
+        /// <param name="position">The new position of the camera.</param>
+        public void SetPosition(Vector3? position)
+        {
+            _targetPosition = position;
+        }
+
+        /// <summary>
+        /// Sets the position of the camera to be near an entity's position.
+        /// </summary>
+        /// <param name="entity">The entity near which to position the camera.</param>
+        /// <param name="zOffset">The optional offset along the Z-axis.</param>
+        public void SetPosition(Entity entity, float? zOffset = 2)
+        {
+            if (entity.GetComponent<TransformComponent>() is TransformComponent transformComponent)
+            {
+                var position = transformComponent.Transform.Position;
+                if (zOffset.HasValue && ActiveCamera is not null)
+                {
+                    position += Rotation.GetLookAt(position, ActiveCamera.Position).GetForwardVector() * zOffset.Value;
+                }
+                _targetPosition = position;
+            }
+            else
+            {
+                _targetPosition = null;
+            }
+        }
+
+        /// <summary>
+        /// Sets the rotation of the camera.
+        /// </summary>
+        /// <param name="rotation">The new rotation of the camera.</param>
+        public void SetRotation(Rotation? rotation)
+        {
+            _targetRotation = rotation;
+        }
+
+        /// <summary>
+        /// Sets the orbit target for the camera.
+        /// </summary>
+        /// <param name="target">The new orbit target position.</param>
+        public void SetOrbitTarget(Vector3? target)
+        {
+            _orbitTarget = target;
+        }
+
+        /// <summary>
+        /// Sets the orbit target for the camera to be near an entity's position.
+        /// </summary>
+        /// <param name="entity">The entity near which to set the orbit target.</param>
+        /// <param name="zOffset">The optional offset along the Z-axis.</param>
+        public void SetOrbitTarget(Entity entity, float? zOffset = null)
+        {
+            if (entity.GetComponent<TransformComponent>() is TransformComponent transformComponent)
+            {
+                if (zOffset.HasValue) SetPosition(entity, zOffset);
+                _orbitTarget = transformComponent.Transform.Position;
+            }
+            else
+            {
+                _orbitTarget = null;
+            }
         }
 
         /// <summary>
@@ -278,22 +372,22 @@ namespace PentaGE.Core
         {
             if (e.Button == Common.MouseButton.Left && _mouseMode == MouseModeEnum.None)
             {
-                _mouseInitialLocationSet = false;
+                _mouseOffsetPositionSet = false;
                 _mouseMode = MouseModeEnum.YawAndPitch;
-                Glfw.SetInputMode(e.Window.Handle, InputMode.Cursor, (int)CursorMode.Hidden);
             }
             else if (e.Button == Common.MouseButton.Right && _mouseMode == MouseModeEnum.None)
             {
-                _mouseInitialLocationSet = false;
+                _mouseOffsetPositionSet = false;
                 _mouseMode = MouseModeEnum.MoveZAndYaw;
-                Glfw.SetInputMode(e.Window.Handle, InputMode.Cursor, (int)CursorMode.Hidden);
             }
             else if (e.Button == Common.MouseButton.Middle)
             {
-                _mouseInitialLocationSet = false;
+                _mouseOffsetPositionSet = false;
                 _mouseMode = MouseModeEnum.MoveXAndY;
-                Glfw.SetInputMode(e.Window.Handle, InputMode.Cursor, (int)CursorMode.Hidden);
             }
+
+            if (_mouseMode != MouseModeEnum.None)
+                Glfw.SetInputMode(e.Window.Handle, InputMode.Cursor, (int)CursorMode.Hidden);
         }
 
         /// <summary>
@@ -304,18 +398,15 @@ namespace PentaGE.Core
         protected override void MouseUp(object? sender, Events.MouseButtonEventArgs e)
         {
             if (e.Button == Common.MouseButton.Left && _mouseMode == MouseModeEnum.YawAndPitch)
-            {
                 _mouseMode = MouseModeEnum.None;
-                Glfw.SetInputMode(e.Window.Handle, InputMode.Cursor, (int)CursorMode.Normal);
-            }
             else if (e.Button == Common.MouseButton.Right && _mouseMode == MouseModeEnum.MoveZAndYaw)
-            {
                 _mouseMode = MouseModeEnum.None;
-                Glfw.SetInputMode(e.Window.Handle, InputMode.Cursor, (int)CursorMode.Normal);
-            }
             else if (e.Button == Common.MouseButton.Middle && _mouseMode == MouseModeEnum.MoveXAndY)
-            {
                 _mouseMode = MouseModeEnum.None;
+
+            if (_mouseMode == MouseModeEnum.None)
+            {
+                Glfw.SetCursorPosition(e.Window.Handle, _mouseInitialPosition.X, _mouseInitialPosition.Y);
                 Glfw.SetInputMode(e.Window.Handle, InputMode.Cursor, (int)CursorMode.Normal);
             }
         }
@@ -331,13 +422,14 @@ namespace PentaGE.Core
 
             // If the mouse initial location has not been set, 
             // set it to the current mouse position
-            if (!_mouseInitialLocationSet)
+            if (!_mouseOffsetPositionSet)
             {
-                _mouseInitialLocation = e.Position;
-                _mouseInitialLocationSet = true;
+                _mouseOffsetPosition = e.Position;
+                _mouseInitialPosition = e.Position;
+                _mouseOffsetPositionSet = true;
                 _mouseLastY = e.Position.Y;
                 _mouseLastX = e.Position.X;
-                _initialRotation = camera.Rotation;
+                _cameraRotationOffset = camera.Rotation;
             }
 
             // Perform the appropriate rotation and/or movement based on the mouse mode
@@ -350,12 +442,13 @@ namespace PentaGE.Core
 
             // Reset the mouse position to the center of the screen
             // when the mouse cursor reaches the edge of the screen
-            if (e.Position.X > e.Window.Size.Width || e.Position.X < 0 ||
-                e.Position.Y > e.Window.Size.Height || e.Position.Y < 0)
+            if (_mouseMode != MouseModeEnum.None &&
+                (e.Position.X >= e.Window.Size.Width || e.Position.X <= 0 ||
+                 e.Position.Y >= e.Window.Size.Height || e.Position.Y <= 0))
             {
                 Glfw.SetCursorPosition(e.Window.Handle, e.Window.Size.Width / 2, e.Window.Size.Height / 2);
-                _mouseInitialLocation = new(e.Window.Size.Width / 2, e.Window.Size.Height / 2);
-                _initialRotation = camera.Rotation;
+                _mouseOffsetPosition = new(e.Window.Size.Width / 2, e.Window.Size.Height / 2);
+                _cameraRotationOffset = camera.Rotation;
             }
         }
 
@@ -455,8 +548,8 @@ namespace PentaGE.Core
         /// <returns>The calculated yaw angle.</returns>
         private float CalculateYaw(MouseMovedEventArgs e)
         {
-            float xDiff = (e.Position.X - _mouseInitialLocation.X) / (e.Window.Size.Width / 2f) * MouseSensitivity;
-            return _initialRotation.Yaw - (xDiff * 90);
+            float xDiff = (e.Position.X - _mouseOffsetPosition.X) / (e.Window.Size.Width / 2f) * MouseSensitivity;
+            return _cameraRotationOffset.Yaw - (xDiff * 90);
         }
 
         /// <summary>
@@ -466,8 +559,8 @@ namespace PentaGE.Core
         /// <returns>The calculated pitch angle.</returns>
         private float CalculatePitch(MouseMovedEventArgs e)
         {
-            float yDiff = (e.Position.Y - _mouseInitialLocation.Y) / (e.Window.Size.Height / 2f) * MouseSensitivity;
-            return _initialRotation.Pitch - (yDiff * 90);
+            float yDiff = (e.Position.Y - _mouseOffsetPosition.Y) / (e.Window.Size.Height / 2f) * MouseSensitivity;
+            return _cameraRotationOffset.Pitch - (yDiff * 90);
         }
 
     }

@@ -308,6 +308,13 @@ namespace PentaGE.Core.Rendering
                 testMesh1.Subdivide(1);
                 _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = testMesh1;
             }
+            else if (e.Key == Key.F11)
+            {
+                if (_engine.Windows[0].Viewport.CameraManager.ActiveController is EditorCameraController cameraController)
+                {
+                    cameraController.SetOrbitTarget(_engine.Scene[1], 1.5f); // Orbit around the light
+                }
+            }
         }
 
         private void InitializeShadersAndTextures()
