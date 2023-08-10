@@ -23,9 +23,11 @@ namespace PentaGE.Core.Rendering
         private Shader normalShader;
         private Shader lightShader;
         private Shader gridShader;
+        private Shader axesShader;
         private Texture texture;
         private Mesh testMesh1;
         private Mesh lightMesh1;
+        private Mesh axesGizmoMesh;
         private bool rotate = true;
         private bool materialTest = true;
         private bool wireframe = false;
@@ -94,11 +96,11 @@ namespace PentaGE.Core.Rendering
             InitializeShadersAndTextures();
 
             // Initialize test mesh
-            //testMesh1 = MeshFactory.CreatePyramid(1f, 0.6f, 1f);
+            testMesh1 = MeshFactory.CreatePyramid(1f, 0.6f, 1f);
             //testMesh1 = MeshFactory.CreatePlane(10f, new(0, -90f, 0));
             //testMesh1 = MeshFactory.CreateCube(1f);
             //testMesh1 = MeshFactory.CreateSphere(1f);
-            testMesh1 = MeshFactory.CreateCylinder(0.5f, 1f);
+            //testMesh1 = MeshFactory.CreateCylinder(0.5f, 1f);
             testMesh1.TileTexture(5, 6);
             //testMesh1.Offset(0, 0.25f, 0);
             //testMesh1.Rotate(45, 0, 0);
@@ -121,10 +123,16 @@ namespace PentaGE.Core.Rendering
             var renderableGridMajor = new RenderableGridEntity(gridA, gridShader);
             var renderableGridMinor = new RenderableGridEntity(gridB, gridShader);
 
+            // Initialize axes gizmo
+            axesGizmoMesh = MeshFactory.CreateAxesGizmo(0.1f);
+            var renderableAxesGizmo = new RenderableMeshEntity(axesGizmoMesh, axesShader);
+            renderableAxesGizmo.GetComponent<MeshRenderComponent>()!.DrawMode = DrawMode.Lines;
+
             _engine.Scene.AddEntity(renderableMesh);
             _engine.Scene.AddEntity(renderableLight);
             _engine.Scene.AddEntity(renderableGridMajor);
             _engine.Scene.AddEntity(renderableGridMinor);
+            _engine.Scene.AddEntity(renderableAxesGizmo);
 
             #endregion
 
@@ -376,6 +384,19 @@ namespace PentaGE.Core.Rendering
                 {
                     gridShader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Grid.shader");
                     gridShader.Load();
+                }
+                catch (System.Exception ex)
+                {
+                    Log.Error($"Error loading shader: {ex}");
+                }
+            }
+
+            using (var logger = Log.Logger.BeginPerfLogger("Loading axes shader"))
+            {
+                try
+                {
+                    axesShader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Axes.shader");
+                    axesShader.Load();
                 }
                 catch (System.Exception ex)
                 {

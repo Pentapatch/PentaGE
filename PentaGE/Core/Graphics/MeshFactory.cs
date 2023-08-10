@@ -392,5 +392,37 @@ namespace PentaGE.Core.Graphics
 
             return new Mesh(vertices, indices);
         }
+
+        /// <summary>
+        /// Creates an axes gizmo mesh with a specified scale for each axis.
+        /// </summary>
+        /// <param name="scale">The scale to be applied to the axes.</param>
+        /// <returns>The axes gizmo mesh.</returns>
+        internal static Mesh CreateAxesGizmo(float scale)
+        {
+            // Define vertices of the axes gizmo
+            List<Vertex> vertices = new()
+            {
+                // X axis
+                new Vertex(new Vector3(0, 0, 0),     World.RightVector),
+                new Vertex(new Vector3(scale, 0, 0), World.RightVector),
+                // Y axis
+                new Vertex(new Vector3(0, 0, 0),     World.UpVector),
+                new Vertex(new Vector3(0, scale, 0), World.UpVector),
+                // Z axis
+                new Vertex(new Vector3(0, 0, 0),     World.ForwardVector),
+                new Vertex(new Vector3(0, 0, scale), World.ForwardVector),
+            };
+
+            // Define indices for the axes gizmo
+            List<uint> indices = new()
+            {
+                0, 1,
+                2, 3,
+                4, 5,
+            };
+
+            return new Mesh(vertices, indices);
+        }
     }
 }

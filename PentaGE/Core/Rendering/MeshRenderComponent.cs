@@ -139,6 +139,7 @@ namespace PentaGE.Core.Rendering
             Shader.SetUniform("model", modelMatrix);
             Shader.SetUniform("view", viewMatrix);
             Shader.SetUniform("projection", projectionMatrix);
+            Shader.SetUniform("viewportSize", new Vector2(window.Viewport.Width, window.Viewport.Height));
 
             // Set the light color uniforms
             Shader.SetUniform("lightColor", new Vector4(1.0f, 1.0f, 1.0f, 1.0f));
