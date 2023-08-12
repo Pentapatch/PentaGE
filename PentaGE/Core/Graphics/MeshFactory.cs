@@ -132,7 +132,7 @@ namespace PentaGE.Core.Graphics
             float halfHeight = height * 0.5f;
             float halfDepth = depth * 0.5f;
 
-            Vector3 upVector = new(0f, 1f, 0f);
+            Vector3 upVector = new(0f, halfHeight, 0f);
 
             // Define vertices of the pyramid
             List<Vertex> vertices = new()
@@ -345,14 +345,14 @@ namespace PentaGE.Core.Graphics
 
             for (int lat = 0; lat <= latitudeSegments; lat++)
             {
-                // Calculate the angle of latitude
+                // Calculate the inclination angle (θ) for the latitude
                 float theta = lat * MathF.PI / latitudeSegments;
                 float sinTheta = MathF.Sin(theta);
                 float cosTheta = MathF.Cos(theta);
 
                 for (int lon = 0; lon <= longitudeSegments; lon++)
                 {
-                    // Calculate the angle of longitude
+                    // Calculate the azimuthal angle (φ) for the longitude
                     float phi = lon * 2 * MathF.PI / longitudeSegments;
                     float sinPhi = MathF.Sin(phi);
                     float cosPhi = MathF.Cos(phi);
@@ -364,7 +364,15 @@ namespace PentaGE.Core.Graphics
 
                     Vector3 position = new(x * radius, y * radius, z * radius);
                     Vector3 normal = new(x, y, z);
-                    Vector2 texCoord = new((float)lon / longitudeSegments, (float)lat / latitudeSegments);
+
+                    // Calculate azimuthal angle (φ) for texture mapping
+                    float phiForTexture = phi + MathF.PI / 2; // Adjust by 90 degrees
+
+                    // Calculate texture coordinates using spherical coordinates
+                    float u = phiForTexture / (2 * MathF.PI);
+                    float v = theta / MathF.PI;
+
+                    Vector2 texCoord = new(u, v);
 
                     vertices.Add(new Vertex(position, normal, -texCoord));
                 }
@@ -380,13 +388,13 @@ namespace PentaGE.Core.Graphics
                     int first = lat * (longitudeSegments + 1) + lon;
                     int second = first + longitudeSegments + 1;
 
-                    indices.Add((uint)(first + 1));
                     indices.Add((uint)second);
-                    indices.Add((uint)first);
-
-                    indices.Add((uint)(first + 1));
+                    indices.Add((uint)first + 1);
                     indices.Add((uint)(second + 1));
+
                     indices.Add((uint)second);
+                    indices.Add((uint)(first));
+                    indices.Add((uint)first + 1);
                 }
             }
 

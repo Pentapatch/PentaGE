@@ -96,7 +96,7 @@ namespace PentaGE.Core.Rendering
             InitializeShadersAndTextures();
 
             // Initialize test mesh
-            testMesh1 = MeshFactory.CreatePyramid(1f, 0.6f, 1f);
+            testMesh1 = MeshFactory.CreatePyramid(1f, 1.4f, 1f);
             //testMesh1 = MeshFactory.CreatePlane(10f, new(0, -90f, 0));
             //testMesh1 = MeshFactory.CreateCube(1f);
             //testMesh1 = MeshFactory.CreateSphere(1f);
@@ -305,7 +305,7 @@ namespace PentaGE.Core.Rendering
             }
             else if (e.Key == Key.F10)
             {
-                testMesh1.Subdivide(1);
+                testMesh1.Subdivide();
                 _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = testMesh1;
             }
             else if (e.Key == Key.F11)
@@ -314,6 +314,32 @@ namespace PentaGE.Core.Rendering
                 {
                     cameraController.SetOrbitTarget(_engine.Scene[1], 1.5f); // Orbit around the light
                 }
+            }
+            else if (e.Key == Key.Alpha1)
+            {
+                testMesh1 = MeshFactory.CreateCube(1f);
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = testMesh1;
+            }
+            else if (e.Key == Key.Alpha2)
+            {
+                testMesh1 = MeshFactory.CreateSphere(1f);
+                //testMesh1.TileTexture(4, 4);
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = testMesh1;
+            }
+            else if (e.Key == Key.Alpha3)
+            {
+                testMesh1 = MeshFactory.CreateCylinder(0.5f, 1f);
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = testMesh1;
+            }
+            else if (e.Key == Key.Alpha4)
+            {
+                testMesh1 = MeshFactory.CreatePyramid(1f, 1f, 1f);
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = testMesh1;
+            }
+            else if (e.Key == Key.Alpha5)
+            {
+                testMesh1 = MeshFactory.CreatePlane(1f, 1f);
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = testMesh1;
             }
         }
 

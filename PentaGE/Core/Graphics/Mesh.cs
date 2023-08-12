@@ -171,7 +171,7 @@ namespace PentaGE.Core.Graphics
             }
         }
 
-        public void Subdivide(int subdivisionLevels)
+        public void Subdivide(int subdivisionLevels = 1)
         {
             if (subdivisionLevels < 1)
                 throw new ArgumentOutOfRangeException(nameof(subdivisionLevels), "The number of subdivisions must be greater than zero.");
