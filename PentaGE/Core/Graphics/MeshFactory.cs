@@ -210,10 +210,10 @@ namespace PentaGE.Core.Graphics
             // Define vertices of the plane
             List<Vertex> vertices = new()
             {
-                new Vertex(new Vector3(-halfWidth, 0f, -halfHeight), World.UpVector, BottomLeft),
-                new Vertex(new Vector3(halfWidth, 0f, -halfHeight), World.UpVector, BottomRight),
-                new Vertex(new Vector3(halfWidth, 0f, halfHeight), World.UpVector, TopRight),
-                new Vertex(new Vector3(-halfWidth, 0f, halfHeight), World.UpVector, TopLeft),
+                new Vertex(new Vector3(-halfWidth, 0f, halfHeight), World.UpVector, BottomLeft),
+                new Vertex(new Vector3(halfWidth, 0f, halfHeight), World.UpVector, BottomRight),
+                new Vertex(new Vector3(halfWidth, 0f, -halfHeight), World.UpVector, TopRight),
+                new Vertex(new Vector3(-halfWidth, 0f, -halfHeight), World.UpVector, TopLeft),
             };
 
             // Define indices for the plane

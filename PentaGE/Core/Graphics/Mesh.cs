@@ -99,7 +99,7 @@ namespace PentaGE.Core.Graphics
                         Vertices[i].Coordinates,
                         Matrix4x4.CreateFromYawPitchRoll(
                             MathHelper.DegreesToRadians(rotation.Yaw % 360),
-                            MathHelper.DegreesToRadians(rotation.Pitch % 360),
+                            MathHelper.DegreesToRadians(-rotation.Pitch % 360),
                             MathHelper.DegreesToRadians(rotation.Roll % 360))),
                     Vector3.Transform(
                         Vertices[i].Normal,
