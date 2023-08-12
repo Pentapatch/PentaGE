@@ -338,6 +338,11 @@ namespace PentaGE.Core.Rendering
             }
             else if (e.Key == Key.Alpha5)
             {
+                testMesh1 = MeshFactory.CreateCone(0.5f, 1f);
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = testMesh1;
+            }
+            else if (e.Key == Key.Alpha6)
+            {
                 testMesh1 = MeshFactory.CreatePlane(1f, 1f, new Rotation(0, -90, 0));
                 _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = testMesh1;
             }

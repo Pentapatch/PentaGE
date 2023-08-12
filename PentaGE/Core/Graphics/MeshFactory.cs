@@ -314,7 +314,7 @@ namespace PentaGE.Core.Graphics
                 indices.Add((uint)(i + 1));             //  XX
                 indices.Add((uint)(i + stride + 1));    //   X
 
-                //// Top face
+                // Top face
                 indices.Add((uint)(i + 2));             //   X
                 indices.Add((uint)(i + 3));             //  XXX
                 indices.Add((uint)(i + stride + 2));    // XXXXX
@@ -323,6 +323,102 @@ namespace PentaGE.Core.Graphics
                 indices.Add((uint)(i + stride + 4));    // XXXXX
                 indices.Add((uint)(i + 5));             //  XXX
                 indices.Add((uint)(i + 4));             //   X
+            }
+
+            return new Mesh(vertices, indices);
+        }
+
+        /// <summary>
+        /// Creates a cone mesh with the specified radius and height.
+        /// </summary>
+        /// <param name="radius">The radius of the cylinder.</param>
+        /// <param name="height">The height of the cylinder.</param>
+        /// <param name="segments">The number of segments used to approximate the cylinder's sides.</param>
+        /// <param name="textureAspectRatio">The aspect ratio to adjust the texture mapping.</param>
+        /// <returns>A cone mesh.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when radius, height, segments, or textureAspectRatio is out of valid range.</exception>
+        public static Mesh CreateCone(float radius, float height, int segments = 16, float textureAspectRatio = 1f)
+        {
+            // TODO: Known issues:
+            // - Not sure that the normals are correct for the cone sides
+            //   Behaves wierd when subdivide is called on the mesh
+            if (radius <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(radius), "Radius must be greater than zero.");
+
+            if (height <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(height), "Height must be greater than zero.");
+
+            if (segments < 3)
+                throw new ArgumentOutOfRangeException(nameof(segments), "Segments must be greater than or equal to three.");
+
+            if (textureAspectRatio <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(textureAspectRatio), "Texture aspect ratio must be greater than zero.");
+
+            // Calculate half height
+            float halfHeight = height * 0.5f;
+
+            // Define vertices of the cylinder
+            List<Vertex> vertices = new();
+            Vector3 topCenter = new(0f, halfHeight, 0f);
+            Vector3 bottomCenter = new(0f, -halfHeight, 0f);
+            for (int i = 0; i <= segments; i++)
+            {
+                float angle = 2 * MathF.PI * i / segments;
+                float nextAngle = 2 * MathF.PI * (i + 1) / segments; // Calculate the angle for the next vertex
+                float x = radius * MathF.Cos(angle);
+                float z = radius * MathF.Sin(angle);
+                // Calculate texture coordinates based on vertex position
+                Vector2 yTexCoord = new(x / (radius * 2) + 0.5f, z / (radius * -2) + 0.5f);
+
+                // Adjust the x texture coordinate for the sides
+                float u = x / radius * 0.5f + 0.5f;
+
+                // Adjust for texture aspect ratio
+                u *= textureAspectRatio;
+
+                // Side face vertex
+                Vector3 sidePosition = new(x, -halfHeight, z);
+
+                // Calculate the next position along the side
+                float nextX = radius * MathF.Cos(nextAngle);
+                float nextZ = radius * MathF.Sin(nextAngle);
+                Vector3 nextSidePosition = new(nextX, -halfHeight, nextZ);
+
+                Vector3 topPosition = new(0f, halfHeight, 0f);
+
+                // Calculate two vectors for the cross product
+                Vector3 sideVector = nextSidePosition - sidePosition;
+                Vector3 slantVector = topPosition - sidePosition;
+
+                // Calculate the side normal using the cross product
+                Vector3 sideNormal = -Vector3.Cross(sideVector, slantVector).Normalize();
+
+                Vector2 sideTexCoord = new(u, 0f);
+                vertices.Add(new Vertex(sidePosition, sideNormal, sideTexCoord));
+
+                // Top face vertex
+                vertices.Add(new Vertex(topCenter, World.UpVector, new Vector2(0.5f, 1f)));
+
+                // Bottom face vertices
+                vertices.Add(new Vertex(new Vector3(x, -halfHeight, z), World.DownVector, yTexCoord));
+                vertices.Add(new Vertex(bottomCenter, World.DownVector, new Vector2(0.5f, 0.5f)));
+            }
+
+            // Define indices for the cylinder
+            List<uint> indices = new();
+
+            int stride = 4;
+            for (int i = 0; i < segments * stride; i += stride)
+            {
+                // Side face
+                indices.Add((uint)(i));                 //   X
+                indices.Add((uint)(i + 1));             //  XXX
+                indices.Add((uint)(i + stride));        // XXXXX
+
+                // Bottom face
+                indices.Add((uint)(i + 2));             //   X
+                indices.Add((uint)(i + stride + 2));    //  XXX
+                indices.Add((uint)(i + 3));             // XXXXX
             }
 
             return new Mesh(vertices, indices);
