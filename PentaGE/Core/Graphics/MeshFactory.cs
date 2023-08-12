@@ -269,7 +269,7 @@ namespace PentaGE.Core.Graphics
                 float z = radius * MathF.Sin(angle);
 
                 // Calculate texture coordinates based on vertex position
-                Vector2 yTexCoord = new(x / (radius * 2) + 0.5f, z / (radius * 2) + 0.5f);
+                Vector2 yTexCoord = new(x / (radius * 2) + 0.5f, z / (radius * -2) + 0.5f);
 
                 // Adjust the x texture coordinate for the sides
                 float u = x / radius * 0.5f + 0.5f;
@@ -305,24 +305,24 @@ namespace PentaGE.Core.Graphics
             for (int i = 0; i < segments * stride; i += stride)
             {
                 // Bottom side face
-                indices.Add((uint)i);                   // BS1  |    x
-                indices.Add((uint)(i + 1));             // TS1  |   xx
-                indices.Add((uint)(i + stride));        // BS2  |  xxx
+                indices.Add((uint)(i));                 // X
+                indices.Add((uint)(i + stride + 1));    // XX
+                indices.Add((uint)(i + stride));        // XXX
 
                 // Top side face
-                indices.Add((uint)(i + stride));        // BS2  |  xxx
-                indices.Add((uint)(i + 1));             // TS1  |  xx
-                indices.Add((uint)(i + stride + 1));    // TS2  |  x
+                indices.Add((uint)(i));                 // XXX
+                indices.Add((uint)(i + 1));             //  XX
+                indices.Add((uint)(i + stride + 1));    //   X
 
-                // Top face
-                indices.Add((uint)(i + 2));             // TF1  |  xxxxx
-                indices.Add((uint)(i + 3));             // TC   |   xxx
-                indices.Add((uint)(i + stride + 2));    // TF2  |    x  
+                //// Top face
+                indices.Add((uint)(i + 2));             //   X
+                indices.Add((uint)(i + 3));             //  XXX
+                indices.Add((uint)(i + stride + 2));    // XXXXX
 
                 // Bottom face
-                indices.Add((uint)(i + stride + 4));    // BF2  |    x
-                indices.Add((uint)(i + 5));             // BC   |   xxx
-                indices.Add((uint)(i + 4));             // BF1  |  xxxxx
+                indices.Add((uint)(i + stride + 4));    // XXXXX
+                indices.Add((uint)(i + 5));             //  XXX
+                indices.Add((uint)(i + 4));             //   X
             }
 
             return new Mesh(vertices, indices);
