@@ -203,9 +203,9 @@ namespace PentaGE.Core.Graphics
                         Vertices.Add(vertex5);
 
                         // Store the indices of the vertices for optimization
-                        uint index0 = (uint)Vertices.IndexOf(vertex0);
-                        uint index1 = (uint)Vertices.IndexOf(vertex1);
-                        uint index2 = (uint)Vertices.IndexOf(vertex2);
+                        uint index0 = Indices[i];
+                        uint index1 = Indices[i + 1];
+                        uint index2 = Indices[i + 2];
                         uint index3 = (uint)vertexCount;
                         uint index4 = (uint)vertexCount + 1;
                         uint index5 = (uint)vertexCount + 2;
