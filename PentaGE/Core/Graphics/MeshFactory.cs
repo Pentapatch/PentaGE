@@ -191,7 +191,7 @@ namespace PentaGE.Core.Graphics
         /// <param name="size">The size of the plane (both width and height).</param>
         /// <param name="rotation">Optional rotation applied to the plane.</param>
         /// <returns>A plane mesh with the specified size.</returns>
-        public static Mesh CreatePlane(float size, Rotation? rotation = null) => 
+        public static Mesh CreatePlane(float size, Rotation? rotation = null) =>
             CreatePlane(size, size, rotation);
 
         /// <summary>

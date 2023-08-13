@@ -97,13 +97,7 @@ namespace PentaGE.Core.Rendering
 
             // Initialize test mesh
             testMesh1 = MeshFactory.CreatePyramid(1f, 1.4f, 1f);
-            //testMesh1 = MeshFactory.CreatePlane(10f, new(0, -90f, 0));
-            //testMesh1 = MeshFactory.CreateCube(1f);
-            //testMesh1 = MeshFactory.CreateSphere(1f);
-            //testMesh1 = MeshFactory.CreateCylinder(0.5f, 1f);
             testMesh1.TileTexture(5, 6);
-            //testMesh1.Offset(0, 0.25f, 0);
-            //testMesh1.Rotate(45, 0, 0);
             var transform = new Transform(new(0, 0, 0), new(0, 0, 0), new(1f, 1f, 1f));
             var renderableMesh = new RenderableMeshEntity(testMesh1, shader, texture);
 
@@ -282,10 +276,6 @@ namespace PentaGE.Core.Rendering
             }
             else if (e.Key == Key.F3)
             {
-                rotate = !rotate;
-            }
-            else if (e.Key == Key.F4)
-            {
                 materialTest = !materialTest;
             }
             else if (e.Key == Key.F5)
@@ -308,7 +298,7 @@ namespace PentaGE.Core.Rendering
                 testMesh1.Subdivide();
                 _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = testMesh1;
             }
-            else if (e.Key == Key.F11)
+            else if (e.Key == Key.Backspace && e.ModifierKeys == ModifierKey.Control)
             {
                 if (_engine.Windows[0].Viewport.CameraManager.ActiveController is EditorCameraController cameraController)
                 {
@@ -345,6 +335,10 @@ namespace PentaGE.Core.Rendering
             {
                 testMesh1 = MeshFactory.CreatePlane(1f, 1f, new Rotation(0, -90, 0));
                 _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = testMesh1;
+            }
+            else if (e.Key == Key.R && e.ModifierKeys == ModifierKey.Control)
+            {
+                rotate = !rotate;
             }
         }
 
