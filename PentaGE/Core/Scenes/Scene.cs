@@ -1,7 +1,6 @@
 ﻿using PentaGE.Core.Entities;
 using PentaGE.Core.Rendering;
 using System.Collections;
-using System.Runtime.InteropServices;
 
 namespace PentaGE.Core.Scenes
 {

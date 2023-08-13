@@ -99,7 +99,7 @@ namespace PentaGE.Core.Graphics
                         Vertices[i].Coordinates,
                         Matrix4x4.CreateFromYawPitchRoll(
                             MathHelper.DegreesToRadians(rotation.Yaw % 360),
-                            MathHelper.DegreesToRadians(rotation.Pitch % 360),
+                            MathHelper.DegreesToRadians(-rotation.Pitch % 360),
                             MathHelper.DegreesToRadians(rotation.Roll % 360))),
                     Vector3.Transform(
                         Vertices[i].Normal,
@@ -171,20 +171,20 @@ namespace PentaGE.Core.Graphics
             }
         }
 
-        public void Subdivide(int subdivisionLevels)
+        public void Subdivide(int subdivisionLevels = 1)
         {
             if (subdivisionLevels < 1)
                 throw new ArgumentOutOfRangeException(nameof(subdivisionLevels), "The number of subdivisions must be greater than zero.");
 
+            if (Indices is null) throw new InvalidOperationException("Cannot subdivide a mesh without indices.");
+
             for (int level = 0; level < subdivisionLevels; level++)
             {
-                List<Vertex> newVertices = new();
-                List<uint> newIndices = new();
-
                 if (Indices is not null)
                 {
                     // Mesh has indices, so we can use them to subdivide
-                    for (int i = 0; i < Indices.Count; i += 3)
+                    int count = Indices.Count;
+                    for (int i = 0; i < count; i += 3)
                     {
                         // Get the original vertices
                         Vertex vertex0 = Vertices[(int)Indices[i]];
@@ -197,43 +197,40 @@ namespace PentaGE.Core.Graphics
                         Vertex vertex5 = CalculateMidpoint(vertex2, vertex0);
 
                         // Add the new vertices
-                        newVertices.Add(vertex0);
-                        newVertices.Add(vertex1);
-                        newVertices.Add(vertex2);
-                        newVertices.Add(vertex3);
-                        newVertices.Add(vertex4);
-                        newVertices.Add(vertex5);
+                        int vertexCount = Vertices.Count;
+                        Vertices.Add(vertex3);
+                        Vertices.Add(vertex4);
+                        Vertices.Add(vertex5);
+
+                        // Store the indices of the vertices for optimization
+                        uint index0 = Indices[i];
+                        uint index1 = Indices[i + 1];
+                        uint index2 = Indices[i + 2];
+                        uint index3 = (uint)vertexCount;
+                        uint index4 = (uint)vertexCount + 1;
+                        uint index5 = (uint)vertexCount + 2;
 
                         // Triangle A
-                        newIndices.Add((uint)newVertices.IndexOf(vertex0));
-                        newIndices.Add((uint)newVertices.IndexOf(vertex3));
-                        newIndices.Add((uint)newVertices.IndexOf(vertex5));
+                        Indices[i] = index0;
+                        Indices[i + 1] = index3;
+                        Indices[i + 2] = index5;
 
                         // Triangle B
-                        newIndices.Add((uint)newVertices.IndexOf(vertex3));
-                        newIndices.Add((uint)newVertices.IndexOf(vertex4));
-                        newIndices.Add((uint)newVertices.IndexOf(vertex5));
+                        Indices.Add(index3);
+                        Indices.Add(index4);
+                        Indices.Add(index5);
 
                         // Triangle C
-                        newIndices.Add((uint)newVertices.IndexOf(vertex3));
-                        newIndices.Add((uint)newVertices.IndexOf(vertex1));
-                        newIndices.Add((uint)newVertices.IndexOf(vertex4));
+                        Indices.Add(index3);
+                        Indices.Add(index1);
+                        Indices.Add(index4);
 
                         // Triangle D
-                        newIndices.Add((uint)newVertices.IndexOf(vertex5));
-                        newIndices.Add((uint)newVertices.IndexOf(vertex4));
-                        newIndices.Add((uint)newVertices.IndexOf(vertex2));
+                        Indices.Add(index5);
+                        Indices.Add(index4);
+                        Indices.Add(index2);
                     }
                 }
-                else
-                {
-                    // Mesh has no indices, so we need to create them
-
-                }
-
-                // Replace the old vertices and indices with the new ones
-                Vertices = newVertices;
-                Indices = newIndices;
             }
         }
 

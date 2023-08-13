@@ -61,5 +61,8 @@ namespace PentaGE.Core.Graphics
             Normal = normal;
             TextureCoordinates = textureCoordinates;
         }
+
+        public override string ToString() =>
+            $"Vertex: {Coordinates.X} {Coordinates.Y} {Coordinates.Z}";
     }
 }
