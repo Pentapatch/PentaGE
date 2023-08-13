@@ -155,6 +155,13 @@ namespace PentaGE.Core.Rendering
             Shader.SetUniform("material.specularStrength", Material.SpecularStrength);
             Shader.SetUniform("material.opacity", Material.Opacity);
 
+            // Set the texture slot uniform in the shader
+            // TODO: Make this more flexible and support multiple textures
+            if (Texture is not null)
+            {
+                Shader.SetUniform("tex0", 0);
+            }
+
             // Bind the texture to the current context
             Texture?.Bind();
 

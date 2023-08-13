@@ -220,18 +220,18 @@ namespace PentaGE.Core.Rendering
             }
             else if (e.Key == Key.F5)
             {
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Shaders.Get("Default")!;
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Shaders.Get("Default")!;
             }
             else if (e.Key == Key.F6)
             {
                 if (e.ModifierKeys == ModifierKey.Shift)
-                    _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Shaders.Get("Face2")!;
+                    _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Shaders.Get("Face2")!;
                 else
-                    _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Shaders.Get("Face")!;
+                    _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Shaders.Get("Face")!;
             }
             else if (e.Key == Key.F7)
             {
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Shaders.Get("Normal")!;
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Shaders.Get("Normal")!;
             }
             else if (e.Key == Key.F10)
             {

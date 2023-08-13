@@ -1,4 +1,5 @@
-﻿using PentaGE.Core.Events;
+﻿using PentaGE.Core.Assets;
+using PentaGE.Core.Events;
 using PentaGE.Core.Logging;
 using PentaGE.Core.Rendering;
 using PentaGE.Core.Scenes;
@@ -15,7 +16,7 @@ namespace PentaGE.Core
         private readonly Timing _timing = new();
         private readonly Renderer _renderer;
         private readonly WindowManager _windowManager;
-        private readonly ShaderManager _shaderManager;
+        private readonly AssetManager _assetManager;
         private readonly EventManager _eventManager = new();
         private GameState _state = GameState.Initializing;
 
@@ -47,9 +48,9 @@ namespace PentaGE.Core
         public GameState State => _state;
 
         /// <summary>
-        /// Gets the ShaderManager responsible for managing shaders in the game engine.
+        /// Gets the Asset manager responsible for managing game assets (like shaders, textures and meshes) in the game engine.
         /// </summary>
-        public ShaderManager Shaders => _shaderManager;
+        public AssetManager Assets => _assetManager;
 
         /// <summary>
         /// Called during game engine initialization to allow concrete implementations to perform engine-related setup.
@@ -87,7 +88,7 @@ namespace PentaGE.Core
         {
             _renderer = new(this);
             _windowManager = new(this);
-            _shaderManager = new(this);
+            _assetManager = new(this);
         }
 
         /// <summary>
@@ -127,7 +128,7 @@ namespace PentaGE.Core
 
             // Terminate the Shader manager
             Log.Information("Terminating the Shader manager.");
-            _shaderManager.Dispose();
+            _assetManager.Dispose();
 
             // Allow the concrete implementation of the engine to unload resources
             using (Log.Logger.BeginPerfLogger("Terminating concrete implementation"))

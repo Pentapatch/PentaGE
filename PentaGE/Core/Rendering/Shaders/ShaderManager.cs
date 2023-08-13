@@ -1,90 +1,18 @@
-﻿using PentaGE.Core.Logging;
+﻿using PentaGE.Core.Assets;
+using PentaGE.Core.Logging;
 using Serilog;
 
 namespace PentaGE.Core.Rendering
 {
-    public sealed class ShaderManager : IDisposable
+    public sealed class ShaderManager : IDisposable, IHotReloadable
     {
         private readonly Dictionary<string, Shader> _shaders = new();
-        private readonly Dictionary<string, string> _shaderPaths = new();
-        private readonly Dictionary<string, DateTime> _shaderModificationTimes = new();
-        private readonly PentaGameEngine _engine;
-        private int _hotReloadIntervalInSeconds;
-        private bool _hotReloadEnabled;
+        
+        private readonly AssetManager _assetManager;
 
-        internal ShaderManager(PentaGameEngine engine)
+        internal ShaderManager(AssetManager assetManager)
         {
-            _engine = engine;
-        }
-
-        public void EnableHotReload(int seconds = 3)
-        {
-            if (_hotReloadEnabled)
-                throw new InvalidOperationException("Hot reload is already enabled.");
-
-            _hotReloadIntervalInSeconds = seconds;
-            HandleHotReloadSubscription(true);
-        }
-
-        public void DisableHotReload()
-        {
-            HandleHotReloadSubscription(false);
-        }
-
-        private void HandleHotReloadSubscription(bool enabled)
-        {
-            if (enabled)
-            {
-                // Register the event handler
-                _engine.Timing.CustomTimings[_hotReloadIntervalInSeconds].Tick += HotReload_Tick;
-            }
-            else
-            {
-                // Unregister the event handler
-                _engine.Timing.CustomTimings[_hotReloadIntervalInSeconds].Tick -= HotReload_Tick;
-            }
-
-            // Set the hot reload enabled flag
-            _hotReloadEnabled = enabled;
-        }
-
-        public bool HotReloadEnabled { get => _hotReloadEnabled; }
-
-        private void HotReload_Tick(object? sender, Events.CustomTimingTickEventArgs e) =>
-            CheckForShaderChanges();
-
-        private void CheckForShaderChanges()
-        {
-            // Loop through all shaders and reload them if they have changed
-            foreach ((string name, string filePath) in _shaderPaths)
-            {
-                if (!_shaderModificationTimes.TryGetValue(filePath, out DateTime lastModified))
-                {
-                    // If the shader is not in the dictionary, add it with the current modification time
-                    _shaderModificationTimes[filePath] = File.GetLastWriteTime(filePath);
-                    continue;
-                }
-
-                DateTime currentModified = File.GetLastWriteTime(filePath);
-
-                if (currentModified > lastModified)
-                {
-                    // Shader file has been modified since the last check, reload it
-                    ReloadShader(name);
-
-                    // Update the last modification time in the dictionary
-                    _shaderModificationTimes[filePath] = currentModified;
-                }
-            }
-        }
-
-        private void ReloadShader(string name)
-        {
-            if (Get(name) is Shader shader)
-            {
-                Log.Information($"Reloading shader '{name}'");
-                shader.Reload();
-            }
+            _assetManager = assetManager;
         }
 
         public bool Add(string name, string vertexSourceCode, string fragmentSourceCode, string? geometrySourceCode = null)
@@ -135,7 +63,10 @@ namespace PentaGE.Core.Rendering
                 try
                 {
                     _shaders.Add(name, shader);
-                    _shaderPaths.Add(name, filePath);
+
+                    // Register the shader for hot reload
+                    if (this is IHotReloadable hotReloadable)
+                        hotReloadable.RegisterPath(name, filePath, this);
                 }
                 catch (Exception ex)
                 {
@@ -156,6 +87,10 @@ namespace PentaGE.Core.Rendering
             if (_shaders.TryGetValue(name, out Shader? shader))
             {
                 shader?.Dispose();
+
+                // Unregister the shader for hot reload
+                if (this is IHotReloadable hotReloadable)
+                    hotReloadable.UnregisterPath(name);
             }
             return _shaders.Remove(name);
         }
@@ -166,9 +101,22 @@ namespace PentaGE.Core.Rendering
         public void Dispose()
         {
             foreach (Shader shader in _shaders.Values)
-            {
                 shader.Dispose();
+        }
+
+        void IHotReloadable.Reload(string name, string filePath)
+        {
+            if (Get(name) is Shader shader)
+            {
+                Log.Information($"Reloading shader '{name}'");
+                shader.Reload();
             }
         }
+
+        void IHotReloadable.RegisterPath(string name, string path, IHotReloadable item) => 
+            _assetManager.RegisterPath(name, path, this);
+
+        void IHotReloadable.UnregisterPath(string name) => 
+            _assetManager.UnregisterPath(name);
     }
 }
