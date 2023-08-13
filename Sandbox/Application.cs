@@ -25,13 +25,13 @@ namespace Sandbox
             Assets.EnableHotReload(seconds: 5);
 
             string path = @"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\";
-            if (!Assets.Shaders.Add("Default", $"{path}Default.shader")) return false;
-            if (!Assets.Shaders.Add("Face", $"{path}Face.shader")) return false;
-            if (!Assets.Shaders.Add("Face2", $"{path}Face2.shader")) return false;
-            if (!Assets.Shaders.Add("Normal", $"{path}Normal.shader")) return false;
-            if (!Assets.Shaders.Add("Light", $"{path}Light.shader")) return false;
-            if (!Assets.Shaders.Add("Grid", $"{path}Grid.shader")) return false;
-            if (!Assets.Shaders.Add("Axes", $"{path}Axes.shader")) return false;
+            if (!Assets.AddShader("Default", $"{path}Default.shader")) return false;
+            if (!Assets.AddShader("Face", $"{path}Face.shader")) return false;
+            if (!Assets.AddShader("Face2", $"{path}Face2.shader")) return false;
+            if (!Assets.AddShader("Normal", $"{path}Normal.shader")) return false;
+            if (!Assets.AddShader("Light", $"{path}Light.shader")) return false;
+            if (!Assets.AddShader("Grid", $"{path}Grid.shader")) return false;
+            if (!Assets.AddShader("Axes", $"{path}Axes.shader")) return false;
 
             // Initialize test texture
             // TODO: Move this to a texture manager and create a resource manager
@@ -47,7 +47,7 @@ namespace Sandbox
             var subjectMesh = MeshFactory.CreatePyramid(1f, 1.4f, 1f);
             subjectMesh.TileTexture(5, 6);
             var transform = new Transform(new(0, 0, 0), new(0, 0, 0), new(1f, 1f, 1f));
-            var renderableMesh = new RenderableMeshEntity(subjectMesh, Assets.Shaders.Get("Default")!, texture);
+            var renderableMesh = new RenderableMeshEntity(subjectMesh, Assets.Get<Shader>("Default")!, texture);
 
             renderableMesh.AddComponent(new TransformComponent(transform));
             renderableMesh.GetComponent<MeshRenderComponent>()!.Material.Albedo = new(1f, 0f, 1f);
@@ -56,19 +56,22 @@ namespace Sandbox
             // Set up test light
             var lightMesh = MeshFactory.CreateSphere(0.2f);
             var transform2 = new Transform(new(0.75f, 0.75f, 0.75f), new(0, 0, 0), new(1f, 1f, 1f));
-            var renderableLight = new RenderableMeshEntity(lightMesh, Assets.Shaders.Get("Light")!);
+            var renderableLight = new RenderableMeshEntity(lightMesh, Assets.Get<Shader>("Light")!);
 
             renderableLight.AddComponent(new TransformComponent(transform2));
 
             // Initialize grid
             Grid gridA = new(10, 10, new(1, 1, 1), 0.2f);
             Grid gridB = new(10, 20, new(0, 0, 0), 0.15f);
-            var renderableGridMajor = new RenderableGridEntity(gridA, Assets.Shaders.Get("Grid")!);
-            var renderableGridMinor = new RenderableGridEntity(gridB, Assets.Shaders.Get("Grid")!);
+            var renderableGridMajor = new RenderableGridEntity(gridA, Assets.Get<Shader>("Grid")!);
+            var renderableGridMinor = new RenderableGridEntity(gridB, Assets.Get<Shader>("Grid")!);
+
+            var syntaxA = Assets.Get<Shader>("Grid")!;
+            var syntaxB = Assets["Grid"] as Shader;
 
             // Initialize axes gizmo
             var axesGizmoMesh = MeshFactory.CreateAxesGizmo(0.1f);
-            var renderableAxesGizmo = new RenderableMeshEntity(axesGizmoMesh, Assets.Shaders.Get("Axes")!);
+            var renderableAxesGizmo = new RenderableMeshEntity(axesGizmoMesh, Assets.Get<Shader>("Axes")!);
             renderableAxesGizmo.GetComponent<MeshRenderComponent>()!.DrawMode = DrawMode.Lines;
 
             // Add entities to the scene

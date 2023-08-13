@@ -1,4 +1,5 @@
 ﻿using PentaGE.Common;
+using PentaGE.Core.Assets;
 using Serilog;
 using System.Numerics;
 using System.Text;
@@ -9,7 +10,7 @@ namespace PentaGE.Core.Rendering
     /// <summary>
     /// Represents a shader program used for rendering graphics on the GPU.
     /// </summary>
-    public sealed class Shader : IDisposable
+    public sealed class Shader : IAsset, IDisposable, IHotReloadable
     {
         private string _vertexSourceCode = string.Empty;
         private string _fragmentSourceCode = string.Empty;
