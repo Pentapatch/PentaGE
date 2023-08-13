@@ -16,7 +16,7 @@ namespace PentaGE.Core.Rendering
         private readonly PentaGameEngine _engine;
         private bool cullingEnabled = false;
         private bool rotate = true;
-        private bool materialTest = true;
+        private bool materialTest = false;
         private bool wireframe = false;
 
         /// <summary>
@@ -30,6 +30,13 @@ namespace PentaGE.Core.Rendering
 
         // Set up the rendered test objects transform
         private Transform objectTransform = new()
+        {
+            Position = new(0, 0, 0),    // in units
+            Rotation = new(0, 0, 0),    // in degrees
+            Scale = new(1, 1, 1),       // multipliers
+        };
+
+        private Transform objectDisplayTransform = new()
         {
             Position = new(0, 0, 0),    // in units
             Rotation = new(0, 0, 0),    // in degrees
@@ -86,14 +93,14 @@ namespace PentaGE.Core.Rendering
                 #region Test rotation
 
                 // Rotate the object based on the current time
-                objectTransform.Rotation = rotate ? new(
+                objectTransform.Rotation = new(
                     MathF.Sin((float)_engine.Timing.TotalElapsedTime) * 180,
                     0,
-                    0) :
-                    new(0, 0, 0); // objectTransform.Rotation;
+                    0);
 
                 // Animate the color and specular strength of the object
-                _engine.Scene[0].GetComponent<TransformComponent>()!.Transform = objectTransform;
+                _engine.Scene[0].GetComponent<TransformComponent>()!.Transform = rotate ? objectTransform : objectDisplayTransform;
+
                 float hue = MathF.Sin((float)_engine.Timing.TotalElapsedTime) * 0.5f + 0.5f; // Adjust the range to [0, 1]
                 _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Material.Albedo =
                     materialTest ?
@@ -178,23 +185,59 @@ namespace PentaGE.Core.Rendering
             // TODO: This code does not belong here, but is here for testing purposes
             if (e.Key == Key.Left)
             {
-                objectTransform.Rotation += new Rotation(-1, 0, 0) * 5;
-                Log.Information($"Object yaw left: {objectTransform.Rotation}");
+                if (e.ModifierKeys == ModifierKey.None)
+                {
+                    objectDisplayTransform.Rotation += new Rotation(-1, 0, 0) * 5;
+                    Log.Information($"Object yaw left: {objectDisplayTransform.Rotation}");
+                }
+                else if (e.ModifierKeys == ModifierKey.Control)
+                {
+                    objectDisplayTransform.Rotation = Rotation.GetLookAt(World.LeftVector * 5, objectDisplayTransform.Position);
+                }
             }
             else if (e.Key == Key.Right)
             {
-                objectTransform.Rotation += new Rotation(1, 0, 0) * 5;
-                Log.Information($"Object yaw right: {objectTransform.Rotation}");
+                if (e.ModifierKeys == ModifierKey.None)
+                {
+                    objectDisplayTransform.Rotation += new Rotation(1, 0, 0) * 5;
+                    Log.Information($"Object yaw right: {objectDisplayTransform.Rotation}");
+                }
+                else if (e.ModifierKeys == ModifierKey.Control)
+                {
+                    objectDisplayTransform.Rotation = Rotation.GetLookAt(World.RightVector * 5, objectDisplayTransform.Position);
+                }
             }
             else if (e.Key == Key.Up)
             {
-                objectTransform.Rotation += new Rotation(0, 1, 0) * 5;
-                Log.Information($"Object pitch up: {objectTransform.Rotation}");
+                if (e.ModifierKeys == ModifierKey.None)
+                {
+                    objectDisplayTransform.Rotation += new Rotation(0, 1, 0) * 5;
+                    Log.Information($"Object pitch up: {objectDisplayTransform.Rotation}");
+                }
+                else if (e.ModifierKeys == ModifierKey.Control)
+                {
+                    objectDisplayTransform.Rotation = Rotation.GetLookAt(World.UpVector * 5, objectDisplayTransform.Position);
+                }
+                else if (e.ModifierKeys == (ModifierKey.Control | ModifierKey.Shift))
+                {
+                    objectDisplayTransform.Rotation = Rotation.GetLookAt(World.ForwardVector * 5, objectDisplayTransform.Position);
+                }
             }
             else if (e.Key == Key.Down)
             {
-                objectTransform.Rotation += new Rotation(0, -1, 0) * 5;
-                Log.Information($"Object pitch down: {objectTransform.Rotation}");
+                if (e.ModifierKeys == ModifierKey.None)
+                {
+                    objectDisplayTransform.Rotation += new Rotation(0, -1, 0) * 5;
+                    Log.Information($"Object pitch down: {objectDisplayTransform.Rotation}");
+                }
+                else if (e.ModifierKeys == ModifierKey.Control)
+                {
+                    objectDisplayTransform.Rotation = Rotation.GetLookAt(World.DownVector * 5, objectDisplayTransform.Position);
+                }
+                else if (e.ModifierKeys == (ModifierKey.Control | ModifierKey.Shift))
+                {
+                    objectDisplayTransform.Rotation = Rotation.GetLookAt(World.BackwardVector * 5, objectDisplayTransform.Position);
+                }
             }
             else if (e.Key == Key.F1)
             {

@@ -36,10 +36,10 @@ namespace PentaGE.Core.Graphics
     /// </summary>
     public static class MeshFactory
     {
-        private static Vector2 TopLeft => new(0f, 1f);
-        private static Vector2 TopRight => new(1f, 1f);
-        private static Vector2 BottomLeft => new(0f, 0f);
-        private static Vector2 BottomRight => new(1f, 0f);
+        private static Vector2 TopLeft => new(1f, 1f);
+        private static Vector2 TopRight => new(0f, 1f);
+        private static Vector2 BottomLeft => new(1f, 0f);
+        private static Vector2 BottomRight => new(0f, 0f);
         private static Vector2 TopCenter => new(0.5f, 1f);
 
         /// <summary>
@@ -67,35 +67,35 @@ namespace PentaGE.Core.Graphics
             // Define vertices of the cuboid
             List<Vertex> vertices = new()
             {
-                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.ForwardVector, BottomLeft),   // 0
-                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.ForwardVector, BottomRight),   // 1
-                new Vertex(new Vector3(halfWidth, halfHeight, halfDepth), World.ForwardVector, TopRight),       // 2
-                new Vertex(new Vector3(-halfWidth, halfHeight, halfDepth), World.ForwardVector, TopLeft),       // 3
+                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.ForwardVector, BottomLeft),       // 0
+                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.ForwardVector, BottomRight),       // 1
+                new Vertex(new Vector3(halfWidth, halfHeight, halfDepth), World.ForwardVector, TopRight),           // 2
+                new Vertex(new Vector3(-halfWidth, halfHeight, halfDepth), World.ForwardVector, TopLeft),           // 3
 
-                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.BackwardVector, BottomLeft), // 4
-                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.BackwardVector, BottomRight), // 5
-                new Vertex(new Vector3(halfWidth, halfHeight, -halfDepth), World.BackwardVector, TopRight),     // 6
-                new Vertex(new Vector3(-halfWidth, halfHeight, -halfDepth), World.BackwardVector, TopLeft),     // 7
+                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.BackwardVector, BottomRight),    // 4
+                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.BackwardVector, BottomLeft),      // 5
+                new Vertex(new Vector3(halfWidth, halfHeight, -halfDepth), World.BackwardVector, TopLeft),          // 6
+                new Vertex(new Vector3(-halfWidth, halfHeight, -halfDepth), World.BackwardVector, TopRight),        // 7
 
-                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.LeftVector, BottomLeft),     // 8
-                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.LeftVector, BottomRight),     // 9
-                new Vertex(new Vector3(-halfWidth, halfHeight, halfDepth), World.LeftVector, TopRight),         // 10
-                new Vertex(new Vector3(-halfWidth, halfHeight, -halfDepth), World.LeftVector, TopLeft),         // 11
+                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.LeftVector, BottomLeft),         // 8
+                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.LeftVector, BottomRight),         // 9
+                new Vertex(new Vector3(-halfWidth, halfHeight, halfDepth), World.LeftVector, TopRight),             // 10
+                new Vertex(new Vector3(-halfWidth, halfHeight, -halfDepth), World.LeftVector, TopLeft),             // 11
 
-                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.RightVector, BottomLeft),     // 12
-                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.RightVector, BottomRight),     // 13
-                new Vertex(new Vector3(halfWidth, halfHeight, halfDepth), World.RightVector, TopRight),         // 14
-                new Vertex(new Vector3(halfWidth, halfHeight, -halfDepth), World.RightVector, TopLeft),         // 15
+                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.RightVector, BottomRight),        // 12
+                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.RightVector, BottomLeft),          // 13
+                new Vertex(new Vector3(halfWidth, halfHeight, halfDepth), World.RightVector, TopLeft),              // 14
+                new Vertex(new Vector3(halfWidth, halfHeight, -halfDepth), World.RightVector, TopRight),            // 15
 
-                new Vertex(new Vector3(-halfWidth, halfHeight, halfDepth), World.UpVector, BottomLeft),         // 16
-                new Vertex(new Vector3(halfWidth, halfHeight, halfDepth), World.UpVector, BottomRight),         // 17
-                new Vertex(new Vector3(halfWidth, halfHeight, -halfDepth), World.UpVector, TopRight),           // 18
-                new Vertex(new Vector3(-halfWidth, halfHeight, -halfDepth), World.UpVector, TopLeft),           // 19
+                new Vertex(new Vector3(-halfWidth, halfHeight, halfDepth), World.UpVector, BottomLeft),             // 16
+                new Vertex(new Vector3(halfWidth, halfHeight, halfDepth), World.UpVector, BottomRight),             // 17
+                new Vertex(new Vector3(halfWidth, halfHeight, -halfDepth), World.UpVector, TopRight),               // 18
+                new Vertex(new Vector3(-halfWidth, halfHeight, -halfDepth), World.UpVector, TopLeft),               // 19
 
-                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.DownVector, BottomLeft),      // 20
-                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.DownVector, BottomRight),      // 21
-                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.DownVector, TopRight),        // 22
-                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.DownVector, TopLeft),        // 23
+                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.DownVector, TopLeft),             // 20
+                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.DownVector, TopRight),             // 21
+                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.DownVector, BottomRight),         // 22
+                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.DownVector, BottomLeft),         // 23
             };
 
             // Define indices for the cuboid
@@ -249,8 +249,8 @@ namespace PentaGE.Core.Graphics
             if (height <= 0f)
                 throw new ArgumentOutOfRangeException(nameof(height), "Height must be greater than zero.");
 
-            if (segments < 3)
-                throw new ArgumentOutOfRangeException(nameof(segments), "Segments must be greater than or equal to three.");
+            if (segments < 5)
+                throw new ArgumentOutOfRangeException(nameof(segments), "Segments must be greater than or equal to five.");
 
             if (textureAspectRatio <= 0f)
                 throw new ArgumentOutOfRangeException(nameof(textureAspectRatio), "Texture aspect ratio must be greater than zero.");
@@ -262,6 +262,8 @@ namespace PentaGE.Core.Graphics
             List<Vertex> vertices = new();
             Vector3 topCenter = new(0f, halfHeight, 0f);
             Vector3 bottomCenter = new(0f, -halfHeight, 0f);
+            int segmentsPerFace = segments / 4;
+            float textureMapPerFace = 1f / segmentsPerFace;
             for (int i = 0; i <= segments; i++)
             {
                 float angle = 2 * MathF.PI * i / segments;
@@ -269,10 +271,12 @@ namespace PentaGE.Core.Graphics
                 float z = radius * MathF.Sin(angle);
 
                 // Calculate texture coordinates based on vertex position
-                Vector2 yTexCoord = new(x / (radius * 2) + 0.5f, z / (radius * -2) + 0.5f);
+                Vector2 topTexCoord = new(x / (radius * -2) + 0.5f, z / (radius * -2) + 0.5f);
+                Vector2 bottomTexCoord = new(x / (radius * -2) + 0.5f, z / (radius * 2) + 0.5f);
 
                 // Adjust the x texture coordinate for the sides
-                float u = x / radius * 0.5f + 0.5f;
+                //float offset = 0.25f * (segmentsPerFace / 16f);
+                float u = (i + (1 % segmentsPerFace)) * textureMapPerFace;
 
                 // Adjust for texture aspect ratio
                 u *= textureAspectRatio;
@@ -290,11 +294,11 @@ namespace PentaGE.Core.Graphics
                 vertices.Add(new Vertex(topSidePosition, topSideNormal, topSideTexCoord));
 
                 // Top face vertices
-                vertices.Add(new Vertex(new Vector3(x, halfHeight, z), World.UpVector, yTexCoord));
+                vertices.Add(new Vertex(new Vector3(x, halfHeight, z), World.UpVector, topTexCoord));
                 vertices.Add(new Vertex(topCenter, World.UpVector, new Vector2(0.5f, 0.5f)));
 
                 // Bottom face vertices
-                vertices.Add(new Vertex(new Vector3(x, -halfHeight, z), World.DownVector, yTexCoord));
+                vertices.Add(new Vertex(new Vector3(x, -halfHeight, z), World.DownVector, bottomTexCoord));
                 vertices.Add(new Vertex(bottomCenter, World.DownVector, new Vector2(0.5f, 0.5f)));
             }
 
@@ -338,18 +342,16 @@ namespace PentaGE.Core.Graphics
         /// <returns>A cone mesh.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when radius, height, segments, or textureAspectRatio is out of valid range.</exception>
         public static Mesh CreateCone(float radius, float height, int segments = 16, float textureAspectRatio = 1f)
-        {
-            // TODO: Known issues:
-            // - Not sure that the normals are correct for the cone sides
-            //   Behaves wierd when subdivide is called on the mesh
+    {
+        // TODO: Known issues:
+        // - Not sure that the normals are correct for the cone sides
+        //   Behaves wierd when subdivide is called on the mesh
             if (radius <= 0f)
-                throw new ArgumentOutOfRangeException(nameof(radius), "Radius must be greater than zero.");
-
-            if (height <= 0f)
-                throw new ArgumentOutOfRangeException(nameof(height), "Height must be greater than zero.");
-
-            if (segments < 3)
-                throw new ArgumentOutOfRangeException(nameof(segments), "Segments must be greater than or equal to three.");
+            throw new ArgumentOutOfRangeException(nameof(radius), "Radius must be greater than zero.");
+        if (height <= 0f)
+            throw new ArgumentOutOfRangeException(nameof(height), "Height must be greater than zero.");
+        if (segments < 3)
+            throw new ArgumentOutOfRangeException(nameof(segments), "Segments must be greater than or equal to three.");
 
             if (textureAspectRatio <= 0f)
                 throw new ArgumentOutOfRangeException(nameof(textureAspectRatio), "Texture aspect ratio must be greater than zero.");
