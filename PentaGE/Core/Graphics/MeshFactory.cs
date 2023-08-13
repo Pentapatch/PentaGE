@@ -502,7 +502,8 @@ namespace PentaGE.Core.Graphics
         /// </summary>
         /// <param name="scale">The scale to be applied to the axes.</param>
         /// <returns>The axes gizmo mesh.</returns>
-        internal static Mesh CreateAxesGizmo(float scale)
+        // TODO: Should probably be moved to the Sandbox project?
+        public static Mesh CreateAxesGizmo(float scale)
         {
             // Define vertices of the axes gizmo
             List<Vertex> vertices = new()

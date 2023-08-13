@@ -1,5 +1,4 @@
-﻿using GLFW;
-using PentaGE.Core.Events;
+﻿using PentaGE.Core.Events;
 using PentaGE.Core.Logging;
 using PentaGE.Core.Rendering;
 using PentaGE.Core.Scenes;
@@ -16,6 +15,7 @@ namespace PentaGE.Core
         private readonly Timing _timing = new();
         private readonly Renderer _renderer;
         private readonly WindowManager _windowManager;
+        private readonly ShaderManager _shaderManager;
         private readonly EventManager _eventManager = new();
         private GameState _state = GameState.Initializing;
 
@@ -47,12 +47,26 @@ namespace PentaGE.Core
         public GameState State => _state;
 
         /// <summary>
-        /// Called during game engine initialization to allow concrete implementations to set up the game.
-        /// Implement this method to initialize the game, create resources, set up the scene, etc.
+        /// Gets the ShaderManager responsible for managing shaders in the game engine.
+        /// </summary>
+        public ShaderManager Shaders => _shaderManager;
+
+        /// <summary>
+        /// Called during game engine initialization to allow concrete implementations to perform engine-related setup.
+        /// Implement this method to initialize engine components, set up windows, configure rendering settings, etc.
         /// If the implementation returns <c>false</c>, the engine startup will be canceled.
         /// </summary>
-        /// <returns><c>true</c> if the game engine is successfully initialized; otherwise, <c>false</c>.</returns>
+        /// <returns><c>true</c> if the engine is successfully initialized; otherwise, <c>false</c>.</returns>
         protected abstract bool Initialize();
+
+        /// <summary>
+        /// Called during game engine initialization after GLFW has been initialized, allowing concrete implementations
+        /// to load resources such as textures, shaders, models, etc.
+        /// Implement this method to load necessary resources needed for the game.
+        /// If the implementation returns <c>false</c>, the engine startup will be canceled.
+        /// </summary>
+        /// <returns><c>true</c> if the resources are successfully loaded; otherwise, <c>false</c>.</returns>
+        protected abstract bool LoadResources();
 
         /// <summary>
         /// Called during game engine termination to allow concrete implementations to clean up resources.
@@ -73,6 +87,7 @@ namespace PentaGE.Core
         {
             _renderer = new(this);
             _windowManager = new(this);
+            _shaderManager = new(this);
         }
 
         /// <summary>
@@ -110,9 +125,9 @@ namespace PentaGE.Core
             Log.Information("Terminating the Renderer.");
             _renderer.Terminate();
 
-            // Terminate Glfw
-            Log.Information("Terminating GLFW.");
-            Glfw.Terminate();
+            // Terminate the Shader manager
+            Log.Information("Terminating the Shader manager.");
+            _shaderManager.Dispose();
 
             // Allow the concrete implementation of the engine to unload resources
             using (Log.Logger.BeginPerfLogger("Terminating concrete implementation"))
@@ -141,12 +156,22 @@ namespace PentaGE.Core
             }
 
             // Initialize GLFW (OpenGL Framework)
-            // Must come after Initialize so the concrete implementation of the engine can add windows
+            // NOTE: Must come after Initialize so the concrete implementation of the engine can add windows
             using (Log.Logger.BeginPerfLogger("Initializing GLFW"))
             {
                 if (!Renderer.InitializeGLFW())
                 {
                     Log.Fatal("Failed to initialize GLFW.");
+                    return false;
+                }
+            }
+
+            // Load resources
+            using (Log.Logger.BeginPerfLogger("Loading resources"))
+            {
+                if (!LoadResources())
+                {
+                    Log.Fatal("Failed to load resources.");
                     return false;
                 }
             }

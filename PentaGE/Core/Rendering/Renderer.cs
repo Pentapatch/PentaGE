@@ -1,9 +1,7 @@
 ﻿using GLFW;
 using PentaGE.Common;
 using PentaGE.Core.Components;
-using PentaGE.Core.Entities;
 using PentaGE.Core.Graphics;
-using PentaGE.Core.Logging;
 using Serilog;
 using System.Numerics;
 using static OpenGL.GL;
@@ -17,22 +15,9 @@ namespace PentaGE.Core.Rendering
     {
         private readonly PentaGameEngine _engine;
         private bool cullingEnabled = false;
-        private Shader shader;
-        private Shader faceShader;
-        private Shader faceShader2;
-        private Shader normalShader;
-        private Shader lightShader;
-        private Shader gridShader;
-        private Shader axesShader;
-        private Texture texture;
-        private Mesh testMesh1;
-        private Mesh lightMesh1;
-        private Mesh axesGizmoMesh;
         private bool rotate = true;
         private bool materialTest = true;
         private bool wireframe = false;
-        private readonly Grid gridA = new(10, 10, new(1, 1, 1), 0.2f);
-        private readonly Grid gridB = new(10, 20, new(0, 0, 0), 0.15f);
 
         /// <summary>
         /// Creates a new instance of the Renderer class.
@@ -88,48 +73,6 @@ namespace PentaGE.Core.Rendering
             // TODO: Only for debugging - remove later
             _engine.Events.KeyDown += Events_KeyDown;
 
-            #region Set up a test object to render
-            // TODO: None of these should be here, it's just for testing
-
-            // Initializing test shaders
-            // TODO: Move this to a shader manager
-            InitializeShadersAndTextures();
-
-            // Initialize test mesh
-            testMesh1 = MeshFactory.CreatePyramid(1f, 1.4f, 1f);
-            testMesh1.TileTexture(5, 6);
-            var transform = new Transform(new(0, 0, 0), new(0, 0, 0), new(1f, 1f, 1f));
-            var renderableMesh = new RenderableMeshEntity(testMesh1, shader, texture);
-
-            renderableMesh.AddComponent(new TransformComponent(transform));
-            renderableMesh.GetComponent<MeshRenderComponent>()!.Material.Albedo = new(1f, 0f, 1f);
-            renderableMesh.GetComponent<MeshRenderComponent>()!.Material.SpecularStrength = 1f;
-
-            // Initialize test light
-            lightMesh1 = MeshFactory.CreateSphere(0.2f);
-            var transform2 = new Transform(new(0.75f, 0.75f, 0.75f), new(0, 0, 0), new(1f, 1f, 1f));
-            var renderableLight = new RenderableMeshEntity(lightMesh1, lightShader);
-
-            renderableLight.AddComponent(new TransformComponent(transform2));
-
-            // Initialize grid
-            //gridB.Mesh.Offset(0, -0.25f, 0);
-            var renderableGridMajor = new RenderableGridEntity(gridA, gridShader);
-            var renderableGridMinor = new RenderableGridEntity(gridB, gridShader);
-
-            // Initialize axes gizmo
-            axesGizmoMesh = MeshFactory.CreateAxesGizmo(0.1f);
-            var renderableAxesGizmo = new RenderableMeshEntity(axesGizmoMesh, axesShader);
-            renderableAxesGizmo.GetComponent<MeshRenderComponent>()!.DrawMode = DrawMode.Lines;
-
-            _engine.Scene.AddEntity(renderableMesh);
-            _engine.Scene.AddEntity(renderableLight);
-            _engine.Scene.AddEntity(renderableGridMajor);
-            _engine.Scene.AddEntity(renderableGridMinor);
-            _engine.Scene.AddEntity(renderableAxesGizmo);
-
-            #endregion
-
             return true;
         }
 
@@ -178,11 +121,8 @@ namespace PentaGE.Core.Rendering
 
         internal void Terminate()
         {
+            Log.Information("Terminating GLFW.");
             Glfw.Terminate();
-            shader.Dispose();
-            lightShader.Dispose();
-            gridShader.Dispose();
-            texture.Dispose();
         }
 
         private void Events_GlfwError(object? sender, Events.GlfwErrorEventArgs e)
@@ -280,23 +220,24 @@ namespace PentaGE.Core.Rendering
             }
             else if (e.Key == Key.F5)
             {
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = shader;
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Shaders.Get("Default")!;
             }
             else if (e.Key == Key.F6)
             {
                 if (e.ModifierKeys == ModifierKey.Shift)
-                    _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = faceShader2;
+                    _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Shaders.Get("Face2")!;
                 else
-                    _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = faceShader;
+                    _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Shaders.Get("Face")!;
             }
             else if (e.Key == Key.F7)
             {
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = normalShader;
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Shaders.Get("Normal")!;
             }
             else if (e.Key == Key.F10)
             {
-                testMesh1.Subdivide();
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = testMesh1;
+                var mesh = _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh;
+                mesh.Subdivide();
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
             }
             else if (e.Key == Key.Backspace && e.ModifierKeys == ModifierKey.Control)
             {
@@ -307,149 +248,38 @@ namespace PentaGE.Core.Rendering
             }
             else if (e.Key == Key.Alpha1)
             {
-                testMesh1 = MeshFactory.CreateCube(1f);
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = testMesh1;
+                var mesh = MeshFactory.CreateCube(1f);
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
             }
             else if (e.Key == Key.Alpha2)
             {
-                testMesh1 = MeshFactory.CreateSphere(1f);
+                var mesh = MeshFactory.CreateSphere(1f);
                 //testMesh1.TileTexture(4, 4);
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = testMesh1;
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
             }
             else if (e.Key == Key.Alpha3)
             {
-                testMesh1 = MeshFactory.CreateCylinder(0.5f, 1f);
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = testMesh1;
+                var mesh = MeshFactory.CreateCylinder(0.5f, 1f);
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
             }
             else if (e.Key == Key.Alpha4)
             {
-                testMesh1 = MeshFactory.CreatePyramid(1f, 1f, 1f);
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = testMesh1;
+                var mesh = MeshFactory.CreatePyramid(1f, 1f, 1f);
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
             }
             else if (e.Key == Key.Alpha5)
             {
-                testMesh1 = MeshFactory.CreateCone(0.5f, 1f);
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = testMesh1;
+                var mesh = MeshFactory.CreateCone(0.5f, 1f);
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
             }
             else if (e.Key == Key.Alpha6)
             {
-                testMesh1 = MeshFactory.CreatePlane(1f, 1f, new Rotation(0, -90, 0));
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = testMesh1;
+                var mesh = MeshFactory.CreatePlane(1f, 1f, new Rotation(0, -90, 0));
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
             }
             else if (e.Key == Key.R && e.ModifierKeys == ModifierKey.Control)
             {
                 rotate = !rotate;
-            }
-        }
-
-        private void InitializeShadersAndTextures()
-        {
-            // NOTE: This is just for testing, this should be moved to a shader manager
-            using (var logger = Log.Logger.BeginPerfLogger("Loading default shader"))
-            {
-                try
-                {
-                    shader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Default.shader");
-                    shader.Load();
-                }
-                catch (System.Exception ex)
-                {
-                    Log.Error($"Error loading shader: {ex}");
-                }
-            }
-
-            using (var logger = Log.Logger.BeginPerfLogger("Loading face shader 1"))
-            {
-                try
-                {
-                    faceShader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Face.shader");
-                    faceShader.Load();
-                }
-                catch (System.Exception ex)
-                {
-                    Log.Error($"Error loading shader: {ex}");
-                }
-            }
-
-            using (var logger = Log.Logger.BeginPerfLogger("Loading face shader 2"))
-            {
-                try
-                {
-                    faceShader2 = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Face2.shader");
-                    faceShader2.Load();
-                }
-                catch (System.Exception ex)
-                {
-                    Log.Error($"Error loading shader: {ex}");
-                }
-            }
-
-            using (var logger = Log.Logger.BeginPerfLogger("Loading normal shader"))
-            {
-                try
-                {
-                    normalShader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Normal.shader");
-                    normalShader.Load();
-                }
-                catch (System.Exception ex)
-                {
-                    Log.Error($"Error loading shader: {ex}");
-                }
-            }
-
-            using (var logger = Log.Logger.BeginPerfLogger("Loading light shader"))
-            {
-                try
-                {
-                    lightShader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Light.shader");
-                    lightShader.Load();
-                }
-                catch (System.Exception ex)
-                {
-                    Log.Error($"Error loading shader: {ex}");
-                }
-            }
-
-            using (var logger = Log.Logger.BeginPerfLogger("Loading grid shader"))
-            {
-                try
-                {
-                    gridShader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Grid.shader");
-                    gridShader.Load();
-                }
-                catch (System.Exception ex)
-                {
-                    Log.Error($"Error loading shader: {ex}");
-                }
-            }
-
-            using (var logger = Log.Logger.BeginPerfLogger("Loading axes shader"))
-            {
-                try
-                {
-                    axesShader = new(@"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\Axes.shader");
-                    axesShader.Load();
-                }
-                catch (System.Exception ex)
-                {
-                    Log.Error($"Error loading shader: {ex}");
-                }
-            }
-
-            // Initialize test texture
-            using (var logger = Log.Logger.BeginPerfLogger("Loading test texture"))
-            {
-                try
-                {
-                    texture = new(
-                    @"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Textures\SourceFiles\TestTexture.jpg",
-                    GL_TEXTURE_2D,
-                    GL_TEXTURE0,
-                    GL_RGBA,
-                    GL_UNSIGNED_BYTE);
-                    Texture.SetTextureSlot(shader, "tex0", 0); // Set the texture slot to 0
-                }
-                catch { /* Gets logged in the constructor */ }
             }
         }
     }
