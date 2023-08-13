@@ -17,6 +17,9 @@ namespace PentaGE.Core.Rendering
         private string _geometrySourceCode = string.Empty;
         private readonly string _filePath = string.Empty;
 
+        /// <summary>
+        /// Gets the OpenGL ID of the shader program.
+        /// </summary>
         public uint ProgramId { get; private set; } = 0u;
 
         /// <summary>
@@ -51,7 +54,7 @@ namespace PentaGE.Core.Rendering
         {
             if (ProgramId != 0)
             {
-                Log.Error("Attempted to load shader that is already loaded.");
+                Log.Error("Attempted to load a shader that is already loaded.");
                 return false;
             }
 

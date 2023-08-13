@@ -34,20 +34,19 @@ namespace Sandbox
             if (!Assets.AddShader("Axes", $"{path}Axes.shader")) return false;
 
             // Initialize test texture
-            // TODO: Move this to a texture manager and create a resource manager
-            //       Resources > Shaders / Textures / Meshes
-            Texture texture = new(
-                @"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Textures\SourceFiles\TestTexture.jpg",
-                GL_TEXTURE_2D,
-                GL_TEXTURE0,
-                GL_RGBA,
-                GL_UNSIGNED_BYTE);
+            if (!Assets.AddTexture("TestTexture",
+                    @"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Textures\SourceFiles\TestTexture.jpg",
+                    GL_TEXTURE_2D,
+                    GL_TEXTURE0,
+                    GL_RGBA,
+                    GL_UNSIGNED_BYTE))
+                return false;
 
             // Set up subject mesh
             var subjectMesh = MeshFactory.CreatePyramid(1f, 1.4f, 1f);
             subjectMesh.TileTexture(5, 6);
             var transform = new Transform(new(0, 0, 0), new(0, 0, 0), new(1f, 1f, 1f));
-            var renderableMesh = new RenderableMeshEntity(subjectMesh, Assets.Get<Shader>("Default")!, texture);
+            var renderableMesh = new RenderableMeshEntity(subjectMesh, Assets.Get<Shader>("Default")!, Assets.Get<Texture>("TestTexture"));
 
             renderableMesh.AddComponent(new TransformComponent(transform));
             renderableMesh.GetComponent<MeshRenderComponent>()!.Material.Albedo = new(1f, 0f, 1f);
@@ -65,9 +64,6 @@ namespace Sandbox
             Grid gridB = new(10, 20, new(0, 0, 0), 0.15f);
             var renderableGridMajor = new RenderableGridEntity(gridA, Assets.Get<Shader>("Grid")!);
             var renderableGridMinor = new RenderableGridEntity(gridB, Assets.Get<Shader>("Grid")!);
-
-            var syntaxA = Assets.Get<Shader>("Grid")!;
-            var syntaxB = Assets["Grid"] as Shader;
 
             // Initialize axes gizmo
             var axesGizmoMesh = MeshFactory.CreateAxesGizmo(0.1f);

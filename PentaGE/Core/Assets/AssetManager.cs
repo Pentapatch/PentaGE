@@ -1,6 +1,7 @@
 ﻿using PentaGE.Core.Logging;
 using PentaGE.Core.Rendering;
 using Serilog;
+using StbImageSharp;
 
 namespace PentaGE.Core.Assets
 {
@@ -46,6 +47,23 @@ namespace PentaGE.Core.Assets
 
         public bool AddShader(string name, string vertexSourceCode, string fragmentSourceCode, string? geometrySourceCode = null) =>
             Add(name, new Shader(vertexSourceCode, fragmentSourceCode, geometrySourceCode));
+
+        public bool AddTexture(string name, string filePath, int type, int slot, int format, int pixelType)
+        {
+            try
+            {
+                Texture texture = new(filePath, type, slot, format, pixelType);
+                return Add(name, texture, filePath);
+            }
+            catch (FileNotFoundException ex)
+            {
+                Log.Error($"Failed to add texture '{name}': {ex}");
+                return false;
+            }
+        }
+
+        public bool AddTexture(string name, ImageResult image, int type, int slot, int format, int pixelType) =>
+            Add(name, new Texture(image, type, slot, format, pixelType));
 
         public bool Add(string name, IAsset asset, string? filePath = null)
         {
