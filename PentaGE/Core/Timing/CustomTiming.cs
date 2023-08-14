@@ -8,6 +8,7 @@ namespace PentaGE.Core
     public sealed class CustomTiming
     {
         private double totalElapsedSeconds = 0d;
+        private readonly CustomTimingsManager _manager;
 
         /// <summary>
         /// Occurs when the custom timing interval has elapsed.
@@ -28,9 +29,11 @@ namespace PentaGE.Core
         /// Initializes a new instance of the <see cref="CustomTiming"/> class with the specified interval.
         /// </summary>
         /// <param name="intervalInSeconds">The interval in seconds at which the custom timing occurs.</param>
-        internal CustomTiming(double intervalInSeconds)
+        /// <param name="manager">The manager that created this instance.</param>
+        internal CustomTiming(double intervalInSeconds, CustomTimingsManager manager)
         {
             Interval = intervalInSeconds;
+            _manager = manager;
         }
 
         /// <summary>
@@ -38,10 +41,12 @@ namespace PentaGE.Core
         /// </summary>
         /// <param name="intervalInSeconds">The interval in seconds at which the custom timing occurs.</param>
         /// <param name="action">The action to be executed when the custom timing interval has elapsed.</param>
-        internal CustomTiming(double intervalInSeconds, Action<double> action)
+        /// <param name="manager">The manager that created this instance.</param>
+        internal CustomTiming(double intervalInSeconds, Action<double> action, CustomTimingsManager manager)
         {
             Interval = intervalInSeconds;
             Action = action;
+            _manager = manager;
         }
 
         /// <summary>
@@ -58,6 +63,12 @@ namespace PentaGE.Core
                 totalElapsedSeconds = 0d;
             }
         }
+
+        /// <summary>
+        /// Remove this particular CustomTiming instance from the <see cref="CustomTimingsManager"/>.
+        /// </summary>
+        public void Remove() => 
+            _manager.Remove(this);
 
         /// <summary>
         /// Triggers the Tick event or executes the associated action when the custom timing interval has elapsed.

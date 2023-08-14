@@ -5,7 +5,7 @@ namespace PentaGE.Core.Events
     /// <summary>
     /// Event arguments for a key down event.
     /// </summary>
-    public sealed class KeyDownEventArgs : EngineEventArgs
+    public class KeyDownEventArgs : EngineEventArgs
     {
         /// <summary>
         /// Gets the event category.

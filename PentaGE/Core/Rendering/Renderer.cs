@@ -78,9 +78,45 @@ namespace PentaGE.Core.Rendering
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-            // Add engine events for moving the camera
-            // TODO: Only for debugging - remove later
-            _engine.Events.KeyDown += Events_KeyDown;
+            #region Subscribe to HotKey events
+
+            // Subscribe to events
+            // TODO: This belongs to the concrete implementation of the engine (Editor)
+            //       and should be moved there
+            _engine.Events.HotKeys[Key.F1].Event += ToggleWireframe_HotKey;
+            _engine.Events.HotKeys[Key.F2].Event += ToggleCulling_HotKey;
+            _engine.Events.HotKeys[Key.F3].Event += ToggleMaterialTest_HotKey;
+            _engine.Events.HotKeys[Key.F5].Event += SetShaderToDefault_HotKey;
+            _engine.Events.HotKeys[Key.F6].Event += SetShaderToFaceA_HotKey;
+            _engine.Events.HotKeys[Key.F6, ModifierKey.Shift].Event += SetShaderToFaceB_HotKey;
+            _engine.Events.HotKeys[Key.F7].Event += SetShaderToNormal_HotKey;
+            _engine.Events.HotKeys[Key.F10].Event += Subdivide_HotKey;
+            _engine.Events.HotKeys[Key.F11].Event += TileTexture_HotKey;
+            _engine.Events.HotKeys[Key.F12].Event += Roughen_HotKey;
+            _engine.Events.HotKeys[Key.F12, ModifierKey.Control].Event += Explode_HotKey;
+            _engine.Events.HotKeys[Key.R, ModifierKey.Control].Event += ToggleRotation_HotKey;
+            _engine.Events.HotKeys[Key.I, ModifierKey.Control].Event += ToggleTexture_HotKey;
+            _engine.Events.HotKeys[Key.Alpha1].Event += CreateCube_HotKey;
+            _engine.Events.HotKeys[Key.Alpha2].Event += CreateCylinder_HotKey;
+            _engine.Events.HotKeys[Key.Alpha3].Event += CreateCone_HotKey;
+            _engine.Events.HotKeys[Key.Alpha4].Event += CreatePyramid_HotKey;
+            _engine.Events.HotKeys[Key.Alpha5].Event += CreateSphere_HotKey;
+            _engine.Events.HotKeys[Key.Alpha6].Event += CreatePlane_HotKey;
+            _engine.Events.HotKeys[Key.Backspace, ModifierKey.Control].Event += OrbitLight_HotKey;
+            _engine.Events.HotKeys[Key.L, ModifierKey.Control].Event += GenerateLandscape_HotKey;
+            _engine.Events.HotKeys[Key.T, ModifierKey.Control].Event += PerformTest_HotKey;
+            _engine.Events.HotKeys[Key.Left].Event += YawSubjectLeft_HotKey;
+            _engine.Events.HotKeys[Key.Right].Event += YawSubjectRight_HotKey;
+            _engine.Events.HotKeys[Key.Up].Event += PitchSubjectUp_HotKey;
+            _engine.Events.HotKeys[Key.Down].Event += PitchSubjectDown_HotKey;
+            _engine.Events.HotKeys[Key.Left, ModifierKey.Control].Event += LookAtSubjectLeftSide_HotKey;
+            _engine.Events.HotKeys[Key.Right, ModifierKey.Control].Event += LookAtSubjectRightSide_HotKey;
+            _engine.Events.HotKeys[Key.Up, ModifierKey.Control].Event += LookAtSubjectTopSide_HotKey;
+            _engine.Events.HotKeys[Key.Down, ModifierKey.Control].Event += LookAtSubjectBottomSide_HotKey;
+            _engine.Events.HotKeys[Key.Up, ModifierKey.Control | ModifierKey.Shift].Event += LookAtSubjectFrontSide_HotKey;
+            _engine.Events.HotKeys[Key.Down, ModifierKey.Control | ModifierKey.Shift].Event += LookAtSubjectBackSide_HotKey;
+
+            #endregion
 
             return true;
         }
@@ -128,23 +164,30 @@ namespace PentaGE.Core.Rendering
             }
         }
 
+        private void PerformTest_HotKey(object? sender, Events.HotKeyEventArgs e)
+        {
+            using (Log.Logger.BeginPerfLogger("Perfoming test"))
+            {
+                // Perform tests here
+
+            }
+        }
+
         internal void Terminate()
         {
             Log.Information("Terminating GLFW.");
             Glfw.Terminate();
         }
 
-        private void Events_GlfwError(object? sender, Events.GlfwErrorEventArgs e)
-        {
-            Log.Error($"GLFW Error: {e.ErrorCode} - {e.Message}");
-        }
+        private void Events_GlfwError(object? sender, Events.GlfwErrorEventArgs e) =>
+            Log.Error($"GLFW error detected: {e.ErrorCode} - {e.Message}");
 
         private static Vector3 ColorFromHSL(float hue, float saturation, float lightness)
         {
             // TODO: This code does not belong here, but is here for testing purposes
             // Convert HSL to RGB
             // Only for visuallisational purposes
-            // TODO: Remove this and use the actual color values
+            // If i desire a method like this i should create a proper color management system
             if (saturation == 0f)
             {
                 return new Vector3(lightness, lightness, lightness);
@@ -182,206 +225,194 @@ namespace PentaGE.Core.Rendering
             }
         }
 
-        private void Events_KeyDown(object? sender, Events.KeyDownEventArgs e)
+        #region Debugging hotkeys
+
+        // TODO: Remove these hotkeys when they are no longer needed
+        //       or move them to a concrete implementation of the engine
+
+        private void ToggleWireframe_HotKey(object? sender, Events.HotKeyEventArgs e) =>
+            wireframe = !wireframe;
+
+        private void ToggleMaterialTest_HotKey(object? sender, Events.HotKeyEventArgs e) =>
+            materialTest = !materialTest;
+
+        private void ToggleCulling_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
-            // TODO: This code does not belong here, but is here for testing purposes
-            if (e.Key == Key.Left)
+            if (!cullingEnabled)
             {
-                if (e.ModifierKeys == ModifierKey.None)
-                {
-                    objectDisplayTransform.Rotation += new Rotation(-1, 0, 0) * 5;
-                    Log.Information($"Object yaw left: {objectDisplayTransform.Rotation}");
-                }
-                else if (e.ModifierKeys == ModifierKey.Control)
-                {
-                    objectDisplayTransform.Rotation = Rotation.GetLookAt(World.LeftVector * 5, objectDisplayTransform.Position);
-                }
+                glEnable(GL_CULL_FACE);
+                glCullFace(GL_BACK);
+                glFrontFace(GL_CCW);
             }
-            else if (e.Key == Key.Right)
+            else
             {
-                if (e.ModifierKeys == ModifierKey.None)
-                {
-                    objectDisplayTransform.Rotation += new Rotation(1, 0, 0) * 5;
-                    Log.Information($"Object yaw right: {objectDisplayTransform.Rotation}");
-                }
-                else if (e.ModifierKeys == ModifierKey.Control)
-                {
-                    objectDisplayTransform.Rotation = Rotation.GetLookAt(World.RightVector * 5, objectDisplayTransform.Position);
-                }
+                glDisable(GL_CULL_FACE);
             }
-            else if (e.Key == Key.Up)
-            {
-                if (e.ModifierKeys == ModifierKey.None)
-                {
-                    objectDisplayTransform.Rotation += new Rotation(0, 1, 0) * 5;
-                    Log.Information($"Object pitch up: {objectDisplayTransform.Rotation}");
-                }
-                else if (e.ModifierKeys == ModifierKey.Control)
-                {
-                    objectDisplayTransform.Rotation = Rotation.GetLookAt(World.UpVector * 5, objectDisplayTransform.Position);
-                }
-                else if (e.ModifierKeys == (ModifierKey.Control | ModifierKey.Shift))
-                {
-                    objectDisplayTransform.Rotation = Rotation.GetLookAt(World.ForwardVector * 5, objectDisplayTransform.Position);
-                }
-            }
-            else if (e.Key == Key.Down)
-            {
-                if (e.ModifierKeys == ModifierKey.None)
-                {
-                    objectDisplayTransform.Rotation += new Rotation(0, -1, 0) * 5;
-                    Log.Information($"Object pitch down: {objectDisplayTransform.Rotation}");
-                }
-                else if (e.ModifierKeys == ModifierKey.Control)
-                {
-                    objectDisplayTransform.Rotation = Rotation.GetLookAt(World.DownVector * 5, objectDisplayTransform.Position);
-                }
-                else if (e.ModifierKeys == (ModifierKey.Control | ModifierKey.Shift))
-                {
-                    objectDisplayTransform.Rotation = Rotation.GetLookAt(World.BackwardVector * 5, objectDisplayTransform.Position);
-                }
-            }
-            else if (e.Key == Key.F1)
-            {
-                wireframe = !wireframe;
-            }
-            else if (e.Key == Key.F2)
-            {
-                if (!cullingEnabled)
-                {
-                    glEnable(GL_CULL_FACE);
-                    glCullFace(GL_BACK);
-                    glFrontFace(GL_CCW);
-                }
-                else
-                {
-                    glDisable(GL_CULL_FACE);
-                }
-                cullingEnabled = !cullingEnabled;
-            }
-            else if (e.Key == Key.F3)
-            {
-                materialTest = !materialTest;
-            }
-            else if (e.Key == Key.F5)
-            {
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Default")!;
-            }
-            else if (e.Key == Key.F6)
-            {
-                if (e.ModifierKeys == ModifierKey.Shift)
-                    _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Face2")!;
-                else
-                    _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Face")!;
-            }
-            else if (e.Key == Key.F7)
-            {
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Normal")!;
-            }
-            else if (e.Key == Key.F10)
+            cullingEnabled = !cullingEnabled;
+        }
+
+        private void SetShaderToDefault_HotKey(object? sender, Events.HotKeyEventArgs e) =>
+            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Default")!;
+
+        private void SetShaderToFaceA_HotKey(object? sender, Events.HotKeyEventArgs e) =>
+            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Face")!;
+
+        private void SetShaderToFaceB_HotKey(object? sender, Events.HotKeyEventArgs e) =>
+            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Face2")!;
+
+        private void SetShaderToNormal_HotKey(object? sender, Events.HotKeyEventArgs e) =>
+            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Normal")!;
+
+        private void Subdivide_HotKey(object? sender, Events.HotKeyEventArgs e)
+        {
+            var mesh = _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh;
+            mesh.Subdivide();
+            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+        }
+
+        private void TileTexture_HotKey(object? sender, Events.HotKeyEventArgs e)
+        {
+            var mesh = _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh;
+            mesh.TileTexture(3, 3);
+            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+        }
+
+        private void Roughen_HotKey(object? sender, Events.HotKeyEventArgs e)
+        {
+            using (Log.Logger.BeginPerfLogger("Roughen"))
             {
                 var mesh = _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh;
-                mesh.Subdivide();
+                mesh.Roughen(0.1f);
                 _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
-            }
-            else if (e.Key == Key.F11)
-            {
-                var mesh = _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh;
-                mesh.TileTexture(3, 3);
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
-            }
-            else if (e.Key == Key.Backspace && e.ModifierKeys == ModifierKey.Control)
-            {
-                if (_engine.Windows[0].Viewport.CameraManager.ActiveController is EditorCameraController cameraController)
-                {
-                    cameraController.SetOrbitTarget(_engine.Scene[1], 1.5f); // Orbit around the light
-                }
-            }
-            else if (e.Key == Key.Alpha1)
-            {
-                var mesh = MeshFactory.CreateCube(1f);
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
-            }
-            else if (e.Key == Key.Alpha2)
-            {
-                var mesh = MeshFactory.CreateSphere(1f);
-                //testMesh1.TileTexture(4, 4);
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
-            }
-            else if (e.Key == Key.Alpha3)
-            {
-                var mesh = MeshFactory.CreateCylinder(0.5f, 1f);
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
-            }
-            else if (e.Key == Key.Alpha4)
-            {
-                var mesh = MeshFactory.CreatePyramid(1f, 1f, 1f);
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
-            }
-            else if (e.Key == Key.Alpha5)
-            {
-                var mesh = MeshFactory.CreateCone(0.5f, 1f);
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
-            }
-            else if (e.Key == Key.Alpha6)
-            {
-                var mesh = MeshFactory.CreatePlane(1f, 1f, new Rotation(0, -90, 0));
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
-            }
-            else if (e.Key == Key.R && e.ModifierKeys == ModifierKey.Control)
-            {
-                rotate = !rotate;
-            }
-            else if (e.Key == Key.I)
-            {
-                blackTexture = !blackTexture;
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Texture = blackTexture ?
-                    _engine.Assets.Get<Texture>("BlackPentaTexture") :
-                    _engine.Assets.Get<Texture>("WhitePentaTexture");
-            }
-            else if (e.Key == Key.F12)
-            {
-                if (e.ModifierKeys == ModifierKey.Control)
-                {
-                    var mesh = _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh;
-                    mesh.Explode(0.15f);
-                    _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
-                }
-                else
-                {
-                    using (Log.Logger.BeginPerfLogger("Roughen"))
-                    {
-                        var mesh = _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh;
-                        mesh.Roughen(0.1f);
-                        _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
-                    }
-                }
-            }
-            else if (e.Key == Key.L)
-            {
-                using (Log.Logger.BeginPerfLogger("Generating landscape"))
-                {
-                    if (_engine.Windows[0].Viewport.CameraManager.ActiveController is EditorCameraController controller)
-                    {
-                        controller.SetPosition(new Vector3(0f, 5f, 3f));
-                        controller.SetOrbitTarget(new Vector3(0f, 0f, 0f));
-                    }
-                    var mesh = MeshFactory.CreatePlane(20f, 20f);
-                    mesh.Offset(0f, -2f, 0f);
-                    mesh.Subdivide();
-                    mesh.Roughen(4f);
-                    mesh.Subdivide(2);
-                    mesh.Roughen(0.3f);
-                    mesh.Subdivide(2);
-                    mesh.Roughen(0.1f);
-                    _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
-                    rotate = false;
-                }
-            }
-            else if (e.Key == Key.T)
-            {
-                // Perform tests here
             }
         }
+
+        private void Explode_HotKey(object? sender, Events.HotKeyEventArgs e)
+        {
+            var mesh = _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh;
+            mesh.Explode(0.15f);
+            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+        }
+
+        private void ToggleRotation_HotKey(object? sender, Events.HotKeyEventArgs e) =>
+            rotate = !rotate;
+
+        private void ToggleTexture_HotKey(object? sender, Events.HotKeyEventArgs e)
+        {
+            blackTexture = !blackTexture;
+            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Texture = blackTexture ?
+                _engine.Assets.Get<Texture>("BlackPentaTexture") :
+                _engine.Assets.Get<Texture>("WhitePentaTexture");
+        }
+
+        private void CreateCube_HotKey(object? sender, Events.HotKeyEventArgs e)
+        {
+            var mesh = MeshFactory.CreateCube(1f);
+            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+        }
+
+        private void CreateSphere_HotKey(object? sender, Events.HotKeyEventArgs e)
+        {
+            var mesh = MeshFactory.CreateSphere(1f);
+            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+        }
+
+        private void CreateCylinder_HotKey(object? sender, Events.HotKeyEventArgs e)
+        {
+            var mesh = MeshFactory.CreateCylinder(0.5f, 1f);
+            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+        }
+
+        private void CreatePyramid_HotKey(object? sender, Events.HotKeyEventArgs e)
+        {
+            var mesh = MeshFactory.CreatePyramid(1f, 1f, 1f);
+            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+        }
+
+        private void CreateCone_HotKey(object? sender, Events.HotKeyEventArgs e)
+        {
+            var mesh = MeshFactory.CreateCone(0.5f, 1f);
+            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+        }
+
+        private void CreatePlane_HotKey(object? sender, Events.HotKeyEventArgs e)
+        {
+            var mesh = MeshFactory.CreatePlane(1f, 1f, new Rotation(0, -90, 0));
+            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+        }
+
+        private void OrbitLight_HotKey(object? sender, Events.HotKeyEventArgs e)
+        {
+            if (_engine.Windows[0].Viewport.CameraManager.ActiveController is EditorCameraController cameraController)
+            {
+                cameraController.SetOrbitTarget(_engine.Scene[1], 1.5f); // Orbit around the light
+            }
+        }
+
+        private void GenerateLandscape_HotKey(object? sender, Events.HotKeyEventArgs e)
+        {
+            using (Log.Logger.BeginPerfLogger("Generating landscape"))
+            {
+                if (_engine.Windows[0].Viewport.CameraManager.ActiveController is EditorCameraController controller)
+                {
+                    controller.SetPosition(new Vector3(0f, 5f, 3f));
+                    controller.SetOrbitTarget(new Vector3(0f, 0f, 0f));
+                }
+                var mesh = MeshFactory.CreatePlane(20f, 20f);
+                mesh.Offset(0f, -2f, 0f);
+                mesh.Subdivide();
+                mesh.Roughen(4f);
+                mesh.Subdivide(2);
+                mesh.Roughen(0.3f);
+                mesh.Subdivide(2);
+                mesh.Roughen(0.1f);
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+                rotate = false;
+            }
+        }
+
+        private void YawSubjectLeft_HotKey(object? sender, Events.HotKeyEventArgs e)
+        {
+            objectDisplayTransform.Rotation += new Rotation(-1, 0, 0) * 5;
+            Log.Information($"Object yaw left: {objectDisplayTransform.Rotation}");
+        }
+
+        private void YawSubjectRight_HotKey(object? sender, Events.HotKeyEventArgs e)
+        {
+            objectDisplayTransform.Rotation += new Rotation(1, 0, 0) * 5;
+            Log.Information($"Object yaw right: {objectDisplayTransform.Rotation}");
+        }
+
+        private void PitchSubjectUp_HotKey(object? sender, Events.HotKeyEventArgs e)
+        {
+            objectDisplayTransform.Rotation += new Rotation(0, 1, 0) * 5;
+            Log.Information($"Object pitch up: {objectDisplayTransform.Rotation}");
+        }
+
+        private void PitchSubjectDown_HotKey(object? sender, Events.HotKeyEventArgs e)
+        {
+            objectDisplayTransform.Rotation += new Rotation(0, -1, 0) * 5;
+            Log.Information($"Object pitch down: {objectDisplayTransform.Rotation}");
+        }
+
+        private void LookAtSubjectLeftSide_HotKey(object? sender, Events.HotKeyEventArgs e) =>
+            objectDisplayTransform.Rotation = Rotation.GetLookAt(World.LeftVector * 5, objectDisplayTransform.Position);
+
+        private void LookAtSubjectRightSide_HotKey(object? sender, Events.HotKeyEventArgs e) =>
+            objectDisplayTransform.Rotation = Rotation.GetLookAt(World.RightVector * 5, objectDisplayTransform.Position);
+
+        private void LookAtSubjectTopSide_HotKey(object? sender, Events.HotKeyEventArgs e) =>
+            objectDisplayTransform.Rotation = Rotation.GetLookAt(World.UpVector * 5, objectDisplayTransform.Position);
+
+        private void LookAtSubjectBottomSide_HotKey(object? sender, Events.HotKeyEventArgs e) =>
+            objectDisplayTransform.Rotation = Rotation.GetLookAt(World.DownVector * 5, objectDisplayTransform.Position);
+
+        private void LookAtSubjectFrontSide_HotKey(object? sender, Events.HotKeyEventArgs e) =>
+            objectDisplayTransform.Rotation = Rotation.GetLookAt(World.BackwardVector * 5, objectDisplayTransform.Position);
+
+        private void LookAtSubjectBackSide_HotKey(object? sender, Events.HotKeyEventArgs e) =>
+            objectDisplayTransform.Rotation = Rotation.GetLookAt(World.ForwardVector * 5, objectDisplayTransform.Position);
+
+#endregion
     }
 }

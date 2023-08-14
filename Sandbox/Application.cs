@@ -13,7 +13,7 @@ namespace Sandbox
     {
         protected override bool Initialize()
         {
-            // Do initialization work
+            // Subscribe to custom timing events
             Timing.CustomTimings[1].Tick += Application_Tick;
 
             return true;
@@ -54,8 +54,8 @@ namespace Sandbox
             var subjectMesh = MeshFactory.CreateCube(1f);
             var transform = new Transform(new(0, 0, 0), new(0, 0, 0), new(1f, 1f, 1f));
             var renderableMesh = new RenderableMeshEntity(
-                subjectMesh, 
-                Assets.Get<Shader>("Default")!, 
+                subjectMesh,
+                Assets.Get<Shader>("Default")!,
                 Assets.Get<Texture>("BlackPentaTexture"));
 
             renderableMesh.AddComponent(new TransformComponent(transform));

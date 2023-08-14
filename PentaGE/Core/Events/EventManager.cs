@@ -26,6 +26,10 @@ namespace PentaGE.Core.Events
 
         private readonly Dictionary<GLFW.Window, Window> _registeredWindows = new();
         private readonly List<EngineEventArgs> _eventBuffer = new();
+        private readonly HotKeyManager _hotKeyManager = new();
+
+        // NOTE: We need to keep a reference to the callbacks to prevent them from
+        //       being garbage collected and crash the engine during runtime.
         private KeyCallback _keyCallback;
         private MouseCallback _mousePositionCallback;
         private MouseButtonCallback _mouseButtonCallback;
@@ -56,7 +60,12 @@ namespace PentaGE.Core.Events
         /// <summary>
         /// Gets or sets the category or categories of events to log.
         /// </summary>
-        internal EventCategory CategoriesToLog { get; set; } = EventCategory.Error;
+        internal EventCategory CategoriesToLog { get; set; } = EventCategory.HotKey;
+
+        /// <summary>
+        /// Provides access to the <see cref="HotKeyManager"/> instance for managing hotkeys.
+        /// </summary>
+        public HotKeyManager HotKeys => _hotKeyManager;
 
         #region Internal methods
 
@@ -383,6 +392,9 @@ namespace PentaGE.Core.Events
                     (Key)key,
                     (ModifierKey)mods,
                     false));
+
+                // Update the HotKeyManager
+                _hotKeyManager.KeyPressed((Key)key, (ModifierKey)mods, GetWindow(windowHandle));
             }
             else if (state == InputState.Release)
             {
@@ -391,6 +403,8 @@ namespace PentaGE.Core.Events
                     (Key)key,
                     (ModifierKey)mods));
 
+                // Update the HotKeyManager
+                _hotKeyManager.KeyReleased((Key)key);
             }
             else if (state == InputState.Repeat)
             {

@@ -94,5 +94,10 @@
         /// A Glfw error occurs.
         /// </summary>
         Error,
+
+        /// <summary>
+        /// A HotKey is pressed.
+        /// </summary>
+        HotKeyPressed,
     }
 }

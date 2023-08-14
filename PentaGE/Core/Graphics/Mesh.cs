@@ -297,7 +297,7 @@ namespace PentaGE.Core.Graphics
 
                 // Calculate the new normal
                 Vector3 normal = Vector3.Cross(
-                    vertexB.Coordinates - vertexA.Coordinates, 
+                    vertexB.Coordinates - vertexA.Coordinates,
                     vertexC.Coordinates - vertexA.Coordinates)
                     .Normalize();
 

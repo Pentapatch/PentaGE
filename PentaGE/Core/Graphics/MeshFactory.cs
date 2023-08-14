@@ -341,16 +341,16 @@ namespace PentaGE.Core.Graphics
         /// <returns>A cone mesh.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when radius, height, segments, or textureAspectRatio is out of valid range.</exception>
         public static Mesh CreateCone(float radius, float height, int segments = 64, float textureAspectRatio = 1f)
-    {
-        // TODO: Known issues:
-        // - Not sure that the normals are correct for the cone sides
-        //   Behaves wierd when subdivide is called on the mesh
+        {
+            // TODO: Known issues:
+            // - Not sure that the normals are correct for the cone sides
+            //   Behaves wierd when subdivide is called on the mesh
             if (radius <= 0f)
-            throw new ArgumentOutOfRangeException(nameof(radius), "Radius must be greater than zero.");
-        if (height <= 0f)
-            throw new ArgumentOutOfRangeException(nameof(height), "Height must be greater than zero.");
-        if (segments < 3)
-            throw new ArgumentOutOfRangeException(nameof(segments), "Segments must be greater than or equal to three.");
+                throw new ArgumentOutOfRangeException(nameof(radius), "Radius must be greater than zero.");
+            if (height <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(height), "Height must be greater than zero.");
+            if (segments < 3)
+                throw new ArgumentOutOfRangeException(nameof(segments), "Segments must be greater than or equal to three.");
 
             if (textureAspectRatio <= 0f)
                 throw new ArgumentOutOfRangeException(nameof(textureAspectRatio), "Texture aspect ratio must be greater than zero.");
