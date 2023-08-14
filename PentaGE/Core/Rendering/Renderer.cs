@@ -134,17 +134,15 @@ namespace PentaGE.Core.Rendering
             Glfw.Terminate();
         }
 
-        private void Events_GlfwError(object? sender, Events.GlfwErrorEventArgs e)
-        {
-            Log.Error($"GLFW Error: {e.ErrorCode} - {e.Message}");
-        }
+        private void Events_GlfwError(object? sender, Events.GlfwErrorEventArgs e) => 
+            Log.Error($"GLFW error detected: {e.ErrorCode} - {e.Message}");
 
         private static Vector3 ColorFromHSL(float hue, float saturation, float lightness)
         {
             // TODO: This code does not belong here, but is here for testing purposes
             // Convert HSL to RGB
             // Only for visuallisational purposes
-            // TODO: Remove this and use the actual color values
+            // If i desire a method like this i should create a proper color management system
             if (saturation == 0f)
             {
                 return new Vector3(lightness, lightness, lightness);
@@ -185,6 +183,7 @@ namespace PentaGE.Core.Rendering
         private void Events_KeyDown(object? sender, Events.KeyDownEventArgs e)
         {
             // TODO: This code does not belong here, but is here for testing purposes
+            //       This code is actually specific to a concrete implementation of an editor
             if (e.Key == Key.Left)
             {
                 if (e.ModifierKeys == ModifierKey.None)

@@ -84,6 +84,11 @@
         /// <summary>
         /// Events related to errors.
         /// </summary>
-        Error = 1 << 13
+        Error = 1 << 13,
+
+        /// <summary>
+        /// Events related to hotkeys.
+        /// </summary>
+        HotKey = 1 << 14,
     }
 }
