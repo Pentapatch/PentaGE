@@ -28,7 +28,7 @@ namespace PentaGE.Core.Assets
             get => Get<IAsset>(name);
         }
 
-        public IQueryable<Shader> Shaders => 
+        public IQueryable<Shader> Shaders =>
             _assets.Values.Where(a => a is Shader).Cast<Shader>().AsQueryable();
 
         public bool AddShader(string name, string filePath)
@@ -136,13 +136,13 @@ namespace PentaGE.Core.Assets
             HandleHotReloadEventSubscription(false);
         }
 
-        public T? Get<T>(string name) where T : IAsset => 
+        public T? Get<T>(string name) where T : IAsset =>
             _assets.TryGetValue(name, out IAsset? asset) ? (T?)asset : default;
 
-        private void RegisterPath(string name, string path, IHotReloadable item) => 
+        private void RegisterPath(string name, string path, IHotReloadable item) =>
             _hotReloadItems.Add(name, new(path, item));
 
-        private void UnregisterPath(string name) => 
+        private void UnregisterPath(string name) =>
             _hotReloadItems.Remove(name);
 
         private void HandleHotReloadEventSubscription(bool enabled)

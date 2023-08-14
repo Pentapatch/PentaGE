@@ -60,7 +60,12 @@ namespace PentaGE.Core.Events
         /// <summary>
         /// Gets or sets the category or categories of events to log.
         /// </summary>
-        internal EventCategory CategoriesToLog { get; set; } = EventCategory.Error;
+        internal EventCategory CategoriesToLog { get; set; } = EventCategory.HotKey;
+
+        /// <summary>
+        /// Provides access to the <see cref="HotKeyManager"/> instance for managing hotkeys.
+        /// </summary>
+        public HotKeyManager HotKeys => _hotKeyManager;
 
         #region Internal methods
 
@@ -389,7 +394,7 @@ namespace PentaGE.Core.Events
                     false));
 
                 // Update the HotKeyManager
-                _hotKeyManager.KeyPressed((Key)key, (ModifierKey)mods);
+                _hotKeyManager.KeyPressed((Key)key, (ModifierKey)mods, GetWindow(windowHandle));
             }
             else if (state == InputState.Release)
             {

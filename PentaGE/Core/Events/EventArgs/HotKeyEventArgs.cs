@@ -7,10 +7,10 @@ namespace PentaGE.Core.Events
     /// </summary>
     public sealed class HotKeyEventArgs : KeyDownEventArgs
     {
-        internal override EventCategory Category => 
+        internal override EventCategory Category =>
             EventCategory.Input | EventCategory.Keyboard | EventCategory.Button | EventCategory.HotKey;
 
-        internal override EventType Type => 
+        internal override EventType Type =>
              EventType.HotKeyPressed;
 
         /// <summary>
@@ -21,7 +21,7 @@ namespace PentaGE.Core.Events
         /// <param name="key">The key associated with the event.</param>
         /// <param name="modifierKeys">The modifier keys that were pressed in combination with the key event.</param>
         /// <param name="isRepeat">A value indicating whether the key event is a repeat event.</param>
-        internal HotKeyEventArgs(Action<EngineEventArgs> onEvent, Window window, Key key, ModifierKey modifierKeys, bool isRepeat) : 
+        internal HotKeyEventArgs(Action<EngineEventArgs> onEvent, Window window, Key key, ModifierKey modifierKeys, bool isRepeat) :
             base(onEvent, window, key, modifierKeys, isRepeat)
         {
 

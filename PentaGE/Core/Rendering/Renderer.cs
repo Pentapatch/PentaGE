@@ -134,7 +134,7 @@ namespace PentaGE.Core.Rendering
             Glfw.Terminate();
         }
 
-        private void Events_GlfwError(object? sender, Events.GlfwErrorEventArgs e) => 
+        private void Events_GlfwError(object? sender, Events.GlfwErrorEventArgs e) =>
             Log.Error($"GLFW error detected: {e.ErrorCode} - {e.Message}");
 
         private static Vector3 ColorFromHSL(float hue, float saturation, float lightness)

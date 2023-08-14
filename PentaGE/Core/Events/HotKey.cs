@@ -1,11 +1,24 @@
 ﻿using PentaGE.Common;
+using Serilog;
 
 namespace PentaGE.Core.Events
 {
+    /// <summary>
+    /// Represents a hotkey combination associated with a specific key and modifier keys.
+    /// HotKey instances can be subscribed to events or actions to handle trigger events
+    /// when the associated key combination is pressed.
+    /// </summary>
     public sealed class HotKey
     {
-        private readonly Key _key;
-        private readonly ModifierKey _modifierKeys;
+        /// <summary>
+        /// Gets the <see cref="Common.Key"/> that is associated with this HotKey.
+        /// </summary>
+        public Key Key { get; init; }
+
+        /// <summary>
+        /// Gets the <see cref="Common.ModifierKey"/>(s) that is associated with this HotKey.
+        /// </summary>
+        public ModifierKey ModifierKeys { get; init; }
 
         /// <summary>
         /// Occurs when this specific combination of key and modifier keys is pressed.
@@ -24,18 +37,23 @@ namespace PentaGE.Core.Events
         /// <param name="modifierKeys">The modifier keys that are associated with this HotKey.</param>
         internal HotKey(Key key, ModifierKey modifierKeys)
         {
-            _key = key;
-            _modifierKeys = modifierKeys;
+            Key = key;
+            ModifierKeys = modifierKeys;
         }
 
         /// <summary>
         /// Triggers the HotKey event.
         /// </summary>
-        internal void TriggerEvent(Window window)
+        /// <param name="window">The window that triggered the HotKey.</param>
+        /// <param name="log">Whether to log the event.</param>
+        internal void TriggerEvent(Window window, bool log = false)
         {
+
             if (Action is not null) Action();
 
-            var eventArgs = new HotKeyEventArgs(OnEvent, window, _key, _modifierKeys, false);
+            var eventArgs = new HotKeyEventArgs(OnEvent, window, Key, ModifierKeys, false);
+            if (log) Log.Information($"Event [{eventArgs.Type}]: {eventArgs}");
+
             eventArgs.RaiseEvent();
         }
 
