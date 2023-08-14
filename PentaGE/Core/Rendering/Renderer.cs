@@ -1,6 +1,7 @@
 ﻿using GLFW;
 using PentaGE.Common;
 using PentaGE.Core.Components;
+using PentaGE.Core.Entities;
 using PentaGE.Core.Graphics;
 using PentaGE.Core.Logging;
 using Serilog;
@@ -20,6 +21,7 @@ namespace PentaGE.Core.Rendering
         private bool materialTest = false;
         private bool wireframe = false;
         private bool blackTexture = true;
+        private RenderableMeshEntity activeSubject;
 
         /// <summary>
         /// Creates a new instance of the Renderer class.
@@ -126,6 +128,8 @@ namespace PentaGE.Core.Rendering
         /// </summary>
         internal unsafe void Render()
         {
+            activeSubject ??= _engine.Assets.Get<RenderableMeshEntity>("Subject")!;
+
             foreach (var window in _engine.Windows)
             {
                 #region Test rotation
@@ -169,7 +173,7 @@ namespace PentaGE.Core.Rendering
             using (Log.Logger.BeginPerfLogger("Perfoming test"))
             {
                 // Perform tests here
-
+                activeSubject = _engine.Assets.Get<RenderableMeshEntity>("LightEntity")!;
             }
         }
 
@@ -252,46 +256,46 @@ namespace PentaGE.Core.Rendering
         }
 
         private void SetShaderToDefault_HotKey(object? sender, Events.HotKeyEventArgs e) =>
-            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Default")!;
+            activeSubject.GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Default")!;
 
         private void SetShaderToFaceA_HotKey(object? sender, Events.HotKeyEventArgs e) =>
-            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Face")!;
+            activeSubject.GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Face")!;
 
         private void SetShaderToFaceB_HotKey(object? sender, Events.HotKeyEventArgs e) =>
-            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Face2")!;
+            activeSubject.GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Face2")!;
 
         private void SetShaderToNormal_HotKey(object? sender, Events.HotKeyEventArgs e) =>
-            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Normal")!;
+            activeSubject.GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Normal")!;
 
         private void Subdivide_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
-            var mesh = _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh;
+            var mesh = activeSubject.GetComponent<MeshRenderComponent>()!.Mesh;
             mesh.Subdivide();
-            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+            activeSubject.GetComponent<MeshRenderComponent>()!.Mesh = mesh;
         }
 
         private void TileTexture_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
-            var mesh = _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh;
+            var mesh = activeSubject.GetComponent<MeshRenderComponent>()!.Mesh;
             mesh.TileTexture(3, 3);
-            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+            activeSubject.GetComponent<MeshRenderComponent>()!.Mesh = mesh;
         }
 
         private void Roughen_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
             using (Log.Logger.BeginPerfLogger("Roughen"))
             {
-                var mesh = _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh;
+                var mesh = activeSubject.GetComponent<MeshRenderComponent>()!.Mesh;
                 mesh.Roughen(0.1f);
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+                activeSubject.GetComponent<MeshRenderComponent>()!.Mesh = mesh;
             }
         }
 
         private void Explode_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
-            var mesh = _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh;
+            var mesh = activeSubject.GetComponent<MeshRenderComponent>()!.Mesh;
             mesh.Explode(0.15f);
-            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+            activeSubject.GetComponent<MeshRenderComponent>()!.Mesh = mesh;
         }
 
         private void ToggleRotation_HotKey(object? sender, Events.HotKeyEventArgs e) =>
@@ -300,7 +304,7 @@ namespace PentaGE.Core.Rendering
         private void ToggleTexture_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
             blackTexture = !blackTexture;
-            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Texture = blackTexture ?
+            activeSubject.GetComponent<MeshRenderComponent>()!.Texture = blackTexture ?
                 _engine.Assets.Get<Texture>("BlackPentaTexture") :
                 _engine.Assets.Get<Texture>("WhitePentaTexture");
         }
@@ -308,37 +312,37 @@ namespace PentaGE.Core.Rendering
         private void CreateCube_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
             var mesh = MeshFactory.CreateCube(1f);
-            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+            activeSubject.GetComponent<MeshRenderComponent>()!.Mesh = mesh;
         }
 
         private void CreateSphere_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
             var mesh = MeshFactory.CreateSphere(1f);
-            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+            activeSubject.GetComponent<MeshRenderComponent>()!.Mesh = mesh;
         }
 
         private void CreateCylinder_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
             var mesh = MeshFactory.CreateCylinder(0.5f, 1f);
-            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+            activeSubject.GetComponent<MeshRenderComponent>()!.Mesh = mesh;
         }
 
         private void CreatePyramid_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
             var mesh = MeshFactory.CreatePyramid(1f, 1f, 1f);
-            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+            activeSubject.GetComponent<MeshRenderComponent>()!.Mesh = mesh;
         }
 
         private void CreateCone_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
             var mesh = MeshFactory.CreateCone(0.5f, 1f);
-            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+            activeSubject.GetComponent<MeshRenderComponent>()!.Mesh = mesh;
         }
 
         private void CreatePlane_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
             var mesh = MeshFactory.CreatePlane(1f, 1f, new Rotation(0, -90, 0));
-            _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+            activeSubject.GetComponent<MeshRenderComponent>()!.Mesh = mesh;
         }
 
         private void OrbitLight_HotKey(object? sender, Events.HotKeyEventArgs e)

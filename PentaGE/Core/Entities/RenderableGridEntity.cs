@@ -21,5 +21,6 @@ namespace PentaGE.Core.Entities
 
             AddComponent(meshRenderer);
         }
+
     }
 }

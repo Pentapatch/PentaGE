@@ -61,6 +61,7 @@ namespace Sandbox
             renderableMesh.AddComponent(new TransformComponent(transform));
             renderableMesh.GetComponent<MeshRenderComponent>()!.Material.Albedo = new(1f, 0f, 1f);
             renderableMesh.GetComponent<MeshRenderComponent>()!.Material.SpecularStrength = 1f;
+            Assets.AddEntity("Subject", renderableMesh);
 
             // Set up test light
             var lightMesh = MeshFactory.CreateSphere(0.2f);
@@ -68,24 +69,29 @@ namespace Sandbox
             var renderableLight = new RenderableMeshEntity(lightMesh, Assets.Get<Shader>("Light")!);
 
             renderableLight.AddComponent(new TransformComponent(transform2));
+            Assets.AddEntity("LightEntity", renderableLight);
 
             // Initialize grid
             Grid gridA = new(10, 10, new(1, 1, 1), 0.2f);
             Grid gridB = new(10, 20, new(0, 0, 0), 0.15f);
-            var renderableGridMajor = new RenderableGridEntity(gridA, Assets.Get<Shader>("Grid")!);
-            var renderableGridMinor = new RenderableGridEntity(gridB, Assets.Get<Shader>("Grid")!);
+            var gridShader = Assets.Get<Shader>("Grid")!;
+            var renderableGridMajor = new RenderableGridEntity(gridA, gridShader);
+            var renderableGridMinor = new RenderableGridEntity(gridB, gridShader);
+            Assets.AddEntity("GridMajor", renderableGridMajor);
+            Assets.AddEntity("GridMinor", renderableGridMinor);
 
             // Initialize axes gizmo
             var axesGizmoMesh = MeshFactory.CreateAxesGizmo(0.1f);
             var renderableAxesGizmo = new RenderableMeshEntity(axesGizmoMesh, Assets.Get<Shader>("Axes")!);
             renderableAxesGizmo.GetComponent<MeshRenderComponent>()!.DrawMode = DrawMode.Lines;
+            Assets.AddEntity("AxesGizmo", renderableAxesGizmo);
 
             // Add entities to the scene
-            Scene.AddEntity(renderableMesh);
-            Scene.AddEntity(renderableLight);
-            Scene.AddEntity(renderableGridMajor);
-            Scene.AddEntity(renderableGridMinor);
-            Scene.AddEntity(renderableAxesGizmo);
+            Scene.AddEntity(Assets.Get<RenderableMeshEntity>("Subject")!);
+            Scene.AddEntity(Assets.Get<RenderableMeshEntity>("LightEntity")!);
+            Scene.AddEntity(Assets.Get<RenderableGridEntity>("GridMajor")!);
+            Scene.AddEntity(Assets.Get<RenderableGridEntity>("GridMinor")!);
+            Scene.AddEntity(Assets.Get<RenderableMeshEntity>("AxesGizmo")!);
 
             return true;
         }
