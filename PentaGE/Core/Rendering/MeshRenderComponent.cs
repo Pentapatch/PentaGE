@@ -13,6 +13,7 @@ namespace PentaGE.Core.Rendering
     public sealed class MeshRenderComponent : Component, IDisposable
     {
         private Mesh _mesh;
+        private Texture? _texture;
         private VertexArray _vao;
         private VertexBuffer _vbo;
         private ElementBuffer? _ebo = null;
@@ -37,9 +38,15 @@ namespace PentaGE.Core.Rendering
         public Shader Shader { get; set; }
 
         /// <summary>
-        /// Gets the texture applied to the mesh (optional).
+        /// Gets or sets the texture applied to the mesh (optional).
         /// </summary>
-        public Texture? Texture { get; }
+        public Texture? Texture
+        {
+            get => _texture; set
+            {
+                _texture = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the PBR material applied to the mesh.
@@ -60,9 +67,9 @@ namespace PentaGE.Core.Rendering
         /// <param name="material">The PBR material applied to the mesh (optional).</param>
         public unsafe MeshRenderComponent(Mesh mesh, Shader shader, Texture? texture = null, PBRMaterial? material = null)
         {
-            Mesh = mesh;
+            _mesh = mesh;
             Shader = shader;
-            Texture = texture;
+            _texture = texture;
             Material = material ?? new();
             DrawMode = DrawMode.Triangles;
 
@@ -154,6 +161,13 @@ namespace PentaGE.Core.Rendering
             Shader.SetUniform("material.ambientOcclusion", Material.AmbientOcclusion);
             Shader.SetUniform("material.specularStrength", Material.SpecularStrength);
             Shader.SetUniform("material.opacity", Material.Opacity);
+
+            // Set the texture slot uniform in the shader
+            // TODO: Make this more flexible and support multiple textures
+            if (Texture is not null)
+            {
+                Shader.SetUniform("tex0", 0);
+            }
 
             // Bind the texture to the current context
             Texture?.Bind();

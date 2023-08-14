@@ -1,4 +1,5 @@
 ﻿using PentaGE.Common;
+using PentaGE.Core.Assets;
 using Serilog;
 using System.Numerics;
 using System.Text;
@@ -9,13 +10,16 @@ namespace PentaGE.Core.Rendering
     /// <summary>
     /// Represents a shader program used for rendering graphics on the GPU.
     /// </summary>
-    public sealed class Shader : IDisposable
+    public sealed class Shader : IAsset, IDisposable, IHotReloadable
     {
         private string _vertexSourceCode = string.Empty;
         private string _fragmentSourceCode = string.Empty;
         private string _geometrySourceCode = string.Empty;
         private readonly string _filePath = string.Empty;
 
+        /// <summary>
+        /// Gets the OpenGL ID of the shader program.
+        /// </summary>
         public uint ProgramId { get; private set; } = 0u;
 
         /// <summary>
@@ -50,7 +54,7 @@ namespace PentaGE.Core.Rendering
         {
             if (ProgramId != 0)
             {
-                Log.Error("Attempted to load shader that is already loaded.");
+                Log.Error("Attempted to load a shader that is already loaded.");
                 return false;
             }
 
