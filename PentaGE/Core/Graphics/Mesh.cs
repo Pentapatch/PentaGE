@@ -237,7 +237,6 @@ namespace PentaGE.Core.Graphics
         public void Roughen(float scale)
         {
             // TODO: Needs optimization
-            //       Normals needs to be recalculated
             HashSet<int> affectedVertices = new();
             Random random = new();
             float maxDistance = 1f;
@@ -265,6 +264,47 @@ namespace PentaGE.Core.Graphics
                 }
             }
 
+            RecalculateNormals();
+        }
+
+        public void RoughenV2(float scale)
+        {
+            Random random = new();
+
+            // Group vertices by their position
+            Dictionary<Vector3, List<int>> vertexGroupIndices = new();
+            for (int i = 0; i < Vertices.Count; i++)
+            {
+                if (vertexGroupIndices.ContainsKey(Vertices[i].Coordinates))
+                {
+                    vertexGroupIndices[Vertices[i].Coordinates].Add(i);
+                }
+                else
+                {
+                    vertexGroupIndices.Add(Vertices[i].Coordinates, new List<int> { i });
+                }
+            }
+
+            // Loop through all groups of vertices
+            foreach (var indices in vertexGroupIndices.Values)
+            {
+                // Calculate distance-based strength
+                float randomValue = (float)random.NextDouble();
+                float strength = scale * randomValue;
+                Vector3 offset = Vertices[indices[0]].Normal * strength;
+
+                // Offset all vertices in the group
+                for (int i = 0; i < indices.Count; i++)
+                {
+                    var vertex = Vertices[indices[i]];
+
+                    vertex.Coordinates += offset;
+
+                    Vertices[indices[i]] = vertex;
+                }
+            }
+
+            // Recalculate normals
             RecalculateNormals();
         }
 
