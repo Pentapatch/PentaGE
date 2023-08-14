@@ -2,6 +2,8 @@
 
 PentaGE is a C# game engine built using OpenGL and GLFW, developed with the primary goal of learning and exploring the complexities of game engine development. The project aims to provide a basic, lightweight game engine and serves as an opportunity to gain hands-on experience in tackling a substantial and challenging project.
 
+Follow the progress here: [Trello](https://trello.com/b/LccCYIoD/pentage).
+
 ## Purpose and Objectives
 
 The main objectives of the Penta Game Engine project are as follows:
@@ -14,7 +16,7 @@ The main objectives of the Penta Game Engine project are as follows:
 
 ## Project Status
 
-As of now, the Penta Game Engine is still a work in progress and might not be fully functional. The focus is on incremental development, continuously adding features, and refining existing components. Currently the engine features a game loop, window management, a simple shader system (no management) which draws a test screen, an event management system and custom timing events system. There is no world/scene/object system as of yet.
+As of now, the Penta Game Engine is still a work in progress and might not be fully functional. The focus is on incremental development, continuously adding features, and refining existing components. Currently the engine features a game loop, window management, basic shader/texture classes, an event management system, custom timing events system, and an asset management system.
 
 ## Dependencies
 
@@ -29,6 +31,7 @@ The engine aims to provide the following features:
 - Event Handling: Implementing a central EventManager for efficient event management and event distribution.
 - Window Management: Utilizing GLFW for window creation and management.
 - Basic Physics: Implementing rudimentary physics simulations to handle simple interactions within the game.
+- Basic Particle System that is component based.
 
 ## Disclaimer
 
