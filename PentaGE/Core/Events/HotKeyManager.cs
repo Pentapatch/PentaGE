@@ -48,7 +48,7 @@ namespace PentaGE.Core.Events
             if (_hotKeys.TryGetValue((key, modifierKeys), out var existingHotKey)) 
                 return existingHotKey;
 
-            var hotKey = new HotKey(key, modifierKeys);
+            var hotKey = new HotKey(key, modifierKeys, this);
             _hotKeys.Add((key, modifierKeys), hotKey);
             return hotKey;
         }

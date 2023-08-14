@@ -10,6 +10,8 @@ namespace PentaGE.Core.Events
     /// </summary>
     public sealed class HotKey
     {
+        private readonly HotKeyManager _manager;
+
         /// <summary>
         /// Gets the <see cref="Common.Key"/> that is associated with this HotKey.
         /// </summary>
@@ -35,11 +37,19 @@ namespace PentaGE.Core.Events
         /// </summary>
         /// <param name="key">The key that is associated with this HotKey.</param>
         /// <param name="modifierKeys">The modifier keys that are associated with this HotKey.</param>
-        internal HotKey(Key key, ModifierKey modifierKeys)
+        /// <param name="manager">The manager that created this instance.</param>
+        internal HotKey(Key key, ModifierKey modifierKeys, HotKeyManager manager)
         {
             Key = key;
             ModifierKeys = modifierKeys;
+            _manager = manager;
         }
+
+        /// <summary>
+        /// Remove this particular HotKey instance from the <see cref="HotKeyManager"/>.
+        /// </summary>
+        public void Remove() => 
+            _manager.Remove(this);
 
         /// <summary>
         /// Triggers the HotKey event.
