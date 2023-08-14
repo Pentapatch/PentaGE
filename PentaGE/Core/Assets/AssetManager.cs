@@ -1,4 +1,5 @@
-﻿using PentaGE.Core.Logging;
+﻿using PentaGE.Core.Entities;
+using PentaGE.Core.Logging;
 using PentaGE.Core.Rendering;
 using Serilog;
 using StbImageSharp;
@@ -64,6 +65,9 @@ namespace PentaGE.Core.Assets
 
         public bool AddTexture(string name, ImageResult image, int type, int slot, int format, int pixelType) =>
             Add(name, new Texture(image, type, slot, format, pixelType));
+
+        public bool AddEntity(string name, Entity entity) =>
+            Add(name, entity);
 
         public bool Add(string name, IAsset asset, string? filePath = null)
         {
@@ -190,7 +194,7 @@ namespace PentaGE.Core.Assets
             }
         }
 
-        private void ReloadAsset(string name, IHotReloadable asset)
+        private static void ReloadAsset(string name, IHotReloadable asset)
         {
             string typeName = asset.GetType().Name;
             Log.Information($"Hot-Reloading {typeName} asset '{name}'");

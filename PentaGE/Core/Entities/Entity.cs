@@ -1,4 +1,5 @@
-﻿using PentaGE.Core.Components;
+﻿using PentaGE.Core.Assets;
+using PentaGE.Core.Components;
 using System.Collections;
 
 namespace PentaGE.Core.Entities
@@ -6,7 +7,7 @@ namespace PentaGE.Core.Entities
     /// <summary>
     /// Represents an entity in the game world that can hold and manage components.
     /// </summary>
-    public abstract class Entity : IEnumerable<Component>
+    public abstract class Entity : IAsset, IEnumerable<Component>
     {
         private readonly List<Component> _components;
 
@@ -23,6 +24,12 @@ namespace PentaGE.Core.Entities
             ID = Guid.NewGuid();
             _components = new List<Component>();
         }
+
+        /// <inheritdoc />
+        public virtual bool Load() => true;
+
+        /// <inheritdoc />
+        public virtual void Dispose() { }
 
         /// <summary>
         /// Adds a component to the entity.
