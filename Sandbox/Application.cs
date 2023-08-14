@@ -34,8 +34,16 @@ namespace Sandbox
             if (!Assets.AddShader("Axes", $"{path}Axes.shader")) return false;
 
             // Initialize test texture
-            if (!Assets.AddTexture("TestTexture",
+            if (!Assets.AddTexture("BlackPentaTexture",
                     @"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Textures\SourceFiles\Pentapatch_Texture_2k_A.jpg",
+                    GL_TEXTURE_2D,
+                    GL_TEXTURE0,
+                    GL_RGBA,
+                    GL_UNSIGNED_BYTE))
+                return false;
+
+            if (!Assets.AddTexture("WhitePentaTexture",
+                    @"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Textures\SourceFiles\Pentapatch_Texture_2k_B.jpg",
                     GL_TEXTURE_2D,
                     GL_TEXTURE0,
                     GL_RGBA,
@@ -45,7 +53,10 @@ namespace Sandbox
             // Set up subject mesh
             var subjectMesh = MeshFactory.CreateCube(1f);
             var transform = new Transform(new(0, 0, 0), new(0, 0, 0), new(1f, 1f, 1f));
-            var renderableMesh = new RenderableMeshEntity(subjectMesh, Assets.Get<Shader>("Default")!, Assets.Get<Texture>("TestTexture"));
+            var renderableMesh = new RenderableMeshEntity(
+                subjectMesh, 
+                Assets.Get<Shader>("Default")!, 
+                Assets.Get<Texture>("BlackPentaTexture"));
 
             renderableMesh.AddComponent(new TransformComponent(transform));
             renderableMesh.GetComponent<MeshRenderComponent>()!.Material.Albedo = new(1f, 0f, 1f);

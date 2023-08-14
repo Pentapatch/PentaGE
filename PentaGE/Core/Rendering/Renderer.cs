@@ -18,6 +18,7 @@ namespace PentaGE.Core.Rendering
         private bool rotate = true;
         private bool materialTest = false;
         private bool wireframe = false;
+        private bool blackTexture = true;
 
         /// <summary>
         /// Creates a new instance of the Renderer class.
@@ -282,6 +283,12 @@ namespace PentaGE.Core.Rendering
                 mesh.Subdivide();
                 _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
             }
+            else if (e.Key == Key.F11)
+            {
+                var mesh = _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh;
+                mesh.TileTexture(3, 3);
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+            }
             else if (e.Key == Key.Backspace && e.ModifierKeys == ModifierKey.Control)
             {
                 if (_engine.Windows[0].Viewport.CameraManager.ActiveController is EditorCameraController cameraController)
@@ -323,6 +330,13 @@ namespace PentaGE.Core.Rendering
             else if (e.Key == Key.R && e.ModifierKeys == ModifierKey.Control)
             {
                 rotate = !rotate;
+            }
+            else if (e.Key == Key.I)
+            {
+                blackTexture = !blackTexture;
+                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Texture = blackTexture ?
+                    _engine.Assets.Get<Texture>("BlackPentaTexture") :
+                    _engine.Assets.Get<Texture>("WhitePentaTexture");
             }
         }
     }
