@@ -9,6 +9,8 @@ namespace PentaGE.Core.Graphics
     /// </summary>
     public sealed class Mesh
     {
+        private readonly Random _random = new();
+
         /// <summary>
         /// Gets or sets the list of vertices composing the mesh.
         /// </summary>
@@ -236,42 +238,77 @@ namespace PentaGE.Core.Graphics
 
         public void Roughen(float scale)
         {
-            // TODO: Needs optimization
-            //       Normals needs to be recalculated
-            HashSet<int> affectedVertices = new();
+            // Group vertices by their position
+            Dictionary<Vector3, List<int>> vertexGroupIndices = new();
             for (int i = 0; i < Vertices.Count; i++)
             {
-                if (affectedVertices.Contains(i)) continue;
-
-                var vertex = Vertices[i];
-                var connectedVertices = GetConnectedVertices(vertex);
-
-                float strength = scale * (float)Random.Shared.NextDouble();
-                for (int j = 0; j < connectedVertices.Count; j++)
+                if (vertexGroupIndices.ContainsKey(Vertices[i].Coordinates))
                 {
-                    var v = Vertices[(int)connectedVertices[j]];
-                    v.Coordinates += vertex.Normal * strength;
-
-                    Vertices[(int)connectedVertices[j]] = v;
-                    affectedVertices.Add((int)connectedVertices[j]);
+                    vertexGroupIndices[Vertices[i].Coordinates].Add(i);
+                }
+                else
+                {
+                    vertexGroupIndices.Add(Vertices[i].Coordinates, new List<int> { i });
                 }
             }
+
+            // Loop through all groups of vertices
+            foreach (var indices in vertexGroupIndices.Values)
+            {
+                // Calculate distance-based strength
+                float randomValue = (float)_random.NextDouble();
+                float strength = scale * randomValue;
+
+                // Calculate averaged normal for the direction
+                Vector3 averagedNormal = Vector3.Zero;
+                foreach (var index in indices)
+                {
+                    averagedNormal += Vertices[index].Normal;
+                }
+                averagedNormal /= indices.Count;
+
+                // Calculate the final offset
+                Vector3 offset = averagedNormal * strength;
+
+                // Offset all vertices in the group
+                for (int i = 0; i < indices.Count; i++)
+                {
+                    var vertex = Vertices[indices[i]];
+
+                    vertex.Coordinates += offset;
+
+                    Vertices[indices[i]] = vertex;
+                }
+            }
+
+            // Recalculate normals
+            RecalculateNormals();
         }
 
-        private List<uint> GetConnectedVertices(Vertex vertex)
+        private void RecalculateNormals()
         {
-            var indices = new List<uint>();
+            if (Indices is null) return;
 
-            for (int i = 0; i < Vertices.Count; i++)
+            for (int i = 0; i < Indices.Count; i += 3)
             {
-                // TODO: Needs approximation
-                if (Vertices[i].Coordinates == vertex.Coordinates)
-                {
-                    indices.Add((uint)i);
-                }
-            }
+                Vertex vertexA = Vertices[(int)Indices[i]];
+                Vertex vertexB = Vertices[(int)Indices[i + 1]];
+                Vertex vertexC = Vertices[(int)Indices[i + 2]];
 
-            return indices;
+                // Calculate the new normal
+                Vector3 normal = Vector3.Cross(
+                    vertexB.Coordinates - vertexA.Coordinates, 
+                    vertexC.Coordinates - vertexA.Coordinates)
+                    .Normalize();
+
+                vertexA.Normal = normal;
+                vertexB.Normal = normal;
+                vertexC.Normal = normal;
+
+                Vertices[(int)Indices[i]] = vertexA;
+                Vertices[(int)Indices[i + 1]] = vertexB;
+                Vertices[(int)Indices[i + 2]] = vertexC;
+            }
         }
 
         public void Explode(float scale)
