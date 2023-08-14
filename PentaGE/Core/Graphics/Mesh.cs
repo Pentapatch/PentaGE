@@ -239,31 +239,44 @@ namespace PentaGE.Core.Graphics
             // TODO: Needs optimization
             //       Normals needs to be recalculated
             HashSet<int> affectedVertices = new();
+            Random random = new();
+            float maxDistance = 1f;
             for (int i = 0; i < Vertices.Count; i++)
             {
                 if (affectedVertices.Contains(i)) continue;
 
                 var vertex = Vertices[i];
-                var connectedVertices = GetConnectedVertices(vertex);
+                var connectedVertices = GetConnectedVertices(vertex, affectedVertices);
 
-                float strength = scale * (float)Random.Shared.NextDouble();
+                // Calculate distance-based strength
+                float randomValue = (float)random.NextDouble();
+
                 for (int j = 0; j < connectedVertices.Count; j++)
                 {
                     var v = Vertices[(int)connectedVertices[j]];
+
+                    float distance = Vector3.Distance(vertex.Coordinates, v.Coordinates);
+                    float strength = scale * (1.0f - distance / maxDistance) * randomValue;
+
                     v.Coordinates += vertex.Normal * strength;
 
                     Vertices[(int)connectedVertices[j]] = v;
                     affectedVertices.Add((int)connectedVertices[j]);
                 }
             }
+
+            RecalculateNormals();
         }
 
-        private List<uint> GetConnectedVertices(Vertex vertex)
+        private List<uint> GetConnectedVertices(Vertex vertex, HashSet<int> affectedVertices)
         {
             var indices = new List<uint>();
 
             for (int i = 0; i < Vertices.Count; i++)
             {
+                // TODO: Needs better optimization
+                if (affectedVertices.Contains(i)) continue;
+
                 // TODO: Needs approximation
                 if (Vertices[i].Coordinates == vertex.Coordinates)
                 {
@@ -272,6 +285,27 @@ namespace PentaGE.Core.Graphics
             }
 
             return indices;
+        }
+
+        private void RecalculateNormals()
+        {
+            if (Indices is null) return;
+
+            for (int i = 0; i < Indices.Count; i += 3)
+            {
+                Vertex vertexA = Vertices[(int)Indices[i]];
+                Vertex vertexB = Vertices[(int)Indices[i + 1]];
+                Vertex vertexC = Vertices[(int)Indices[i + 2]];
+
+                Vector3 normal = Vector3.Normalize(Vector3.Cross(vertexB.Coordinates - vertexA.Coordinates, vertexC.Coordinates - vertexA.Coordinates));
+                vertexA.Normal = normal;
+                vertexB.Normal = normal;
+                vertexC.Normal = normal;
+
+                Vertices[(int)Indices[i]] = vertexA;
+                Vertices[(int)Indices[i + 1]] = vertexB;
+                Vertices[(int)Indices[i + 2]] = vertexC;
+            }
         }
 
         public void Explode(float scale)

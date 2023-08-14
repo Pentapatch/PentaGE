@@ -2,6 +2,7 @@
 using PentaGE.Common;
 using PentaGE.Core.Components;
 using PentaGE.Core.Graphics;
+using PentaGE.Core.Logging;
 using Serilog;
 using System.Numerics;
 using static OpenGL.GL;
@@ -348,9 +349,33 @@ namespace PentaGE.Core.Rendering
                 }
                 else
                 {
-                    var mesh = _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh;
+                    using (Log.Logger.BeginPerfLogger("Roughen"))
+                    {
+                        var mesh = _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh;
+                        mesh.Roughen(0.1f);
+                        _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+                    }
+                }
+            }
+            else if( e.Key == Key.L)
+            {
+                using (Log.Logger.BeginPerfLogger("Generating landscape"))
+                {
+                    if (_engine.Windows[0].Viewport.CameraManager.ActiveController is EditorCameraController controller)
+                    {
+                        controller.SetPosition(new Vector3(0f, 5f, 3f));
+                        controller.SetOrbitTarget(new Vector3(0f, 0f, 0f));
+                    }
+                    var mesh = MeshFactory.CreatePlane(20f, 20f);
+                    mesh.Offset(0f, -2f, 0f);
+                    mesh.Subdivide();
+                    mesh.Roughen(4f);
+                    mesh.Subdivide(2);
+                    mesh.Roughen(0.3f);
+                    mesh.Subdivide(2);
                     mesh.Roughen(0.1f);
                     _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+                    rotate = false;
                 }
             }
         }
