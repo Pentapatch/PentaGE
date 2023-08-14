@@ -9,6 +9,8 @@ namespace PentaGE.Core.Graphics
     /// </summary>
     public sealed class Mesh
     {
+        private readonly Random _random = new();
+
         /// <summary>
         /// Gets or sets the list of vertices composing the mesh.
         /// </summary>
@@ -236,41 +238,6 @@ namespace PentaGE.Core.Graphics
 
         public void Roughen(float scale)
         {
-            // TODO: Needs optimization
-            HashSet<int> affectedVertices = new();
-            Random random = new();
-            float maxDistance = 1f;
-            for (int i = 0; i < Vertices.Count; i++)
-            {
-                if (affectedVertices.Contains(i)) continue;
-
-                var vertex = Vertices[i];
-                var connectedVertices = GetConnectedVertices(vertex, affectedVertices);
-
-                // Calculate distance-based strength
-                float randomValue = (float)random.NextDouble();
-
-                for (int j = 0; j < connectedVertices.Count; j++)
-                {
-                    var v = Vertices[(int)connectedVertices[j]];
-
-                    float distance = Vector3.Distance(vertex.Coordinates, v.Coordinates);
-                    float strength = scale * (1.0f - distance / maxDistance) * randomValue;
-
-                    v.Coordinates += vertex.Normal * strength;
-
-                    Vertices[(int)connectedVertices[j]] = v;
-                    affectedVertices.Add((int)connectedVertices[j]);
-                }
-            }
-
-            RecalculateNormals();
-        }
-
-        public void RoughenV2(float scale)
-        {
-            Random random = new();
-
             // Group vertices by their position
             Dictionary<Vector3, List<int>> vertexGroupIndices = new();
             for (int i = 0; i < Vertices.Count; i++)
@@ -289,9 +256,19 @@ namespace PentaGE.Core.Graphics
             foreach (var indices in vertexGroupIndices.Values)
             {
                 // Calculate distance-based strength
-                float randomValue = (float)random.NextDouble();
+                float randomValue = (float)_random.NextDouble();
                 float strength = scale * randomValue;
-                Vector3 offset = Vertices[indices[0]].Normal * strength;
+
+                // Calculate averaged normal for the direction
+                Vector3 averagedNormal = Vector3.Zero;
+                foreach (var index in indices)
+                {
+                    averagedNormal += Vertices[index].Normal;
+                }
+                averagedNormal /= indices.Count;
+
+                // Calculate the final offset
+                Vector3 offset = averagedNormal * strength;
 
                 // Offset all vertices in the group
                 for (int i = 0; i < indices.Count; i++)
@@ -308,25 +285,6 @@ namespace PentaGE.Core.Graphics
             RecalculateNormals();
         }
 
-        private List<uint> GetConnectedVertices(Vertex vertex, HashSet<int> affectedVertices)
-        {
-            var indices = new List<uint>();
-
-            for (int i = 0; i < Vertices.Count; i++)
-            {
-                // TODO: Needs better optimization
-                if (affectedVertices.Contains(i)) continue;
-
-                // TODO: Needs approximation
-                if (Vertices[i].Coordinates == vertex.Coordinates)
-                {
-                    indices.Add((uint)i);
-                }
-            }
-
-            return indices;
-        }
-
         private void RecalculateNormals()
         {
             if (Indices is null) return;
@@ -337,7 +295,12 @@ namespace PentaGE.Core.Graphics
                 Vertex vertexB = Vertices[(int)Indices[i + 1]];
                 Vertex vertexC = Vertices[(int)Indices[i + 2]];
 
-                Vector3 normal = Vector3.Normalize(Vector3.Cross(vertexB.Coordinates - vertexA.Coordinates, vertexC.Coordinates - vertexA.Coordinates));
+                // Calculate the new normal
+                Vector3 normal = Vector3.Cross(
+                    vertexB.Coordinates - vertexA.Coordinates, 
+                    vertexC.Coordinates - vertexA.Coordinates)
+                    .Normalize();
+
                 vertexA.Normal = normal;
                 vertexB.Normal = normal;
                 vertexC.Normal = normal;

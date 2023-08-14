@@ -352,24 +352,10 @@ namespace PentaGE.Core.Rendering
                     using (Log.Logger.BeginPerfLogger("Roughen"))
                     {
                         var mesh = _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh;
-                        mesh.RoughenV2(0.1f);
+                        mesh.Roughen(0.1f);
                         _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
                     }
                 }
-            }
-            else if (e.Key == Key.T)
-            {
-                var mesh = MeshFactory.CreateCube(1f);
-                mesh.Subdivide(5);
-                using (Log.Logger.BeginPerfLogger("Roughen V1"))
-                {
-                    mesh.Roughen(0.1f);
-                }
-                using (Log.Logger.BeginPerfLogger("Roughen V2"))
-                {
-                    mesh.RoughenV2(0.1f);
-                }
-                _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
             }
             else if (e.Key == Key.L)
             {
@@ -391,6 +377,10 @@ namespace PentaGE.Core.Rendering
                     _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
                     rotate = false;
                 }
+            }
+            else if (e.Key == Key.T)
+            {
+                // Perform tests here
             }
         }
     }
