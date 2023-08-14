@@ -317,7 +317,7 @@ namespace PentaGE.Core
                 _targetRotation = new(0, 0, 0);
                 _targetFieldOfView = 90f;
             }
-            else if (e.Key == Key.Backspace)
+            else if (e.Key == Key.Backspace && e.ModifierKeys == ModifierKey.None)
             {
                 if (_orbitTarget is null)
                     _orbitTarget = new(0, 0, 0);

@@ -28,8 +28,8 @@ namespace PentaGE.Core.Events
         /// If the HotKey doesn't exist, a new one is created.
         /// </summary>
         /// <param name="key">The key that is associated with the HotKey.</param>
-        /// <param name="modifierKeys">The modifier key(s) that are associated with the HotKey.</param>
-        public HotKey this[Key key, ModifierKey modifierKeys] =>
+        /// <param name="modifierKeys">The modifier key(s) that are associated with the HotKey. Default is <see cref="ModifierKey.None"/>.</param>
+        public HotKey this[Key key, ModifierKey modifierKeys = ModifierKey.None] =>
             CreateOrReturnHotKey(key, modifierKeys);
 
         /// <summary>

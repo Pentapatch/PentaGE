@@ -13,7 +13,7 @@ namespace Sandbox
     {
         protected override bool Initialize()
         {
-            // Do initialization work
+            // Subscribe to custom timing events
             Timing.CustomTimings[1].Tick += Application_Tick;
 
             return true;
