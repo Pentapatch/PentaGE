@@ -1,6 +1,5 @@
 ﻿using PentaGE.Core.Graphics;
 using PentaGE.Core.Rendering;
-using PentaGE.Core.Rendering.Materials;
 
 namespace PentaGE.Core.Entities
 {

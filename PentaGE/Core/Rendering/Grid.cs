@@ -1,6 +1,5 @@
 ﻿using PentaGE.Common;
 using PentaGE.Core.Graphics;
-using PentaGE.Core.Rendering.Materials;
 using System.Numerics;
 
 namespace PentaGE.Core.Rendering

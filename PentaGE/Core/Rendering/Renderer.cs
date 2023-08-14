@@ -338,6 +338,21 @@ namespace PentaGE.Core.Rendering
                     _engine.Assets.Get<Texture>("BlackPentaTexture") :
                     _engine.Assets.Get<Texture>("WhitePentaTexture");
             }
+            else if (e.Key == Key.F12)
+            {
+                if (e.ModifierKeys == ModifierKey.Control)
+                {
+                    var mesh = _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh;
+                    mesh.Explode(0.15f);
+                    _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+                }
+                else
+                {
+                    var mesh = _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh;
+                    mesh.Roughen(0.1f);
+                    _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+                }
+            }
         }
     }
 }

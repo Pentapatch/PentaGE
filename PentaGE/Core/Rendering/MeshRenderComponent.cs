@@ -1,7 +1,6 @@
 ﻿using PentaGE.Common;
 using PentaGE.Core.Components;
 using PentaGE.Core.Graphics;
-using PentaGE.Core.Rendering.Materials;
 using System.Numerics;
 using static OpenGL.GL;
 

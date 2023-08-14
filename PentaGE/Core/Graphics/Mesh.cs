@@ -234,6 +234,58 @@ namespace PentaGE.Core.Graphics
             }
         }
 
+        public void Roughen(float scale)
+        {
+            // TODO: Needs optimization
+            //       Normals needs to be recalculated
+            HashSet<int> affectedVertices = new();
+            for (int i = 0; i < Vertices.Count; i++)
+            {
+                if (affectedVertices.Contains(i)) continue;
+
+                var vertex = Vertices[i];
+                var connectedVertices = GetConnectedVertices(vertex);
+
+                float strength = scale * (float)Random.Shared.NextDouble();
+                for (int j = 0; j < connectedVertices.Count; j++)
+                {
+                    var v = Vertices[(int)connectedVertices[j]];
+                    v.Coordinates += vertex.Normal * strength;
+
+                    Vertices[(int)connectedVertices[j]] = v;
+                    affectedVertices.Add((int)connectedVertices[j]);
+                }
+            }
+        }
+
+        private List<uint> GetConnectedVertices(Vertex vertex)
+        {
+            var indices = new List<uint>();
+
+            for (int i = 0; i < Vertices.Count; i++)
+            {
+                // TODO: Needs approximation
+                if (Vertices[i].Coordinates == vertex.Coordinates)
+                {
+                    indices.Add((uint)i);
+                }
+            }
+
+            return indices;
+        }
+
+        public void Explode(float scale)
+        {
+            // TODO: Does this work as expected on spherical meshes?
+            //       i.e. it seems to keep the original shape, but just scaled up
+            for (int i = 0; i < Vertices.Count; i++)
+            {
+                var vertex = Vertices[i];
+                vertex.Coordinates += vertex.Normal * scale;
+                Vertices[i] = vertex;
+            }
+        }
+
         private static Vertex CalculateMidpoint(Vertex vertexA, Vertex vertexB)
         {
             Vector3 midpointPosition = (vertexA.Coordinates + vertexB.Coordinates) * 0.5f;

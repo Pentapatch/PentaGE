@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace PentaGE.Core.Rendering.Materials
+namespace PentaGE.Core.Rendering
 {
     /// <summary>
     /// Represents a PBR (Physically-Based Rendering) material with properties for rendering realistic surfaces.
