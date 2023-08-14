@@ -153,10 +153,10 @@ namespace PentaGE.Core.Graphics
                 new Vertex(upVector, World.RightVector, TopCenter),
                 new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.RightVector, BottomRight),
 
-                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.DownVector, BottomLeft),
-                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.DownVector, BottomRight),
-                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.DownVector, TopRight),
-                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.DownVector, TopLeft),
+                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.DownVector, TopLeft),
+                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.DownVector, TopRight),
+                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.DownVector, BottomRight),
+                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.DownVector, BottomLeft),
             };
 
             // Recalculate the normals for the front, back, left and right faces
@@ -275,7 +275,6 @@ namespace PentaGE.Core.Graphics
                 Vector2 bottomTexCoord = new(x / (radius * -2) + 0.5f, z / (radius * 2) + 0.5f);
 
                 // Adjust the x texture coordinate for the sides
-                //float offset = 0.25f * (segmentsPerFace / 16f);
                 float u = (i + (1 % segmentsPerFace)) * textureMapPerFace;
 
                 // Adjust for texture aspect ratio
@@ -341,7 +340,7 @@ namespace PentaGE.Core.Graphics
         /// <param name="textureAspectRatio">The aspect ratio to adjust the texture mapping.</param>
         /// <returns>A cone mesh.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when radius, height, segments, or textureAspectRatio is out of valid range.</exception>
-        public static Mesh CreateCone(float radius, float height, int segments = 16, float textureAspectRatio = 1f)
+        public static Mesh CreateCone(float radius, float height, int segments = 64, float textureAspectRatio = 1f)
     {
         // TODO: Known issues:
         // - Not sure that the normals are correct for the cone sides
@@ -369,11 +368,16 @@ namespace PentaGE.Core.Graphics
                 float nextAngle = 2 * MathF.PI * (i + 1) / segments; // Calculate the angle for the next vertex
                 float x = radius * MathF.Cos(angle);
                 float z = radius * MathF.Sin(angle);
-                // Calculate texture coordinates based on vertex position
-                Vector2 yTexCoord = new(x / (radius * 2) + 0.5f, z / (radius * -2) + 0.5f);
 
-                // Adjust the x texture coordinate for the sides
-                float u = x / radius * 0.5f + 0.5f;
+                // Calculate texture coordinates based on vertex position
+                Vector2 yTexCoord = new(x / (radius * -2) + 0.5f, z / (radius * 2) + 0.5f);
+
+                // Calculate the azimuthal angle (φ) for the longitude
+                float phi = i * 2 * MathF.PI / segments;
+
+                // Calculate azimuthal angle (φ) for texture mapping
+                float phiForTexture = phi + MathF.PI / 2; // Adjust by 90 degrees
+                float u = phiForTexture / (2 * MathF.PI);
 
                 // Adjust for texture aspect ratio
                 u *= textureAspectRatio;
@@ -399,7 +403,7 @@ namespace PentaGE.Core.Graphics
                 vertices.Add(new Vertex(sidePosition, sideNormal, sideTexCoord));
 
                 // Top face vertex
-                vertices.Add(new Vertex(topCenter, World.UpVector, new Vector2(0.5f, 1f)));
+                vertices.Add(new Vertex(topCenter, World.UpVector, new Vector2(u, 1f)));
 
                 // Bottom face vertices
                 vertices.Add(new Vertex(new Vector3(x, -halfHeight, z), World.DownVector, yTexCoord));
@@ -470,9 +474,9 @@ namespace PentaGE.Core.Graphics
                     float u = phiForTexture / (2 * MathF.PI);
                     float v = theta / MathF.PI;
 
-                    Vector2 texCoord = new(u, v);
+                    Vector2 texCoord = new(u, -v);
 
-                    vertices.Add(new Vertex(position, normal, -texCoord));
+                    vertices.Add(new Vertex(position, normal, texCoord));
                 }
             }
 

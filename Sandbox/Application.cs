@@ -35,7 +35,7 @@ namespace Sandbox
 
             // Initialize test texture
             if (!Assets.AddTexture("TestTexture",
-                    @"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Textures\SourceFiles\TestTexture.jpg",
+                    @"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Textures\SourceFiles\Pentapatch_Texture_2k_A.jpg",
                     GL_TEXTURE_2D,
                     GL_TEXTURE0,
                     GL_RGBA,
@@ -43,8 +43,7 @@ namespace Sandbox
                 return false;
 
             // Set up subject mesh
-            var subjectMesh = MeshFactory.CreatePyramid(1f, 1.4f, 1f);
-            subjectMesh.TileTexture(5, 6);
+            var subjectMesh = MeshFactory.CreateCube(1f);
             var transform = new Transform(new(0, 0, 0), new(0, 0, 0), new(1f, 1f, 1f));
             var renderableMesh = new RenderableMeshEntity(subjectMesh, Assets.Get<Shader>("Default")!, Assets.Get<Texture>("TestTexture"));
 

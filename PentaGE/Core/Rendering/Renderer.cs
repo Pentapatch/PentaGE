@@ -101,15 +101,15 @@ namespace PentaGE.Core.Rendering
                 // Animate the color and specular strength of the object
                 _engine.Scene[0].GetComponent<TransformComponent>()!.Transform = rotate ? objectTransform : objectDisplayTransform;
 
-                float hue = MathF.Sin((float)_engine.Timing.TotalElapsedTime) * 0.5f + 0.5f; // Adjust the range to [0, 1]
+                float hue = MathF.Sin((float)_engine.Timing.TotalElapsedTime) * 0.5f + 0.5f; // 0 - 1
                 _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Material.Albedo =
                     materialTest ?
-                        ColorFromHSL(hue, 1.0f, 0.5f) :
+                        ColorFromHSL(hue, 0.8f, 0.85f) :
                         new(1, 1, 1);
                 _engine.Scene[0].GetComponent<MeshRenderComponent>()!.Material.SpecularStrength =
                     materialTest ?
-                        (MathF.Sin((float)_engine.Timing.TotalElapsedTime) + 1) / 2 * 2 :
-                        2;
+                        MathF.Sin(((float)_engine.Timing.TotalElapsedTime) + 1) / 2 :
+                        1;
 
                 #endregion
 
