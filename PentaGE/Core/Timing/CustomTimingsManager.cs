@@ -29,7 +29,7 @@
         /// <returns>The newly added <see cref="CustomTiming"/> instance.</returns>
         public CustomTiming Add(double intervalInSeconds, Action<double> action)
         {
-            var customTiming = new CustomTiming(intervalInSeconds, action);
+            var customTiming = new CustomTiming(intervalInSeconds, action, this);
             _customTimings.Add(customTiming);
             return customTiming;
         }
@@ -41,7 +41,7 @@
         /// <returns>The newly added <see cref="CustomTiming"/> instance.</returns>
         public CustomTiming Add(double intervalInSeconds)
         {
-            var customTiming = new CustomTiming(intervalInSeconds);
+            var customTiming = new CustomTiming(intervalInSeconds, this);
             _customTimings.Add(customTiming);
             return customTiming;
         }
