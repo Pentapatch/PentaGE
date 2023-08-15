@@ -27,6 +27,7 @@ namespace PentaGE.Core.Events
         private readonly Dictionary<GLFW.Window, Window> _registeredWindows = new();
         private readonly List<EngineEventArgs> _eventBuffer = new();
         private readonly HotKeyManager _hotKeyManager = new();
+        private readonly KeyBindingManager _keyBindingManager;
 
         // NOTE: We need to keep a reference to the callbacks to prevent them from
         //       being garbage collected and crash the engine during runtime.
@@ -55,7 +56,10 @@ namespace PentaGE.Core.Events
         /// within the assembly. Access to the event manager should be made through the <c>Events</c> property of the concrete implementation class,
         /// which provides access to the single instance of the class.
         /// </remarks>
-        internal EventManager() { }
+        internal EventManager()
+        {
+            _keyBindingManager = new(this);
+        }
 
         /// <summary>
         /// Gets or sets the category or categories of events to log.
@@ -66,6 +70,11 @@ namespace PentaGE.Core.Events
         /// Provides access to the <see cref="HotKeyManager"/> instance for managing hotkeys.
         /// </summary>
         public HotKeyManager HotKeys => _hotKeyManager;
+
+        /// <summary>
+        /// Provides access to the <see cref="KeyBindingManager"/> instance for managing keybindings.
+        /// </summary>
+        public KeyBindingManager KeyBindings => _keyBindingManager;
 
         #region Internal methods
 
@@ -402,9 +411,6 @@ namespace PentaGE.Core.Events
                     GetWindow(windowHandle),
                     (Key)key,
                     (ModifierKey)mods));
-
-                // Update the HotKeyManager
-                _hotKeyManager.KeyReleased((Key)key);
             }
             else if (state == InputState.Repeat)
             {
