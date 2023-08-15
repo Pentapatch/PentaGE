@@ -24,18 +24,19 @@ namespace Sandbox
             // Set up shaders
             Assets.EnableHotReload(seconds: 5);
 
-            string path = @"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Shaders\SourceCode\";
-            if (!Assets.AddShader("Default", $"{path}Default.shader")) return false;
-            if (!Assets.AddShader("Face", $"{path}Face.shader")) return false;
-            if (!Assets.AddShader("Face2", $"{path}Face2.shader")) return false;
-            if (!Assets.AddShader("Normal", $"{path}Normal.shader")) return false;
-            if (!Assets.AddShader("Light", $"{path}Light.shader")) return false;
-            if (!Assets.AddShader("Grid", $"{path}Grid.shader")) return false;
-            if (!Assets.AddShader("Axes", $"{path}Axes.shader")) return false;
+            string shaderPath = @"C:\Users\newsi\source\repos\PentaGE\Sandbox\SourceFiles\Shaders\";
+            if (!Assets.AddShader("Default", $"{shaderPath}Default.shader")) return false;
+            if (!Assets.AddShader("Face", $"{shaderPath}Face.shader")) return false;
+            if (!Assets.AddShader("Face2", $"{shaderPath}Face2.shader")) return false;
+            if (!Assets.AddShader("Normal", $"{shaderPath}Normal.shader")) return false;
+            if (!Assets.AddShader("Light", $"{shaderPath}Light.shader")) return false;
+            if (!Assets.AddShader("Grid", $"{shaderPath}Grid.shader")) return false;
+            if (!Assets.AddShader("Axes", $"{shaderPath}Axes.shader")) return false;
 
             // Initialize test texture
+            var texturePath = @"C:\Users\newsi\source\repos\PentaGE\Sandbox\SourceFiles\Textures\";
             if (!Assets.AddTexture("BlackPentaTexture",
-                    @"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Textures\SourceFiles\Pentapatch_Texture_2k_A.jpg",
+                    $"{texturePath}Pentapatch_Texture_2k_A.jpg",
                     GL_TEXTURE_2D,
                     GL_TEXTURE0,
                     GL_RGBA,
@@ -43,7 +44,7 @@ namespace Sandbox
                 return false;
 
             if (!Assets.AddTexture("WhitePentaTexture",
-                    @"C:\Users\newsi\source\repos\PentaGE\PentaGE\Core\Rendering\Textures\SourceFiles\Pentapatch_Texture_2k_B.jpg",
+                    $"{texturePath}Pentapatch_Texture_2k_B.jpg",
                     GL_TEXTURE_2D,
                     GL_TEXTURE0,
                     GL_RGBA,
