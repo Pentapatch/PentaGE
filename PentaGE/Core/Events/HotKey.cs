@@ -58,7 +58,6 @@ namespace PentaGE.Core.Events
         /// <param name="log">Whether to log the event.</param>
         internal void TriggerEvent(Window window, bool log = false)
         {
-
             if (Action is not null) Action();
 
             var eventArgs = new HotKeyEventArgs(OnEvent, window, Key, ModifierKeys, false);

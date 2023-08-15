@@ -7,7 +7,6 @@ namespace PentaGE.Core.Events
     /// </summary>
     public sealed class HotKeyManager
     {
-        private ModifierKey _modifiers = ModifierKey.None;
         private readonly Dictionary<(Key, ModifierKey), HotKey> _hotKeys;
 
         /// <summary>
@@ -34,22 +33,22 @@ namespace PentaGE.Core.Events
 
         /// <summary>
         /// Adds a new <see cref="HotKey"/> with the specified key and modifier key(s).
-        /// If a <see cref="HotKey"/> with the same key and modifier key(s) combination already exists,
-        /// the existing instance is returned.
         /// </summary>
         /// <param name="key">The key that is associated with the HotKey.</param>
-        /// <param name="modifierKeys">The modifier key(s) that are associated with the HotKey.</param>
-        /// <returns>
-        /// The newly added <see cref="HotKey"/> instance if it doesn't exist; otherwise, the existing instance.
-        /// </returns>
-        public HotKey Add(Key key, ModifierKey modifierKeys)
+        /// <param name="modifierKeys">(Optional) The modifier key(s) that are associated with the HotKey.</param>
+        /// <returns>The newly added <see cref="HotKey"/> instance.</returns>
+        /// <exception cref="ArgumentException">Thrown when a HotKey with the same key and modifier keys already exists.</exception>
+        public HotKey Add(Key key, ModifierKey modifierKeys = ModifierKey.None)
         {
-            // Return the HotKey if it already exists
-            if (_hotKeys.TryGetValue((key, modifierKeys), out var existingHotKey)) 
-                return existingHotKey;
+            if (_hotKeys.ContainsKey((key, modifierKeys)))
+            {
+                throw new ArgumentException($"A HotKey with the key {key} and modifier keys {modifierKeys} already exists.");
+            }
 
             var hotKey = new HotKey(key, modifierKeys, this);
+
             _hotKeys.Add((key, modifierKeys), hotKey);
+
             return hotKey;
         }
 
@@ -73,42 +72,14 @@ namespace PentaGE.Core.Events
         /// A HotKeyEvent will be triggered if a registered HotKey combination exists.
         /// </remarks>
         /// <param name="key">The key that was pressed.</param>
-        /// <param name="mods">The modifier key(s) associated with the key press.</param>
+        /// <param name="modifierKeys">The modifier key(s) associated with the key press.</param>
         /// <param name="window">The window where the key press occurred.</param>
-        internal void KeyPressed(Key key, ModifierKey mods, Window window)
+        internal void KeyPressed(Key key, ModifierKey modifierKeys, Window window)
         {
-            // Add the modifier key to the current modifiers
-            _modifiers |= mods;
-
             // Handle the key
-            if (_hotKeys.TryGetValue((key, _modifiers), out var hotKey))
+            if (_hotKeys.TryGetValue((key, modifierKeys), out var hotKey))
             {
                 hotKey.TriggerEvent(window, LoggingEnabled);
-            }
-        }
-
-        /// <summary>
-        /// Handles the event when a key is released and removes associated modifier keys.
-        /// </summary>
-        /// <param name="key">The key that was released.</param>
-        internal void KeyReleased(Key key)
-        {
-            // Remove the modifier key from the current modifiers
-            if (key == Key.LeftShift || key == Key.RightShift)
-            {
-                _modifiers &= ~ModifierKey.Shift;
-            }
-            else if (key == Key.LeftControl || key == Key.RightControl)
-            {
-                _modifiers &= ~ModifierKey.Control;
-            }
-            else if (key == Key.LeftAlt || key == Key.RightAlt)
-            {
-                _modifiers &= ~ModifierKey.Alt;
-            }
-            else if (key == Key.LeftSuper || key == Key.RightSuper)
-            {
-                _modifiers &= ~ModifierKey.Super;
             }
         }
 
@@ -121,10 +92,12 @@ namespace PentaGE.Core.Events
         /// <returns>The existing or newly created <see cref="HotKey"/> instance.</returns>
         private HotKey CreateOrReturnHotKey(Key key, ModifierKey modifierKeys)
         {
-            HotKey? hotKey = _hotKeys.FirstOrDefault(x => x.Value.Key == key && x.Value.ModifierKeys == modifierKeys).Value;
-            if (hotKey is not null) return hotKey;
+            if (_hotKeys.TryGetValue((key, modifierKeys), out var hotKey))
+            {
+                return hotKey;
+            }
+
             return Add(key, modifierKeys);
         }
-
     }
 }
