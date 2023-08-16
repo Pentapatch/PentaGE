@@ -5,6 +5,8 @@ using PentaGE.Core.Entities;
 using PentaGE.Core.Events;
 using PentaGE.Core.Graphics;
 using PentaGE.Core.Rendering;
+using Sandbox.Components;
+using System.Numerics;
 using static OpenGL.GL;
 
 namespace Sandbox
@@ -16,8 +18,40 @@ namespace Sandbox
             // Subscribe to custom timing events
             Timing.CustomTimings[1].Tick += Application_Tick;
 
+            Events.KeyBindings[StopScene].Bind(Key.P, ModifierKey.Control);
+            Events.KeyBindings[PauseScene].Bind(Key.P, ModifierKey.Shift);
+            Events.KeyBindings[PlayScene].Bind(Key.P);
+            Events.KeyBindings[Test1].Bind(Key.Enter);
+            Events.KeyBindings[Test2].Bind(Key.Enter, ModifierKey.Control);
+            Events.KeyBindings[ToggleRotation].Bind(Key.R, ModifierKey.Control);
+
             return true;
         }
+
+        public void ToggleRotation()
+        {
+            var rotator = Scenes.Scene[0].GetComponent<DisplayRotator>();
+            if (rotator is not null) rotator.Enabled = !rotator.Enabled;
+        }
+
+        public void Test1()
+        {
+            var component = Scenes.Scene[1].GetComponent<TransformComponent>()!.Transform;
+            component.Position += new Vector3(1, 1, 0);
+            Scenes.Scene[1].GetComponent<TransformComponent>()!.Transform = component;
+        }
+
+        public void Test2()
+        {
+            var entity = new RenderableMeshEntity(MeshFactory.CreateSphere(1f), Assets.Get<Shader>("Default")!);
+            Scenes.Scene.Add(entity);
+        }
+
+        private void PlayScene() => Scenes.Run();
+
+        private void PauseScene() => Scenes.Pause();
+
+        private void StopScene() => Scenes.Stop();
 
         protected override bool LoadResources()
         {
@@ -62,7 +96,8 @@ namespace Sandbox
             renderableMesh.AddComponent(new TransformComponent(transform));
             renderableMesh.GetComponent<MeshRenderComponent>()!.Material.Albedo = new(1f, 0f, 1f);
             renderableMesh.GetComponent<MeshRenderComponent>()!.Material.SpecularStrength = 1f;
-            Assets.AddEntity("Subject", renderableMesh);
+            renderableMesh.AddComponent(new DisplayRotator());
+            Assets.Add("Subject", renderableMesh);
 
             // Set up test light
             var lightMesh = MeshFactory.CreateSphere(0.2f);
@@ -70,7 +105,7 @@ namespace Sandbox
             var renderableLight = new RenderableMeshEntity(lightMesh, Assets.Get<Shader>("Light")!);
 
             renderableLight.AddComponent(new TransformComponent(transform2));
-            Assets.AddEntity("LightEntity", renderableLight);
+            Assets.Add("LightEntity", renderableLight);
 
             // Initialize grid
             Grid gridA = new(10, 10, new(1, 1, 1), 0.2f);
@@ -78,21 +113,25 @@ namespace Sandbox
             var gridShader = Assets.Get<Shader>("Grid")!;
             var renderableGridMajor = new RenderableGridEntity(gridA, gridShader);
             var renderableGridMinor = new RenderableGridEntity(gridB, gridShader);
-            Assets.AddEntity("GridMajor", renderableGridMajor);
-            Assets.AddEntity("GridMinor", renderableGridMinor);
+            Assets.Add("GridMajor", renderableGridMajor);
+            Assets.Add("GridMinor", renderableGridMinor);
 
             // Initialize axes gizmo
             var axesGizmoMesh = MeshFactory.CreateAxesGizmo(0.1f);
             var renderableAxesGizmo = new RenderableMeshEntity(axesGizmoMesh, Assets.Get<Shader>("Axes")!);
             renderableAxesGizmo.GetComponent<MeshRenderComponent>()!.DrawMode = DrawMode.Lines;
-            Assets.AddEntity("AxesGizmo", renderableAxesGizmo);
+            Assets.Add("AxesGizmo", renderableAxesGizmo);
 
             // Add entities to the scene
-            Scene.AddEntity(Assets.Get<RenderableMeshEntity>("Subject")!);
-            Scene.AddEntity(Assets.Get<RenderableMeshEntity>("LightEntity")!);
-            Scene.AddEntity(Assets.Get<RenderableGridEntity>("GridMajor")!);
-            Scene.AddEntity(Assets.Get<RenderableGridEntity>("GridMinor")!);
-            Scene.AddEntity(Assets.Get<RenderableMeshEntity>("AxesGizmo")!);
+            var scene = Scenes.Add("Main");
+            scene.Add((Entity)Assets["Subject"]!);
+            scene.Add((Entity)Assets["LightEntity"]!);
+            scene.Add((Entity)Assets["GridMajor"]!);
+            scene.Add((Entity)Assets["GridMinor"]!);
+            scene.Add((Entity)Assets["AxesGizmo"]!);
+
+            // Test: Set up scene
+            Scenes.SetActiveScene(scene);
 
             return true;
         }

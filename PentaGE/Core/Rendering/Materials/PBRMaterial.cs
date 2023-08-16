@@ -5,7 +5,7 @@ namespace PentaGE.Core.Rendering
     /// <summary>
     /// Represents a PBR (Physically-Based Rendering) material with properties for rendering realistic surfaces.
     /// </summary>
-    public sealed class PBRMaterial
+    public sealed class PBRMaterial : ICloneable
     {
         /// <summary>
         /// Gets or sets the base color (albedo) of the material.
@@ -75,5 +75,8 @@ namespace PentaGE.Core.Rendering
             AmbientOcclusion = 1.0f;
             SpecularStrength = 0.5f;
         }
+
+        /// <inheritdoc />
+        public object Clone() => MemberwiseClone();
     }
 }

@@ -37,5 +37,8 @@ namespace PentaGE.Core.Components
         {
             // Do nothing
         }
+
+        /// <inheritdoc />
+        public override object Clone() => MemberwiseClone();
     }
 }

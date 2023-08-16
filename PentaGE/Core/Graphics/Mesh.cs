@@ -7,7 +7,7 @@ namespace PentaGE.Core.Graphics
     /// <summary>
     /// Represents a 3D mesh consisting of vertices and optional indices.
     /// </summary>
-    public sealed class Mesh
+    public sealed class Mesh : ICloneable
     {
         private readonly Random _random = new();
 
@@ -32,6 +32,14 @@ namespace PentaGE.Core.Graphics
             Indices = indices;
         }
 
+        /// <inheritdoc/>
+        public object Clone()
+        {
+            var vertices = new List<Vertex>(Vertices);
+            var indices = new List<uint>(Indices ?? new List<uint>());
+
+            return new Mesh(vertices, indices);
+        }
 
         /// <summary>
         /// Offsets all vertex positions of the mesh by specified x, y, and z values.

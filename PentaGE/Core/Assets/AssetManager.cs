@@ -24,10 +24,7 @@ namespace PentaGE.Core.Assets
             _hotReloadEnabled = false;
         }
 
-        public IAsset? this[string name]
-        {
-            get => Get<IAsset>(name);
-        }
+        public IAsset? this[string name] => Get<IAsset>(name);
 
         public IQueryable<Shader> Shaders =>
             _assets.Values.Where(a => a is Shader).Cast<Shader>().AsQueryable();
@@ -66,8 +63,14 @@ namespace PentaGE.Core.Assets
         public bool AddTexture(string name, ImageResult image, int type, int slot, int format, int pixelType) =>
             Add(name, new Texture(image, type, slot, format, pixelType));
 
-        public bool AddEntity(string name, Entity entity) =>
-            Add(name, entity);
+        public bool Add(string name, Entity entity) =>
+            Add(name, (IAsset)entity);
+
+        public bool Add(string name, Shader shader) =>
+            Add(name, (IAsset)shader);
+
+        public bool Add(string name, Texture texture, string? filePath = null) =>
+            Add(name, (IAsset)texture, filePath);
 
         public bool Add(string name, IAsset asset, string? filePath = null)
         {
@@ -142,6 +145,9 @@ namespace PentaGE.Core.Assets
 
         public T? Get<T>(string name) where T : IAsset =>
             _assets.TryGetValue(name, out IAsset? asset) ? (T?)asset : default;
+
+        public IAsset? Get(string name) => 
+            _assets.TryGetValue(name, out IAsset? asset) ? asset : default;
 
         private void RegisterPath(string name, string path, IHotReloadable item) =>
             _hotReloadItems.Add(name, new(path, item));

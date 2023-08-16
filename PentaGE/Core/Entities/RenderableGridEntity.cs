@@ -17,10 +17,8 @@ namespace PentaGE.Core.Entities
             var meshRenderer = new MeshRenderComponent(grid.Mesh, shader, null, grid.Material)
             {
                 DrawMode = DrawMode.Lines,
-            };
-
+            }; ;
             AddComponent(meshRenderer);
         }
-
     }
 }

@@ -34,7 +34,7 @@ namespace PentaGE.Core.Scenes
         /// Adds an entity to the scene.
         /// </summary>
         /// <param name="entity">The entity to add.</param>
-        public void AddEntity(Entity entity) =>
+        public void Add(Entity entity) =>
             _entities.Add(entity);
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace PentaGE.Core.Scenes
         /// </summary>
         /// <param name="entity">The entity to remove.</param>
         /// <returns>True if the entity was removed successfully; otherwise, false.</returns>
-        public bool RemoveEntity(Entity entity) =>
+        public bool Remove(Entity entity) =>
             _entities.Remove(entity);
 
         /// <summary>
@@ -54,9 +54,11 @@ namespace PentaGE.Core.Scenes
             // Loop through entities and update their components.
             foreach (var entity in _entities)
             {
+                if (!entity.Enabled) continue;
+
                 foreach (var component in entity)
                 {
-                    component.Update(deltaTime);
+                    component.OnUpdate(deltaTime);
                 }
             }
         }

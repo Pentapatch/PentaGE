@@ -7,14 +7,19 @@ namespace PentaGE.Core.Entities
     /// <summary>
     /// Represents an entity in the game world that can hold and manage components.
     /// </summary>
-    public abstract class Entity : IAsset, IEnumerable<Component>
+    public abstract class Entity : IAsset, IEnumerable<Component>, ICloneable
     {
-        private readonly List<Component> _components;
+        private List<Component> _components;
 
         /// <summary>
         /// Gets the unique identifier of the entity.
         /// </summary>
         public Guid ID { get; private set; }
+
+        /// <summary>
+        /// Gets or sets if the entity is enabled and should recieve update events.
+        /// </summary>
+        public bool Enabled { get; set; } = true;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Entity"/> class.
@@ -87,5 +92,24 @@ namespace PentaGE.Core.Entities
         /// <inheritdoc />
         IEnumerator IEnumerable.GetEnumerator() =>
             ((IEnumerable)_components).GetEnumerator();
+
+        /// <inheritdoc />
+        public virtual object Clone()
+        {
+            var clonedEntity = (Entity)MemberwiseClone();
+
+            clonedEntity.ID = Guid.NewGuid(); // Generate a new ID for the cloned entity
+
+            // Deep copy components
+            clonedEntity._components = new List<Component>();
+            foreach (var component in _components)
+            {
+                var clonedComponent = (Component)component.Clone();
+                clonedComponent.Entity = clonedEntity;
+                clonedEntity._components.Add(clonedComponent);
+            }
+
+            return clonedEntity;
+        }
     }
 }
