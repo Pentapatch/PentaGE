@@ -97,6 +97,14 @@ namespace PentaGE.Core.Components
         public T? Get<T>() where T : Component =>
             _components.FirstOrDefault(c => c is T) as T;
 
+        /// <summary>
+        /// Gets all components of a specific type attached to the entity.
+        /// </summary>
+        /// <typeparam name="T">The type of component to retrieve.</typeparam>
+        /// <returns>A list of components of the specified type.</returns>
+        public List<T> GetAll<T>() where T : Component =>
+            _components.Where(c => c is T).Cast<T>().ToList();
+
         /// <inheritdoc />
         public IEnumerator<Component> GetEnumerator() =>
             ((IEnumerable<Component>)_components).GetEnumerator();

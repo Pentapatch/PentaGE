@@ -17,7 +17,6 @@ namespace PentaGE.Core.Rendering
     {
         private readonly PentaGameEngine _engine;
         private bool cullingEnabled = false;
-        private bool materialTest = false;
         private bool wireframe = false;
         private bool blackTexture = true;
         private int activeSubjectIndex = 0;
@@ -71,7 +70,6 @@ namespace PentaGE.Core.Rendering
             //       and should be moved there
             _engine.Events.HotKeys[Key.F1].Event += ToggleWireframe_HotKey;
             _engine.Events.HotKeys[Key.F2].Event += ToggleCulling_HotKey;
-            _engine.Events.HotKeys[Key.F3].Event += ToggleMaterialTest_HotKey;
             _engine.Events.HotKeys[Key.F5].Event += SetShaderToDefault_HotKey;
             _engine.Events.HotKeys[Key.F6].Event += SetShaderToFaceA_HotKey;
             _engine.Events.HotKeys[Key.F6, ModifierKey.Shift].Event += SetShaderToFaceB_HotKey;
@@ -115,21 +113,6 @@ namespace PentaGE.Core.Rendering
         {
             foreach (var window in _engine.Windows)
             {
-                #region Test rotation
-
-                // Animate the color and specular strength of the object
-                float hue = MathF.Sin((float)_engine.Timing.TotalElapsedTime) * 0.5f + 0.5f; // 0 - 1
-                _engine.Scenes.Scene[0].Components.Get<MeshRenderComponent>()!.Material.Albedo =
-                    materialTest ?
-                        ColorFromHSL(hue, 0.8f, 0.85f) :
-                        new(1, 1, 1);
-                _engine.Scenes.Scene[0].Components.Get<MeshRenderComponent>()!.Material.SpecularStrength =
-                    materialTest ?
-                        MathF.Sin(((float)_engine.Timing.TotalElapsedTime) + 1) / 2 :
-                        1;
-
-                #endregion
-
                 // Update the current window's rendering context
                 window.RenderingContext.Use();
 
@@ -162,49 +145,6 @@ namespace PentaGE.Core.Rendering
         private void Events_GlfwError(object? sender, Events.GlfwErrorEventArgs e) =>
             Log.Error($"GLFW error detected: {e.ErrorCode} - {e.Message}");
 
-        private static Vector3 ColorFromHSL(float hue, float saturation, float lightness)
-        {
-            // TODO: This code does not belong here, but is here for testing purposes
-            // Convert HSL to RGB
-            // Only for visuallisational purposes
-            // If i desire a method like this i should create a proper color management system
-            if (saturation == 0f)
-            {
-                return new Vector3(lightness, lightness, lightness);
-            }
-            else
-            {
-                float q = lightness < 0.5f ? lightness * (1 + saturation) : lightness + saturation - lightness * saturation;
-                float p = 2 * lightness - q;
-                float[] rgb = new float[3];
-                rgb[0] = hue + 1f / 3f;
-                rgb[1] = hue;
-                rgb[2] = hue - 1f / 3f;
-                for (int i = 0; i < 3; i++)
-                {
-                    if (rgb[i] < 0f) rgb[i]++;
-                    if (rgb[i] > 1f) rgb[i]--;
-                    if (6f * rgb[i] < 1f)
-                    {
-                        rgb[i] = p + ((q - p) * 6f * rgb[i]);
-                    }
-                    else if (2f * rgb[i] < 1f)
-                    {
-                        rgb[i] = q;
-                    }
-                    else if (3f * rgb[i] < 2f)
-                    {
-                        rgb[i] = p + ((q - p) * 6f * ((2f / 3f) - rgb[i]));
-                    }
-                    else
-                    {
-                        rgb[i] = p;
-                    }
-                }
-                return new Vector3(rgb[0], rgb[1], rgb[2]);
-            }
-        }
-
         #region Debugging hotkeys
 
         // TODO: Remove these hotkeys when they are no longer needed
@@ -216,9 +156,6 @@ namespace PentaGE.Core.Rendering
 
         private void ToggleWireframe_HotKey(object? sender, Events.HotKeyEventArgs e) =>
             wireframe = !wireframe;
-
-        private void ToggleMaterialTest_HotKey(object? sender, Events.HotKeyEventArgs e) =>
-            materialTest = !materialTest;
 
         private void ToggleCulling_HotKey(object? sender, Events.HotKeyEventArgs e)
         {

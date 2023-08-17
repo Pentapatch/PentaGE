@@ -24,16 +24,38 @@ namespace Sandbox
             Events.KeyBindings[Test1].Bind(Key.Enter);
             Events.KeyBindings[Test2].Bind(Key.Enter, ModifierKey.Control);
             Events.KeyBindings[ToggleRotation].Bind(Key.R, ModifierKey.Control);
-
-            AutoPlay = false;
+            Events.KeyBindings[ToggleMaterialModulator].Bind(Key.M, ModifierKey.Control);
 
             return true;
         }
 
+        public void ToggleMaterialModulator()
+        {
+            bool enabled = false;
+            foreach (var modulator in Scenes.Scene[0].Components.GetAll<MaterialModulator>())
+            {
+                modulator.Enabled = !modulator.Enabled;
+                if (modulator.Enabled) enabled = true;
+            }
+
+            var component = Scenes.Scene[0].Components.Get<MeshRenderComponent>()!;
+            if (!enabled)
+            {
+                component.Material = new PBRMaterial();
+                component.Texture = Assets.Get<Texture>("BlackPentaTexture")!;
+            }
+            else
+            {
+                component.Texture = Assets.Get<Texture>("WhitePentaTexture")!;
+            }
+        }
+
         public void ToggleRotation()
         {
-            var rotator = Scenes.Scene[0].Components.Get<DisplayRotator>();
-            if (rotator is not null) rotator.Enabled = !rotator.Enabled;
+            foreach (var rotator in Scenes.Scene[0].Components.GetAll<ConstantRotator>())
+            {
+                rotator.Enabled = !rotator.Enabled;
+            }
         }
 
         public void Test1()
@@ -96,9 +118,9 @@ namespace Sandbox
                 Assets.Get<Texture>("BlackPentaTexture"));
 
             renderableMesh.Components.Add(new TransformComponent(transform));
-            renderableMesh.Components.Get<MeshRenderComponent>()!.Material.Albedo = new(1f, 0f, 1f);
-            renderableMesh.Components.Get<MeshRenderComponent>()!.Material.SpecularStrength = 1f;
-            renderableMesh.Components.Add<DisplayRotator>();
+            renderableMesh.Components.Add<ConstantRotator>();
+            renderableMesh.Components.Add(new ConstantRotator(false, true, false) { Speed = 0.25f });
+            renderableMesh.Components.Add(new MaterialModulator() { Albedo = true, AlbedoModulators = new(1f, 0.75f, 0.25f), Enabled = false });
             Assets.Add("Subject", renderableMesh);
 
             // Set up test light
