@@ -17,9 +17,11 @@ namespace Sandbox.Components
 
         public bool Roll { get; set; } = false;
 
+        public override bool CanHaveMultiple => true;
+
         public override void Update(float deltaTime)
         {
-            var transformComponent = Entity!.GetComponent<TransformComponent>();
+            var transformComponent = Entity!.Components.Get<TransformComponent>();
             if (transformComponent is not null)
             {
                 var transform = transformComponent.Transform;

@@ -119,11 +119,11 @@ namespace PentaGE.Core.Rendering
 
                 // Animate the color and specular strength of the object
                 float hue = MathF.Sin((float)_engine.Timing.TotalElapsedTime) * 0.5f + 0.5f; // 0 - 1
-                _engine.Scenes.Scene[0].GetComponent<MeshRenderComponent>()!.Material.Albedo =
+                _engine.Scenes.Scene[0].Components.Get<MeshRenderComponent>()!.Material.Albedo =
                     materialTest ?
                         ColorFromHSL(hue, 0.8f, 0.85f) :
                         new(1, 1, 1);
-                _engine.Scenes.Scene[0].GetComponent<MeshRenderComponent>()!.Material.SpecularStrength =
+                _engine.Scenes.Scene[0].Components.Get<MeshRenderComponent>()!.Material.SpecularStrength =
                     materialTest ?
                         MathF.Sin(((float)_engine.Timing.TotalElapsedTime) + 1) / 2 :
                         1;
@@ -236,52 +236,52 @@ namespace PentaGE.Core.Rendering
         }
 
         private void SetShaderToDefault_HotKey(object? sender, Events.HotKeyEventArgs e) =>
-            _engine.Scenes.Scene[activeSubjectIndex].GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Default")!;
+            _engine.Scenes.Scene[activeSubjectIndex].Components.Get<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Default")!;
 
         private void SetShaderToFaceA_HotKey(object? sender, Events.HotKeyEventArgs e) =>
-            _engine.Scenes.Scene[activeSubjectIndex].GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Face")!;
+            _engine.Scenes.Scene[activeSubjectIndex].Components.Get<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Face")!;
 
         private void SetShaderToFaceB_HotKey(object? sender, Events.HotKeyEventArgs e) =>
-            _engine.Scenes.Scene[activeSubjectIndex].GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Face2")!;
+            _engine.Scenes.Scene[activeSubjectIndex].Components.Get<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Face2")!;
 
         private void SetShaderToNormal_HotKey(object? sender, Events.HotKeyEventArgs e) =>
-            _engine.Scenes.Scene[activeSubjectIndex].GetComponent<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Normal")!;
+            _engine.Scenes.Scene[activeSubjectIndex].Components.Get<MeshRenderComponent>()!.Shader = _engine.Assets.Get<Shader>("Normal")!;
 
         private void Subdivide_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
-            var mesh = _engine.Scenes.Scene[activeSubjectIndex].GetComponent<MeshRenderComponent>()!.Mesh;
+            var mesh = _engine.Scenes.Scene[activeSubjectIndex].Components.Get<MeshRenderComponent>()!.Mesh;
             mesh.Subdivide();
-            _engine.Scenes.Scene[activeSubjectIndex].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+            _engine.Scenes.Scene[activeSubjectIndex].Components.Get<MeshRenderComponent>()!.Mesh = mesh;
         }
 
         private void TileTexture_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
-            var mesh = _engine.Scenes.Scene[activeSubjectIndex].GetComponent<MeshRenderComponent>()!.Mesh;
+            var mesh = _engine.Scenes.Scene[activeSubjectIndex].Components.Get<MeshRenderComponent>()!.Mesh;
             mesh.TileTexture(3, 3);
-            _engine.Scenes.Scene[activeSubjectIndex].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+            _engine.Scenes.Scene[activeSubjectIndex].Components.Get<MeshRenderComponent>()!.Mesh = mesh;
         }
 
         private void Roughen_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
             using (Log.Logger.BeginPerfLogger("Roughen"))
             {
-                var mesh = _engine.Scenes.Scene[activeSubjectIndex].GetComponent<MeshRenderComponent>()!.Mesh;
+                var mesh = _engine.Scenes.Scene[activeSubjectIndex].Components.Get<MeshRenderComponent>()!.Mesh;
                 mesh.Roughen(0.1f);
-                _engine.Scenes.Scene[activeSubjectIndex].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+                _engine.Scenes.Scene[activeSubjectIndex].Components.Get<MeshRenderComponent>()!.Mesh = mesh;
             }
         }
 
         private void Explode_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
-            var mesh = _engine.Scenes.Scene[activeSubjectIndex].GetComponent<MeshRenderComponent>()!.Mesh;
+            var mesh = _engine.Scenes.Scene[activeSubjectIndex].Components.Get<MeshRenderComponent>()!.Mesh;
             mesh.Explode(0.15f);
-            _engine.Scenes.Scene[activeSubjectIndex].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+            _engine.Scenes.Scene[activeSubjectIndex].Components.Get<MeshRenderComponent>()!.Mesh = mesh;
         }
 
         private void ToggleTexture_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
             blackTexture = !blackTexture;
-            _engine.Scenes.Scene[activeSubjectIndex].GetComponent<MeshRenderComponent>()!.Texture = blackTexture ?
+            _engine.Scenes.Scene[activeSubjectIndex].Components.Get<MeshRenderComponent>()!.Texture = blackTexture ?
                 _engine.Assets.Get<Texture>("BlackPentaTexture") :
                 _engine.Assets.Get<Texture>("WhitePentaTexture");
         }
@@ -289,37 +289,37 @@ namespace PentaGE.Core.Rendering
         private void CreateCube_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
             var mesh = MeshFactory.CreateCube(1f);
-            _engine.Scenes.Scene[activeSubjectIndex].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+            _engine.Scenes.Scene[activeSubjectIndex].Components.Get<MeshRenderComponent>()!.Mesh = mesh;
         }
 
         private void CreateSphere_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
             var mesh = MeshFactory.CreateSphere(1f);
-            _engine.Scenes.Scene[activeSubjectIndex].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+            _engine.Scenes.Scene[activeSubjectIndex].Components.Get<MeshRenderComponent>()!.Mesh = mesh;
         }
 
         private void CreateCylinder_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
             var mesh = MeshFactory.CreateCylinder(0.5f, 1f);
-            _engine.Scenes.Scene[activeSubjectIndex].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+            _engine.Scenes.Scene[activeSubjectIndex].Components.Get<MeshRenderComponent>()!.Mesh = mesh;
         }
 
         private void CreatePyramid_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
             var mesh = MeshFactory.CreatePyramid(1f, 1f, 1f);
-            _engine.Scenes.Scene[activeSubjectIndex].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+            _engine.Scenes.Scene[activeSubjectIndex].Components.Get<MeshRenderComponent>()!.Mesh = mesh;
         }
 
         private void CreateCone_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
             var mesh = MeshFactory.CreateCone(0.5f, 1f);
-            _engine.Scenes.Scene[activeSubjectIndex].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+            _engine.Scenes.Scene[activeSubjectIndex].Components.Get<MeshRenderComponent>()!.Mesh = mesh;
         }
 
         private void CreatePlane_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
             var mesh = MeshFactory.CreatePlane(1f, 1f, new Rotation(0, -90, 0));
-            _engine.Scenes.Scene[activeSubjectIndex].GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+            _engine.Scenes.Scene[activeSubjectIndex].Components.Get<MeshRenderComponent>()!.Mesh = mesh;
         }
 
         private void OrbitLight_HotKey(object? sender, Events.HotKeyEventArgs e)
@@ -352,7 +352,7 @@ namespace PentaGE.Core.Rendering
 
                 if (_engine.Assets["Landscape"] is RenderableMeshEntity landscape)
                 {
-                    landscape.GetComponent<MeshRenderComponent>()!.Mesh = mesh;
+                    landscape.Components.Get<MeshRenderComponent>()!.Mesh = mesh;
                 }
                 else
                 {
@@ -368,7 +368,7 @@ namespace PentaGE.Core.Rendering
         private void UpdateRotation(float yaw, float pitch, float roll)
         {
             var angle = 15f;
-            var component = _engine.Scenes.Scene[activeSubjectIndex].GetComponent<TransformComponent>()!;
+            var component = _engine.Scenes.Scene[activeSubjectIndex].Components.Get<TransformComponent>()!;
             var transform = component.Transform;
             transform.Rotation += new Rotation(yaw, pitch, roll) * angle;
             component.Transform = transform;
@@ -377,7 +377,7 @@ namespace PentaGE.Core.Rendering
 
         private void UpdateLookAt(Vector3 vector)
         {
-            var component = _engine.Scenes.Scene[activeSubjectIndex].GetComponent<TransformComponent>()!;
+            var component = _engine.Scenes.Scene[activeSubjectIndex].Components.Get<TransformComponent>()!;
             var transform = component.Transform;
             transform.Rotation = Rotation.GetLookAt(vector * 5, transform.Position);
             component.Transform = transform;

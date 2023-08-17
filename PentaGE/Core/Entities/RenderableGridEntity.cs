@@ -18,7 +18,7 @@ namespace PentaGE.Core.Entities
             {
                 DrawMode = DrawMode.Lines,
             }; ;
-            AddComponent(meshRenderer);
+            Components.Add(meshRenderer);
         }
     }
 }

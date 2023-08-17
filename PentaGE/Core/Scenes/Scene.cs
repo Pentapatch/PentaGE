@@ -56,7 +56,7 @@ namespace PentaGE.Core.Scenes
             {
                 if (!entity.Enabled) continue;
 
-                foreach (var component in entity)
+                foreach (var component in entity.Components)
                 {
                     component.OnUpdate(deltaTime);
                 }
@@ -73,7 +73,7 @@ namespace PentaGE.Core.Scenes
             // Loop through entities and render entities with a MeshRendererComponent.
             foreach (var entity in _entities)
             {
-                var meshRenderer = entity.GetComponent<MeshRenderComponent>();
+                var meshRenderer = entity.Components.Get<MeshRenderComponent>();
                 meshRenderer?.Render(camera, window, wireframe);
             }
         }

@@ -25,20 +25,22 @@ namespace Sandbox
             Events.KeyBindings[Test2].Bind(Key.Enter, ModifierKey.Control);
             Events.KeyBindings[ToggleRotation].Bind(Key.R, ModifierKey.Control);
 
+            AutoPlay = false;
+
             return true;
         }
 
         public void ToggleRotation()
         {
-            var rotator = Scenes.Scene[0].GetComponent<DisplayRotator>();
+            var rotator = Scenes.Scene[0].Components.Get<DisplayRotator>();
             if (rotator is not null) rotator.Enabled = !rotator.Enabled;
         }
 
         public void Test1()
         {
-            var component = Scenes.Scene[1].GetComponent<TransformComponent>()!.Transform;
+            var component = Scenes.Scene[1].Components.Get<TransformComponent>()!.Transform;
             component.Position += new Vector3(1, 1, 0);
-            Scenes.Scene[1].GetComponent<TransformComponent>()!.Transform = component;
+            Scenes.Scene[1].Components.Get<TransformComponent>()!.Transform = component;
         }
 
         public void Test2()
@@ -93,10 +95,10 @@ namespace Sandbox
                 Assets.Get<Shader>("Default")!,
                 Assets.Get<Texture>("BlackPentaTexture"));
 
-            renderableMesh.AddComponent(new TransformComponent(transform));
-            renderableMesh.GetComponent<MeshRenderComponent>()!.Material.Albedo = new(1f, 0f, 1f);
-            renderableMesh.GetComponent<MeshRenderComponent>()!.Material.SpecularStrength = 1f;
-            renderableMesh.AddComponent(new DisplayRotator());
+            renderableMesh.Components.Add(new TransformComponent(transform));
+            renderableMesh.Components.Get<MeshRenderComponent>()!.Material.Albedo = new(1f, 0f, 1f);
+            renderableMesh.Components.Get<MeshRenderComponent>()!.Material.SpecularStrength = 1f;
+            renderableMesh.Components.Add<DisplayRotator>();
             Assets.Add("Subject", renderableMesh);
 
             // Set up test light
@@ -104,7 +106,7 @@ namespace Sandbox
             var transform2 = new Transform(new(0.75f, 0.75f, 0.75f), new(0, 0, 0), new(1f, 1f, 1f));
             var renderableLight = new RenderableMeshEntity(lightMesh, Assets.Get<Shader>("Light")!);
 
-            renderableLight.AddComponent(new TransformComponent(transform2));
+            renderableLight.Components.Add(new TransformComponent(transform2));
             Assets.Add("LightEntity", renderableLight);
 
             // Initialize grid
@@ -119,7 +121,7 @@ namespace Sandbox
             // Initialize axes gizmo
             var axesGizmoMesh = MeshFactory.CreateAxesGizmo(0.1f);
             var renderableAxesGizmo = new RenderableMeshEntity(axesGizmoMesh, Assets.Get<Shader>("Axes")!);
-            renderableAxesGizmo.GetComponent<MeshRenderComponent>()!.DrawMode = DrawMode.Lines;
+            renderableAxesGizmo.Components.Get<MeshRenderComponent>()!.DrawMode = DrawMode.Lines;
             Assets.Add("AxesGizmo", renderableAxesGizmo);
 
             // Add entities to the scene

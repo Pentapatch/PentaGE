@@ -8,6 +8,11 @@ namespace PentaGE.Core.Components
     public abstract class Component : ICloneable
     {
         /// <summary>
+        /// Specifies if the component can be attached to an entity multiple times.
+        /// </summary>
+        public abstract bool CanHaveMultiple { get; }
+
+        /// <summary>
         /// Gets or sets the entity to which this component is attached.
         /// </summary>
         /// <remarks>
@@ -16,7 +21,7 @@ namespace PentaGE.Core.Components
         public Entity? Entity { get; internal set; }
 
         /// <summary>
-        /// Gets or sets if the component is enabled and should recieve update events.
+        /// Gets or sets wether the component is enabled and should recieve update events.
         /// </summary>
         public bool Enabled { get; set; } = true;
 

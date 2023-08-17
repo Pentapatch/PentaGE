@@ -57,6 +57,8 @@ namespace PentaGE.Core.Rendering
         /// </summary>
         public DrawMode DrawMode { get; set; }
 
+        public override bool CanHaveMultiple => false;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MeshRenderComponent"/> class.
         /// </summary>
@@ -121,7 +123,7 @@ namespace PentaGE.Core.Rendering
 
             // Get the transform of the object (if applicable)
             // or create a new default transform
-            Transform transform = Entity?.GetComponent<TransformComponent>()?.Transform ?? new Transform();
+            Transform transform = Entity?.Components.Get<TransformComponent>()?.Transform ?? new Transform();
 
             // Calculate the view and projection matrices from the camera
             // ViewMatrix means "camera space" (or "eye space") and is used for moving the camera.

@@ -3,13 +3,6 @@ using Serilog;
 
 namespace PentaGE.Core.Scenes
 {
-    public enum SceneState
-    {
-        Idle = 0,
-        Running = 1,
-        Paused = 2,
-    }
-
     public sealed class SceneManager
     {
         private readonly Dictionary<string, Scene> _scenes;
