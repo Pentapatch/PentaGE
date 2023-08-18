@@ -19,7 +19,7 @@ namespace PentaGE.Core.Components
         /// </summary>
         public TransformComponent()
         {
-            Transform = new Transform();
+            Transform = Transform.Identity;
         }
 
         /// <summary>

@@ -146,7 +146,7 @@ namespace PentaGE.Core.Assets
         public T? Get<T>(string name) where T : IAsset =>
             _assets.TryGetValue(name, out IAsset? asset) ? (T?)asset : default;
 
-        public IAsset? Get(string name) => 
+        public IAsset? Get(string name) =>
             _assets.TryGetValue(name, out IAsset? asset) ? asset : default;
 
         private void RegisterPath(string name, string path, IHotReloadable item) =>

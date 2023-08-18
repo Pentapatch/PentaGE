@@ -21,6 +21,7 @@ namespace Sandbox
             Events.KeyBindings[StopScene].Bind(Key.P, ModifierKey.Control);
             Events.KeyBindings[PauseScene].Bind(Key.P, ModifierKey.Shift);
             Events.KeyBindings[PlayScene].Bind(Key.P);
+            Events.KeyBindings[RestartScene].Bind(Key.P, ModifierKey.Control | ModifierKey.Shift);
             Events.KeyBindings[Test1].Bind(Key.Enter);
             Events.KeyBindings[Test2].Bind(Key.Enter, ModifierKey.Control);
             Events.KeyBindings[ToggleRotation].Bind(Key.R, ModifierKey.Control);
@@ -32,13 +33,13 @@ namespace Sandbox
         public void ToggleMaterialModulator()
         {
             bool enabled = false;
-            foreach (var modulator in Scenes.Scene[0].Components.GetAll<MaterialModulator>())
+            foreach (var modulator in Scenes.CurrentScene[0].Components.GetAll<MaterialModulator>())
             {
                 modulator.Enabled = !modulator.Enabled;
                 if (modulator.Enabled) enabled = true;
             }
 
-            var component = Scenes.Scene[0].Components.Get<MeshRenderComponent>()!;
+            var component = Scenes.CurrentScene[0].Components.Get<MeshRenderComponent>()!;
             if (!enabled)
             {
                 component.Material = new PBRMaterial();
@@ -52,7 +53,7 @@ namespace Sandbox
 
         public void ToggleRotation()
         {
-            foreach (var rotator in Scenes.Scene[0].Components.GetAll<ConstantRotator>())
+            foreach (var rotator in Scenes.CurrentScene[0].Components.GetAll<ConstantRotator>())
             {
                 rotator.Enabled = !rotator.Enabled;
             }
@@ -60,22 +61,61 @@ namespace Sandbox
 
         public void Test1()
         {
-            var component = Scenes.Scene[1].Components.Get<TransformComponent>()!.Transform;
-            component.Position += new Vector3(1, 1, 0);
-            Scenes.Scene[1].Components.Get<TransformComponent>()!.Transform = component;
+            for (int i = 0; i < 10; i++)
+            {
+                var mesh = MeshFactory.CreateSphere((float)Random.Shared.NextDouble() * 0.15f + 0.05f);
+                var shader = Assets.Get<Shader>("Default")!;
+                var texture = Assets.Get<Texture>("WhitePentaTexture")!;
+                var entity = new RenderableMeshEntity(mesh, shader, texture);
+                var transform = new Transform
+                {
+                    Position = new Vector3(
+                        (float)Random.Shared.NextDouble() * 4 - 2,
+                        (float)Random.Shared.NextDouble() * 4 - 2,
+                        (float)Random.Shared.NextDouble() * 4 - 2)
+                };
+                var transformComponent = new TransformComponent(transform);
+                entity.Components.Add(transformComponent);
+                entity.Components.Add(new ConstantRotator());
+                entity.Components.Add(new MaterialModulator());
+                Scenes.CurrentScene.SpawnEntity(entity);
+            }
         }
 
         public void Test2()
         {
-            var entity = new RenderableMeshEntity(MeshFactory.CreateSphere(1f), Assets.Get<Shader>("Default")!);
-            Scenes.Scene.Add(entity);
+            var scene = Scenes.Exists("Default") ? Scenes["Default"] : Scenes.Add("Default");
+            var mesh = Random.Shared.NextDouble() switch
+            {
+                < 0.25 => MeshFactory.CreateCube(1f),
+                < 0.5 => MeshFactory.CreateSphere(1f),
+                < 0.75 => MeshFactory.CreateCylinder(1f, 1f),
+                _ => MeshFactory.CreateCone(1f, 1f)
+            };
+            var shader = Assets.Get<Shader>("Default")!;
+            var texture = Assets.Get<Texture>("BlackPentaTexture")!;
+            var entity = new RenderableMeshEntity(mesh, shader, texture);
+            entity.Components.Add<TransformComponent>();
+            entity.Components.Add<ConstantRotator>();
+            scene.Clear();
+            scene.Add(entity);
+            scene.Load();
+            Scenes.Run();
         }
 
         private void PlayScene() => Scenes.Run();
 
-        private void PauseScene() => Scenes.Pause();
+        private void PauseScene()
+        {
+            if (Scenes.State == PentaGE.Core.Scenes.SceneState.Paused)
+                Scenes.Run();
+            else
+                Scenes.Pause();
+        }
 
         private void StopScene() => Scenes.Stop();
+
+        private void RestartScene() => Scenes.Restart();
 
         protected override bool LoadResources()
         {
@@ -125,7 +165,7 @@ namespace Sandbox
 
             // Set up test light
             var lightMesh = MeshFactory.CreateSphere(0.2f);
-            var transform2 = new Transform(new(0.75f, 0.75f, 0.75f), new(0, 0, 0), new(1f, 1f, 1f));
+            var transform2 = new Transform(new(10f, 10f, 10f), new(0, 0, 0), new(1f, 1f, 1f));
             var renderableLight = new RenderableMeshEntity(lightMesh, Assets.Get<Shader>("Light")!);
 
             renderableLight.Components.Add(new TransformComponent(transform2));
@@ -153,9 +193,11 @@ namespace Sandbox
             scene.Add((Entity)Assets["GridMajor"]!);
             scene.Add((Entity)Assets["GridMinor"]!);
             scene.Add((Entity)Assets["AxesGizmo"]!);
+            scene.Load();
 
-            // Test: Set up scene
-            Scenes.SetActiveScene(scene);
+            //var asset = Assets["BlackPentaTexture"] as Texture;
+            //var comp = scene[0].Components.Get<MeshRenderComponent>();
+            //var com2 = scene[0].Components["MeshRenderComponent"] as MeshRenderComponent;
 
             return true;
         }

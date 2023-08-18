@@ -46,6 +46,11 @@ namespace PentaGE.Common
             Scale = Vector3.One;
         }
 
+        /// <summary>
+        /// Gets a <see cref="Transform"/> instance with default values (position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1]).
+        /// </summary>
+        public static Transform Identity => new(Vector3.Zero, Rotation.Zero, Vector3.One);
+
         #region Operator overloads
 
         /// <summary>

@@ -3,22 +3,47 @@ using System.Collections;
 
 namespace PentaGE.Core.Components
 {
+    /// <summary>
+    /// Represents a manager for components attached to an entity.
+    /// </summary>
     public sealed class ComponentManager : IEnumerable<Component>
     {
-        private List<Component> _components;
+        private readonly List<Component> _components;
         private readonly Entity _entity;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ComponentManager"/> class.
+        /// </summary>
+        /// <param name="entity">The entity to which this manager is associated.</param>
         internal ComponentManager(Entity entity)
         {
             _components = new List<Component>();
             _entity = entity;
         }
 
+        /// <summary>
+        /// Gets the component at the specified index within the manager.
+        /// </summary>
+        /// <param name="index">The index of the component to get.</param>
+        /// <returns>The component at the specified index, or null if index is out of range.</returns>
         public Component? this[int index] =>
             index >= 0 && index < _components.Count ? _components[index] : null;
 
+        /// <summary>
+        /// Gets the first component of the specified type within the manager.
+        /// </summary>
+        /// <param name="type">The type of component to get.</param>
+        /// <returns>The first component of the specified type, or null if not found.</returns>
         public Component? this[Type type] =>
             _components.FirstOrDefault(c => c.GetType() == type);
+
+        /// <summary>
+        /// Gets the first component with the specified type name within the manager.
+        /// </summary>
+        /// <param name="typeName">The case insensitive name of the component type to get.</param>
+        /// <returns>The first component with the specified type name, or null if not found.</returns>
+        public Component? this[string typeName] =>
+            _components.FirstOrDefault(c => c.GetType().Name.ToLower() == typeName.ToLower());
 
         /// <summary>
         /// Adds a component to the entity.
