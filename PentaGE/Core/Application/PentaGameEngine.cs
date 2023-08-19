@@ -56,6 +56,9 @@ namespace PentaGE.Core
         /// </summary>
         public AssetManager Assets => _assetManager;
 
+        /// <summary>
+        /// Gets the <see cref="SceneManager"/> responsible for managing scenes in the game engine.
+        /// </summary>
         public SceneManager Scenes => _scenes;
 
         /// <summary>

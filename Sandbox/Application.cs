@@ -160,7 +160,7 @@ namespace Sandbox
             renderableMesh.Components.Add(new TransformComponent(transform));
             renderableMesh.Components.Add<ConstantRotator>();
             renderableMesh.Components.Add(new ConstantRotator(false, true, false) { Speed = 0.25f });
-            renderableMesh.Components.Add(new MaterialModulator() { Albedo = true, AlbedoModulators = new(1f, 0.75f, 0.25f), Enabled = false });
+            renderableMesh.Components.Add(new MaterialModulator() { AlbedoEnabled = true, AlbedoModulatorFactors = new(1f, 0.75f, 0.25f), Enabled = false });
             Assets.Add("Subject", renderableMesh);
 
             // Set up test light

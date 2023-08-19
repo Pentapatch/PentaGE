@@ -1,41 +1,73 @@
-﻿using PentaGE.Core.Components;
+﻿using PentaGE.Common;
+using PentaGE.Core.Components;
 using PentaGE.Core.Rendering;
 using System.Numerics;
 
 namespace Sandbox.Components
 {
+    /// <summary>
+    /// Represents a component that modulates material properties over time based on HSL values.
+    /// </summary>
     public sealed class MaterialModulator : Component
     {
         private float _totalElapsedTime = 0f;
 
+        /// <inheritdoc />
         public override bool CanHaveMultiple => true;
 
+        /// <summary>
+        /// Gets or sets whether albedo modulation is enabled.
+        /// </summary>
+        public bool AlbedoEnabled { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets the factors for modulating albedo properties.
+        /// </summary>
+        /// <remarks>
+        /// The X, Y, and Z components of the <see cref="AlbedoModulatorFactors"/> will affect the red (R), green (G), and blue (B) channels in the albedo color respecively.
+        /// </remarks>
+        public Vector3 AlbedoModulatorFactors { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether specular strength modulation is enabled.
+        /// </summary>
+        public bool SpecularStrengthEnabled { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets the factor for modulating specular strength.
+        /// </summary>
+        public float SpecularStrengthModulatorFactor { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MaterialModulator"/> class.
+        /// </summary>
         public MaterialModulator() { }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MaterialModulator"/> class with specified properties.
+        /// </summary>
+        /// <param name="albedo">Whether albedo modulation is enabled.</param>
+        /// <param name="specularStrength">Whether specular strength modulation is enabled.</param>
         public MaterialModulator(bool albedo, bool specularStrength)
         {
-            Albedo = albedo;
-            SpecularStrength = specularStrength;
+            AlbedoEnabled = albedo;
+            SpecularStrengthEnabled = specularStrength;
+            AlbedoModulatorFactors = new(1f, 0.75f, 0.25f);
+            SpecularStrengthModulatorFactor = 0f;
         }
 
-        public bool Albedo { get; set; } = true;
-
-        public Vector3 AlbedoModulators { get; set; } = new(1f, 0.75f, 0.25f);
-
-        public bool SpecularStrength { get; set; } = false;
-
-        public float SpecularStrengthModulator { get; set; } = 0f;
-
+        /// <inheritdoc />
         public override object Clone() =>
             new MaterialModulator()
             {
-                Albedo = Albedo,
-                AlbedoModulators = AlbedoModulators,
-                SpecularStrength = SpecularStrength,
-                SpecularStrengthModulator = SpecularStrengthModulator,
+                AlbedoEnabled = AlbedoEnabled,
+                AlbedoModulatorFactors = AlbedoModulatorFactors,
+                SpecularStrengthEnabled = SpecularStrengthEnabled,
+                SpecularStrengthModulatorFactor = SpecularStrengthModulatorFactor,
                 Enabled = Enabled,
             };
 
+        /// <inheritdoc />
         public override void Update(float deltaTime)
         {
             _totalElapsedTime += deltaTime;
@@ -48,62 +80,49 @@ namespace Sandbox.Components
             var sin = Sin();
             var cos = Cos();
 
-            if (Albedo)
-            {
-                var hue = sin * AlbedoModulators.X;
-                var saturation = cos * AlbedoModulators.Y;
-                var lightness = sin * AlbedoModulators.Z;
-
-                material.Albedo = ColorFromHSL(1 - hue, 1 - saturation, 1 - lightness);
-            }
-
-            if (SpecularStrength)
-            {
-                material.SpecularStrength = sin * SpecularStrengthModulator;
-            }
+            UpdateAlbedo(material, sin, cos);
+            UpdateSpecularStrength(material, sin);
         }
 
-        private float Sin() => (MathF.Sin(_totalElapsedTime) * 0.5f + 0.5f);  // 0 - 1
-
-        private float Cos() => (MathF.Cos(_totalElapsedTime) * 0.5f + 0.5f);  // 0 - 1
-
-        public static Vector3 ColorFromHSL(float hue, float saturation, float lightness)
+        /// <summary>
+        /// Updates the albedo properties of the <paramref name="material"/> based on modulator factors and time-dependent values.
+        /// </summary>
+        /// <param name="material">The material to update.</param>
+        /// <param name="sin">The sine value used for modulation calculations.</param>
+        /// <param name="cos">The cosine value used for modulation calculations.</param>
+        private void UpdateAlbedo(PBRMaterial material, float sin, float cos)
         {
-            if (saturation == 0f)
-            {
-                return new Vector3(lightness, lightness, lightness);
-            }
-            else
-            {
-                float q = lightness < 0.5f ? lightness * (1 + saturation) : lightness + saturation - lightness * saturation;
-                float p = 2 * lightness - q;
-                float[] rgb = new float[3];
-                rgb[0] = hue + 1f / 3f;
-                rgb[1] = hue;
-                rgb[2] = hue - 1f / 3f;
-                for (int i = 0; i < 3; i++)
-                {
-                    if (rgb[i] < 0f) rgb[i]++;
-                    if (rgb[i] > 1f) rgb[i]--;
-                    if (6f * rgb[i] < 1f)
-                    {
-                        rgb[i] = p + ((q - p) * 6f * rgb[i]);
-                    }
-                    else if (2f * rgb[i] < 1f)
-                    {
-                        rgb[i] = q;
-                    }
-                    else if (3f * rgb[i] < 2f)
-                    {
-                        rgb[i] = p + ((q - p) * 6f * ((2f / 3f) - rgb[i]));
-                    }
-                    else
-                    {
-                        rgb[i] = p;
-                    }
-                }
-                return new Vector3(rgb[0], rgb[1], rgb[2]);
-            }
+            if (!AlbedoEnabled) return;
+
+            var hue = sin * AlbedoModulatorFactors.X;
+            var saturation = cos * AlbedoModulatorFactors.Y;
+            var lightness = sin * AlbedoModulatorFactors.Z;
+
+            material.Albedo = Colors.Vector3FromHSL(1 - hue, 1 - saturation, 1 - lightness);
         }
+
+        /// <summary>
+        /// Updates the specular strength property of the <paramref name="material"/> based on a modulator factor and time-dependent value.
+        /// </summary>
+        /// <param name="material">The material to update.</param>
+        /// <param name="sin">The sine value used for modulation calculations.</param>
+        private void UpdateSpecularStrength(PBRMaterial material, float sin)
+        {
+            if (!SpecularStrengthEnabled) return;
+
+            material.SpecularStrength = sin * SpecularStrengthModulatorFactor;
+        }
+
+        /// <summary>
+        /// Calculates the sine value of the total elapsed time scaled to the range [0, 1].
+        /// </summary>
+        /// <returns>The scaled sine value.</returns>
+        private float Sin() => (MathF.Sin(_totalElapsedTime) * 0.5f + 0.5f);
+
+        /// <summary>
+        /// Calculates the cosine value of the total elapsed time scaled to the range [0, 1].
+        /// </summary>
+        /// <returns>The scaled cosine value.</returns>
+        private float Cos() => (MathF.Cos(_totalElapsedTime) * 0.5f + 0.5f);
     }
 }
