@@ -137,7 +137,7 @@ namespace PentaGE.Core
             _renderer.Terminate();
 
             // Terminate the Shader manager
-            Log.Information("Terminating the Shader manager.");
+            Log.Information("Terminating the Asset manager.");
             _assetManager.Dispose();
 
             // Allow the concrete implementation of the engine to unload resources

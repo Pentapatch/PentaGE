@@ -120,7 +120,7 @@ namespace Sandbox
         protected override bool LoadResources()
         {
             // Set up shaders
-            Assets.EnableHotReload(seconds: 5);
+            Assets.EnableHotReload(intervalInSeconds: 5);
 
             string shaderPath = @"C:\Users\newsi\source\repos\PentaGE\Sandbox\SourceFiles\Shaders\";
             if (!Assets.AddShader("Default", $"{shaderPath}Default.shader")) return false;
@@ -194,10 +194,6 @@ namespace Sandbox
             scene.Add((Entity)Assets["GridMinor"]!);
             scene.Add((Entity)Assets["AxesGizmo"]!);
             scene.Load();
-
-            //var asset = Assets["BlackPentaTexture"] as Texture;
-            //var comp = scene[0].Components.Get<MeshRenderComponent>();
-            //var com2 = scene[0].Components["MeshRenderComponent"] as MeshRenderComponent;
 
             return true;
         }
