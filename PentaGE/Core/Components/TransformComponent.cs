@@ -12,12 +12,14 @@ namespace PentaGE.Core.Components
         /// </summary>
         public Transform Transform { get; set; }
 
+        public override bool CanHaveMultiple => false;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TransformComponent"/> class with a default transform.
         /// </summary>
         public TransformComponent()
         {
-            Transform = new Transform();
+            Transform = Transform.Identity;
         }
 
         /// <summary>
@@ -37,5 +39,8 @@ namespace PentaGE.Core.Components
         {
             // Do nothing
         }
+
+        /// <inheritdoc />
+        public override object Clone() => MemberwiseClone();
     }
 }

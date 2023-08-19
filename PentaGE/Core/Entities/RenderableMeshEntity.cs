@@ -19,7 +19,20 @@ namespace PentaGE.Core.Entities
         {
             var meshRenderer = new MeshRenderComponent(mesh, shader, texture, material);
 
-            AddComponent(meshRenderer);
+            Components.Add(meshRenderer);
+        }
+
+        public override object Clone()
+        {
+            var clone = (RenderableMeshEntity)base.Clone();
+
+            var mesh = (Mesh)Components.Get<MeshRenderComponent>()!.Mesh.Clone();
+            var material = (PBRMaterial)Components.Get<MeshRenderComponent>()!.Material.Clone();
+
+            clone.Components.Get<MeshRenderComponent>()!.Mesh = mesh;
+            clone.Components.Get<MeshRenderComponent>()!.Material = material;
+
+            return clone;
         }
     }
 }

@@ -67,7 +67,7 @@ namespace PentaGE.Core
         /// <summary>
         /// Remove this particular CustomTiming instance from the <see cref="CustomTimingsManager"/>.
         /// </summary>
-        public void Remove() => 
+        public void Remove() =>
             _manager.Remove(this);
 
         /// <summary>

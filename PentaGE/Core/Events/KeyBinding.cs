@@ -132,7 +132,7 @@ namespace PentaGE.Core.Events
         /// <summary>
         /// Removes the key binding from the manager and unbinds it.
         /// </summary>
-        public void Remove() => 
+        public void Remove() =>
             _manager.Remove(this);
 
         /// <summary>
@@ -145,8 +145,8 @@ namespace PentaGE.Core.Events
             if (!_isListening) return;
 
             // Ignore modifier keys
-            if (e.Key is Key.LeftShift or Key.RightShift 
-                or Key.LeftAlt or Key.RightAlt 
+            if (e.Key is Key.LeftShift or Key.RightShift
+                or Key.LeftAlt or Key.RightAlt
                 or Key.LeftControl or Key.RightControl
                 or Key.LeftSuper or Key.RightSuper
                 or Key.CapsLock or Key.NumLock)

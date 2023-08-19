@@ -1,16 +1,20 @@
-﻿using PentaGE.Maths;
+﻿using PentaGE.Core.Serialization;
+using PentaGE.Maths;
 using System.Numerics;
+using System.Text.Json.Serialization;
 
 namespace PentaGE.Common
 {
     /// <summary>
     /// Represents a transformation in 3D space, defined by position, rotation, and scale.
     /// </summary>
+    [Serializable]
     public struct Transform
     {
         /// <summary>
         /// Gets or sets the position of the transform in 3D space.
         /// </summary>
+        [JsonConverter(typeof(Vector3Converter))]
         public Vector3 Position { get; set; }
 
         /// <summary>
@@ -21,6 +25,7 @@ namespace PentaGE.Common
         /// <summary>
         /// Gets or sets the scale of the transform in 3D space.
         /// </summary>
+        [JsonConverter(typeof(Vector3Converter))]
         public Vector3 Scale { get; set; }
 
         /// <summary>
@@ -45,6 +50,11 @@ namespace PentaGE.Common
             Rotation = Rotation.Zero;
             Scale = Vector3.One;
         }
+
+        /// <summary>
+        /// Gets a <see cref="Transform"/> instance with default values (position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1]).
+        /// </summary>
+        public static Transform Identity => new(Vector3.Zero, Rotation.Zero, Vector3.One);
 
         #region Operator overloads
 

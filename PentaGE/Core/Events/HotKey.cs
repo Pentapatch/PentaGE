@@ -48,7 +48,7 @@ namespace PentaGE.Core.Events
         /// <summary>
         /// Remove this particular HotKey instance from the <see cref="HotKeyManager"/>.
         /// </summary>
-        public void Remove() => 
+        public void Remove() =>
             _manager.Remove(this);
 
         /// <summary>

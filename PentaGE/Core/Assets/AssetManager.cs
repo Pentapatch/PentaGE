@@ -6,6 +6,9 @@ using StbImageSharp;
 
 namespace PentaGE.Core.Assets
 {
+    /// <summary>
+    /// Manages loading, tracking, and hot-reloading assets in the PentaGameEngine.
+    /// </summary>
     public sealed class AssetManager : IDisposable
     {
         private readonly PentaGameEngine _engine;
@@ -16,22 +19,52 @@ namespace PentaGE.Core.Assets
         private int _hotReloadIntervalInSeconds;
         private bool _hotReloadEnabled;
 
+        /// <summary>
+        /// Gets a value indicating whether hot reload is enabled for assets.
+        /// </summary>
         public bool HotReloadEnabled { get => _hotReloadEnabled; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AssetManager"/> class.
+        /// </summary>
+        /// <param name="engine">The PentaGameEngine instance associated with this asset manager.</param>
         internal AssetManager(PentaGameEngine engine)
         {
             _engine = engine;
             _hotReloadEnabled = false;
         }
 
-        public IAsset? this[string name]
-        {
-            get => Get<IAsset>(name);
-        }
+        /// <summary>
+        /// Gets the asset with the specified name.
+        /// </summary>
+        /// <param name="name">The name of the asset.</param>
+        /// <returns>The asset with the specified name, if found; otherwise, <c>null</c>.</returns>
+        public IAsset? this[string name] => Get<IAsset>(name);
 
-        public IQueryable<Shader> Shaders =>
-            _assets.Values.Where(a => a is Shader).Cast<Shader>().AsQueryable();
+        /// <summary>
+        /// Gets all shaders managed by the asset manager.
+        /// </summary>
+        public IEnumerable<Shader> Shaders =>
+            GetAll<Shader>();
 
+        /// <summary>
+        /// Gets all textures managed by the asset manager.
+        /// </summary>
+        public IEnumerable<Texture> Textures =>
+            GetAll<Texture>();
+
+        /// <summary>
+        /// Gets all entities managed by the asset manager.
+        /// </summary>
+        public IEnumerable<Entity> Entities =>
+            GetAll<Entity>();
+
+        /// <summary>
+        /// Adds a shader asset to the asset manager.
+        /// </summary>
+        /// <param name="name">The name to assign to the shader.</param>
+        /// <param name="filePath">The path to the shader file.</param>
+        /// <returns><c>true</c> if the shader was added successfully; otherwise, <c>false</c>.</returns>
         public bool AddShader(string name, string filePath)
         {
             try
@@ -46,9 +79,27 @@ namespace PentaGE.Core.Assets
             }
         }
 
+        /// <summary>
+        /// Adds a shader asset to the asset manager using provided source code.
+        /// </summary>
+        /// <param name="name">The name to assign to the shader.</param>
+        /// <param name="vertexSourceCode">The source code of the vertex shader.</param>
+        /// <param name="fragmentSourceCode">The source code of the fragment shader.</param>
+        /// <param name="geometrySourceCode">The source code of the geometry shader (optional).</param>
+        /// <returns><c>true</c> if the shader was added successfully; otherwise, <c>false</c>.</returns>
         public bool AddShader(string name, string vertexSourceCode, string fragmentSourceCode, string? geometrySourceCode = null) =>
             Add(name, new Shader(vertexSourceCode, fragmentSourceCode, geometrySourceCode));
 
+        /// <summary>
+        /// Adds a texture asset to the asset manager using a file path.
+        /// </summary>
+        /// <param name="name">The name to assign to the texture.</param>
+        /// <param name="filePath">The path to the texture file.</param>
+        /// <param name="type">The texture type.</param>
+        /// <param name="slot">The texture slot.</param>
+        /// <param name="format">The texture format.</param>
+        /// <param name="pixelType">The pixel data type.</param>
+        /// <returns><c>true</c> if the texture was added successfully; otherwise, <c>false</c>.</returns>
         public bool AddTexture(string name, string filePath, int type, int slot, int format, int pixelType)
         {
             try
@@ -63,12 +114,54 @@ namespace PentaGE.Core.Assets
             }
         }
 
+        /// <summary>
+        /// Adds a texture asset to the asset manager using an <see cref="ImageResult"/>.
+        /// </summary>
+        /// <param name="name">The name to assign to the texture.</param>
+        /// <param name="image">The image data for the texture.</param>
+        /// <param name="type">The texture type.</param>
+        /// <param name="slot">The texture slot.</param>
+        /// <param name="format">The texture format.</param>
+        /// <param name="pixelType">The pixel data type.</param>
+        /// <returns><c>true</c> if the texture was added successfully; otherwise, <c>false</c>.</returns>
         public bool AddTexture(string name, ImageResult image, int type, int slot, int format, int pixelType) =>
             Add(name, new Texture(image, type, slot, format, pixelType));
 
-        public bool AddEntity(string name, Entity entity) =>
-            Add(name, entity);
+        /// <summary>
+        /// Adds an <see cref="Entity"/> asset to the asset manager.
+        /// </summary>
+        /// <param name="name">The name to assign to the entity.</param>
+        /// <param name="entity">The entity to be added as an asset.</param>
+        /// <returns><c>true</c> if the entity was added successfully; otherwise, <c>false</c>.</returns>
+        public bool Add(string name, Entity entity) =>
+            Add(name, (IAsset)entity);
 
+        /// <summary>
+        /// Adds a <see cref="Shader"/> asset to the asset manager.
+        /// </summary>
+        /// <param name="name">The name to assign to the shader.</param>
+        /// <param name="shader">The shader to be added as an asset.</param>
+        /// <returns><c>true</c> if the shader was added successfully; otherwise, <c>false</c>.</returns>
+        public bool Add(string name, Shader shader) =>
+            Add(name, (IAsset)shader);
+
+        /// <summary>
+        /// Adds a <see cref="Texture"/> asset to the asset manager.
+        /// </summary>
+        /// <param name="name">The name to assign to the texture.</param>
+        /// <param name="texture">The texture to be added as an asset.</param>
+        /// <param name="filePath">The path to the texture file, if applicable.</param>
+        /// <returns><c>true</c> if the texture was added successfully; otherwise, <c>false</c>.</returns>
+        public bool Add(string name, Texture texture, string? filePath = null) =>
+            Add(name, (IAsset)texture, filePath);
+
+        /// <summary>
+        /// Adds an asset to the asset manager.
+        /// </summary>
+        /// <param name="name">The name of the asset.</param>
+        /// <param name="asset">The asset to add.</param>
+        /// <param name="filePath">The optional file path of the asset.</param>
+        /// <returns><c>true</c> if the asset was successfully added; otherwise, <c>false</c>.</returns>
         public bool Add(string name, IAsset asset, string? filePath = null)
         {
             string typeName = asset.GetType().Name;
@@ -104,6 +197,10 @@ namespace PentaGE.Core.Assets
             return true;
         }
 
+        /// <summary>
+        /// Removes an asset from the asset manager.
+        /// </summary>
+        /// <param name="name">The name of the asset to remove.</param>
         public void Remove(string name)
         {
             if (_assets.TryGetValue(name, out IAsset? asset))
@@ -111,27 +208,42 @@ namespace PentaGE.Core.Assets
                 asset?.Dispose();
 
                 // Unregister the asset from hot reload
-                if (asset is IHotReloadable hotReloadable)
+                if (asset is IHotReloadable)
                     UnregisterPath(name);
             }
 
             _assets.Remove(name);
         }
 
+        /// <summary>
+        /// Disposes of all assets managed by the asset manager.
+        /// </summary>
         public void Dispose()
         {
-
+            foreach (var asset in _assets.Values)
+            {
+                asset.Dispose();
+            }
         }
 
-        public void EnableHotReload(int seconds = 3)
+        /// <summary>
+        /// Enables hot reload for assets with the specified interval.
+        /// </summary>
+        /// <param name="intervalInSeconds">The interval in seconds for checking file changes.</param>
+        /// <exception cref="InvalidOperationException">Thrown if hot reload is already enabled.</exception>"
+        public void EnableHotReload(int intervalInSeconds = 3)
         {
             if (_hotReloadEnabled)
                 throw new InvalidOperationException("Hot reload is already enabled.");
 
-            _hotReloadIntervalInSeconds = seconds;
+            _hotReloadIntervalInSeconds = intervalInSeconds;
             HandleHotReloadEventSubscription(true);
         }
 
+        /// <summary>
+        /// Disables hot reload for assets.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown if hot reload is already disabled.</exception>""
         public void DisableHotReload()
         {
             if (!_hotReloadEnabled)
@@ -140,15 +252,51 @@ namespace PentaGE.Core.Assets
             HandleHotReloadEventSubscription(false);
         }
 
+        /// <summary>
+        /// Retrieves an asset of type <typeparamref name="T"/> with the specified name.
+        /// </summary>
+        /// <typeparam name="T">The type of the asset.</typeparam>
+        /// <param name="name">The name of the asset.</param>
+        /// <returns>The asset if found; otherwise, <c>null</c>.</returns>
         public T? Get<T>(string name) where T : IAsset =>
             _assets.TryGetValue(name, out IAsset? asset) ? (T?)asset : default;
 
+        /// <summary>
+        /// Retrieves an asset with the specified name.
+        /// </summary>
+        /// <param name="name">The name of the asset.</param>
+        /// <returns>The asset if found; otherwise, <c>null</c>.</returns>
+        public IAsset? Get(string name) =>
+            _assets.TryGetValue(name, out IAsset? asset) ? asset : default;
+
+        /// <summary>
+        /// Retrieves all assets of type <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of assets to retrieve.</typeparam>
+        /// <returns>An enumerable collection of assets of type <typeparamref name="T"/>.</returns>
+        public IEnumerable<T> GetAll<T>() where T : IAsset =>
+            _assets.Values.Where(a => a is T).Cast<T>().AsEnumerable();
+
+        /// <summary>
+        /// Registers the file path for an asset to enable hot reload.
+        /// </summary>
+        /// <param name="name">The name of the asset.</param>
+        /// <param name="path">The file path of the asset.</param>
+        /// <param name="item">The hot-reloadable item associated with the asset.</param>
         private void RegisterPath(string name, string path, IHotReloadable item) =>
             _hotReloadItems.Add(name, new(path, item));
 
+        /// <summary>
+        /// Unregisters the file path of an asset to disable hot reload.
+        /// </summary>
+        /// <param name="name">The name of the asset.</param>
         private void UnregisterPath(string name) =>
             _hotReloadItems.Remove(name);
 
+        /// <summary>
+        /// Handles the subscription or unsubscription of the hot reload event.
+        /// </summary>
+        /// <param name="enabled"><c>true</c> to enable hot reload, <c>false</c> to disable.</param>
         private void HandleHotReloadEventSubscription(bool enabled)
         {
             if (enabled)
@@ -166,9 +314,17 @@ namespace PentaGE.Core.Assets
             _hotReloadEnabled = enabled;
         }
 
+        /// <summary>
+        /// Event handler for the hot reload tick event.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
         private void HotReload_Tick(object? sender, Events.CustomTimingTickEventArgs e) =>
             CheckForFileChanges();
 
+        /// <summary>
+        /// Checks for file changes in hot-reloadable assets and reloads them if necessary.
+        /// </summary>
         private void CheckForFileChanges()
         {
             // Loop through all shaders and reload them if they have changed
@@ -194,6 +350,11 @@ namespace PentaGE.Core.Assets
             }
         }
 
+        /// <summary>
+        /// Reloads a hot-reloadable asset.
+        /// </summary>
+        /// <param name="name">The name of the asset.</param>
+        /// <param name="asset">The asset to reload.</param>
         private static void ReloadAsset(string name, IHotReloadable asset)
         {
             string typeName = asset.GetType().Name;

@@ -18,9 +18,13 @@ namespace PentaGE.Core
         private readonly WindowManager _windowManager;
         private readonly AssetManager _assetManager;
         private readonly EventManager _eventManager = new();
+        private readonly SceneManager _scenes;
         private GameState _state = GameState.Initializing;
 
-        public Scene Scene { get; } = new();
+        /// <summary>
+        /// Get or set whether the game engine should automatically start the default level after initialization.
+        /// </summary>
+        public bool AutoPlay { get; set; } = true;
 
         /// <summary>
         /// Gets the timing manager for the game engine, responsible for handling frame timing and delta time calculation.
@@ -51,6 +55,11 @@ namespace PentaGE.Core
         /// Gets the Asset manager responsible for managing game assets (like shaders, textures and meshes) in the game engine.
         /// </summary>
         public AssetManager Assets => _assetManager;
+
+        /// <summary>
+        /// Gets the <see cref="SceneManager"/> responsible for managing scenes in the game engine.
+        /// </summary>
+        public SceneManager Scenes => _scenes;
 
         /// <summary>
         /// Called during game engine initialization to allow concrete implementations to perform engine-related setup.
@@ -89,6 +98,7 @@ namespace PentaGE.Core
             _renderer = new(this);
             _windowManager = new(this);
             _assetManager = new(this);
+            _scenes = new();
         }
 
         /// <summary>
@@ -127,7 +137,7 @@ namespace PentaGE.Core
             _renderer.Terminate();
 
             // Terminate the Shader manager
-            Log.Information("Terminating the Shader manager.");
+            Log.Information("Terminating the Asset manager.");
             _assetManager.Dispose();
 
             // Allow the concrete implementation of the engine to unload resources
@@ -177,6 +187,9 @@ namespace PentaGE.Core
                 }
             }
 
+            // Optionally start the scene
+            if (AutoPlay) Scenes.Run();
+
             // Start the game loop
             using (Log.Logger.BeginPerfLogger("Entering game loop"))
             {
@@ -219,7 +232,7 @@ namespace PentaGE.Core
             Update(); // Let the concrete implementation update
 
             // Update the scene
-            Scene.Update((float)Timing.CurrentFrame.DeltaTime);
+            Scenes.Update((float)Timing.CurrentFrame.DeltaTime);
 
             // Update the camera controller
             foreach (var window in Windows)

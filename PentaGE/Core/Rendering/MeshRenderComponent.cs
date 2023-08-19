@@ -57,6 +57,8 @@ namespace PentaGE.Core.Rendering
         /// </summary>
         public DrawMode DrawMode { get; set; }
 
+        public override bool CanHaveMultiple => false;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MeshRenderComponent"/> class.
         /// </summary>
@@ -121,7 +123,7 @@ namespace PentaGE.Core.Rendering
 
             // Get the transform of the object (if applicable)
             // or create a new default transform
-            Transform transform = Entity?.GetComponent<TransformComponent>()?.Transform ?? new Transform();
+            Transform transform = Entity?.Components.Get<TransformComponent>()?.Transform ?? new Transform();
 
             // Calculate the view and projection matrices from the camera
             // ViewMatrix means "camera space" (or "eye space") and is used for moving the camera.
@@ -148,15 +150,15 @@ namespace PentaGE.Core.Rendering
             Shader.SetUniform("viewportSize", new Vector2(window.Viewport.Width, window.Viewport.Height));
 
             // Set the light color uniforms
-            Shader.SetUniform("lightColor", new Vector4(1.0f, 1.0f, 1.0f, 1.0f));
-            Shader.SetUniform("lightPosition", new Vector3(10f, 10f, 10f));
+            Shader.SetUniform("lightColor", new Vector4(1.0f, 1.0f, 1.0f, 1.0f)); // TODO: Move to directional light
+            Shader.SetUniform("lightPosition", new Vector3(10f, 10f, 10f));       // TODO: Move to directional light
             //Shader.SetUniform("lightPosition", camera.Position); // If you want the light to follow the camera
             Shader.SetUniform("cameraPosition", camera.Position);
 
             // Set the material properties as uniforms in the shader
             Shader.SetUniform("material.albedo", Material.Albedo);
             Shader.SetUniform("material.roughness", Material.Roughness);
-            Shader.SetUniform("material.metalness", Material.Metalness);
+            Shader.SetUniform("material.metalness", Material.Metallic);
             Shader.SetUniform("material.ambientOcclusion", Material.AmbientOcclusion);
             Shader.SetUniform("material.specularStrength", Material.SpecularStrength);
             Shader.SetUniform("material.opacity", Material.Opacity);
@@ -206,6 +208,18 @@ namespace PentaGE.Core.Rendering
         public override void Update(float deltaTime)
         {
             // Do nothing
+        }
+
+        /// <inheritdoc />
+        public override object Clone()
+        {
+            var clonedComponent = new MeshRenderComponent(Mesh, Shader, Texture, Material.Clone() as PBRMaterial)
+            {
+                DrawMode = DrawMode, // Copy the draw mode directly
+                Enabled = true
+            };
+
+            return clonedComponent;
         }
     }
 }

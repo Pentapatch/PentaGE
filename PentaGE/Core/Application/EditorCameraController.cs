@@ -141,7 +141,7 @@ namespace PentaGE.Core
         /// <param name="zOffset">The optional offset along the Z-axis.</param>
         public void SetPosition(Entity entity, float? zOffset = 2)
         {
-            if (entity.GetComponent<TransformComponent>() is TransformComponent transformComponent)
+            if (entity.Components.Get<TransformComponent>() is TransformComponent transformComponent)
             {
                 var position = transformComponent.Transform.Position;
                 if (zOffset.HasValue && ActiveCamera is not null)
@@ -181,7 +181,7 @@ namespace PentaGE.Core
         /// <param name="zOffset">The optional offset along the Z-axis.</param>
         public void SetOrbitTarget(Entity entity, float? zOffset = null)
         {
-            if (entity.GetComponent<TransformComponent>() is TransformComponent transformComponent)
+            if (entity.Components.Get<TransformComponent>() is TransformComponent transformComponent)
             {
                 if (zOffset.HasValue) SetPosition(entity, zOffset);
                 _orbitTarget = transformComponent.Transform.Position;
