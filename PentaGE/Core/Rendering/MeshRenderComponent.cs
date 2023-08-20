@@ -160,7 +160,7 @@ namespace PentaGE.Core.Rendering
             }
             Shader.SetUniform("hasDirectionalLight", hasDirectionalLight);
 
-
+            Shader.SetUniform("lightColor", new Vector4(1f, 1f, 1f, 1f));
             Shader.SetUniform("cameraPosition", camera.Position);
 
             // Set the material properties as uniforms in the shader

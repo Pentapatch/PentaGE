@@ -19,18 +19,19 @@ namespace PentaGE.Core.Scenes
         public string Name { get; }
 
         /// <summary>
-        /// Gets or sets the <see cref="DirectionalLightEntity"/> used for lighting the scene.
+        /// Gets the <see cref="DirectionalLightEntity"/> used for lighting the scene if there is one.
         /// </summary>
-        public DirectionalLightEntity? DirectionalLight { get; set; }
+        public DirectionalLightEntity? DirectionalLight { get; }
 
         /// <summary>
         /// Initializes a new instance of the Scene class.
         /// </summary>
-        internal Scene(string name, SceneManager manager)
+        internal Scene(string name, SceneManager manager, DirectionalLightEntity? directionalLight = null)
         {
             _entities = new();
             Name = name;
             _manager = manager;
+            DirectionalLight = directionalLight;
         }
 
         /// <summary>
@@ -50,11 +51,21 @@ namespace PentaGE.Core.Scenes
         public IEnumerable<Entity> Entities => _entities;
 
         /// <summary>
-        /// Adds an entity to the scene.
+        /// Adds an entity to the scene. 
+        /// If the entity is marked as single instance, ensures only one instance of that type exists in the scene.
         /// </summary>
         /// <param name="entity">The entity to add.</param>
-        public void Add(Entity entity) =>
+        /// <returns><see langword="true"/> if the entity was successfully added, <see langword="false"/> if it was 
+        /// not added due to already existing or other reasons.</returns>
+        public bool Add(Entity entity)
+        {
+            // Make sure that single instance entities are not added more than once.
+            if (!entity.CanHaveMultipleInstances && _entities.Of(entity).Any()) return false;
+
             _entities.Add(entity);
+
+            return true;
+        }
 
         /// <summary>
         /// Removes an entity from the scene.

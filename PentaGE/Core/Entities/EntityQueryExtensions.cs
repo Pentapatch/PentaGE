@@ -17,6 +17,15 @@ namespace PentaGE.Core.Entities
             source.OfType<T>();
 
         /// <summary>
+        /// Filters the source collection to return entities of the same type as the specified entity.
+        /// </summary>
+        /// <param name="source">The collection of entities to filter.</param>
+        /// <param name="entity">The entity whose type to match for filtering.</param>
+        /// <returns>An enumerable collection of filtered entities of the same type as the specified entity.</returns>
+        public static IEnumerable<Entity> Of(this IEnumerable<Entity> source, Entity entity) =>
+            source.Where(e => e.GetType() == entity.GetType()).Cast<Entity>();
+
+        /// <summary>
         /// Filters the source collection to return entities that have components of the specified type.
         /// </summary>
         /// <typeparam name="T">The type of component to consider for entity filtering.</typeparam>

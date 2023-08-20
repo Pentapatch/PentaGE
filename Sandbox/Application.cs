@@ -175,7 +175,7 @@ namespace Sandbox
 
             // Set up test light
             var lightMesh = MeshFactory.CreateSphere(0.2f);
-            var transform2 = new Transform(new(10f, 10f, 10f), new(0, 0, 0), new(1f, 1f, 1f));
+            var transform2 = new Transform(new(2f, 2f, 2f), new(0, 0, 0), new(1f, 1f, 1f));
             var renderableLight = new RenderableMeshEntity(lightMesh, Assets.Get<Shader>("Light")!);
 
             renderableLight.Components.Add(new TransformComponent(transform2));
@@ -206,7 +206,6 @@ namespace Sandbox
 
             // Add entities to the scene
             var scene = Scenes.Add("Main");
-            scene.DirectionalLight = directionalLight;
             scene.Add((Entity)Assets["Subject"]!);
             scene.Add((Entity)Assets["LightEntity"]!);
             scene.Add((Entity)Assets["GridMajor"]!);
