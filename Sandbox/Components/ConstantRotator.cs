@@ -9,12 +9,15 @@ namespace Sandbox.Components
     public sealed class ConstantRotator : Component
     {
         private float _totalElapsedTime = 0f;
-        private int _range = 360;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConstantRotator"/> class.
         /// </summary>
-        public ConstantRotator() { }
+        public ConstantRotator()
+        {
+            Range = 360;
+            Speed = 1f;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConstantRotator"/> class with specified rotation axis flags.
@@ -27,24 +30,19 @@ namespace Sandbox.Components
             YawEnabled = yaw;
             PitchEnabled = pitch;
             RollEnabled = roll;
+            Range = 360;
+            Speed = 1f;
         }
 
         /// <summary>
         /// Gets or sets the rotation range in degrees.
         /// </summary>
-        /// <remarks>
-        /// Will automatically be kept between 0 and 360 degrees using modulo.
-        /// </remarks>
-        public int Range
-        {
-            get => _range;
-            set => _range = value % 360;
-        }
+        public int Range { get; set; }
 
         /// <summary>
         /// Gets or sets the rotation speed factor.
         /// </summary>
-        public float Speed { get; set; } = 1f;
+        public float Speed { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether yaw rotation is enabled.
