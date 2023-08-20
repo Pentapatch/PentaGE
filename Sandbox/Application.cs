@@ -171,6 +171,14 @@ namespace Sandbox
             renderableLight.Components.Add(new TransformComponent(transform2));
             Assets.Add("LightEntity", renderableLight);
 
+            // Set up test directional light
+            var dirLightMesh = MeshFactory.CreateSphere(0.2f);
+            var widgetTransform = new Transform(new Vector3(0f, 1f, 0f), Rotation.Zero, Vector3.One);
+            var rotation = new Rotation(45f, -45f, 0f);
+            var color = new Vector4(1f, 0.8f, 0.8f, 1f);
+            var directionalLight = new DirectionalLightEntity(dirLightMesh, Assets.Get<Shader>("Default")!, rotation, widgetTransform, color);
+            Assets.Add("DirectionalLightEntity", directionalLight);
+
             // Initialize grid
             Grid gridA = new(10, 10, new(1, 1, 1), 0.2f);
             Grid gridB = new(10, 20, new(0, 0, 0), 0.15f);
@@ -188,11 +196,13 @@ namespace Sandbox
 
             // Add entities to the scene
             var scene = Scenes.Add("Main");
+            scene.DirectionalLight = directionalLight;
             scene.Add((Entity)Assets["Subject"]!);
             scene.Add((Entity)Assets["LightEntity"]!);
             scene.Add((Entity)Assets["GridMajor"]!);
             scene.Add((Entity)Assets["GridMinor"]!);
             scene.Add((Entity)Assets["AxesGizmo"]!);
+            scene.Add((Entity)Assets["DirectionalLightEntity"]!);
             scene.Load();
 
             return true;

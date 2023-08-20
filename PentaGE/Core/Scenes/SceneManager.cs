@@ -214,7 +214,10 @@ namespace PentaGE.Core.Scenes
         /// </summary>
         private void CreatePlayableScene()
         {
-            var playableScene = new Scene($"{_activeScene.Name}_play", this);
+            var playableScene = new Scene($"{_activeScene.Name}_play", this)
+            {
+                DirectionalLight = _activeScene.DirectionalLight
+            };
 
             foreach (var entity in _activeScene)
             {

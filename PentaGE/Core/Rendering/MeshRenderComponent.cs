@@ -1,5 +1,6 @@
 ﻿using PentaGE.Common;
 using PentaGE.Core.Components;
+using PentaGE.Core.Entities;
 using PentaGE.Core.Graphics;
 using System.Numerics;
 using static OpenGL.GL;
@@ -116,7 +117,7 @@ namespace PentaGE.Core.Rendering
         /// <param name="camera">The camera used for rendering.</param>
         /// <param name="window">The window to render onto.</param>
         /// <param name="wireframe">Whether to render the mesh in wireframe mode (optional, default is false).</param>
-        internal unsafe void Render(Camera camera, Window window, bool wireframe = false)
+        internal unsafe void Render(Camera camera, Window window, bool wireframe = false, DirectionalLightEntity? directionalLight = null)
         {
             // Use the shader program
             Shader.Use();
@@ -148,6 +149,14 @@ namespace PentaGE.Core.Rendering
             Shader.SetUniform("view", viewMatrix);
             Shader.SetUniform("projection", projectionMatrix);
             Shader.SetUniform("viewportSize", new Vector2(window.Viewport.Width, window.Viewport.Height));
+
+            // Set up the directional light
+            if (directionalLight is not null)
+            {
+                Shader.SetUniform("directionalLight.direction", directionalLight.Direction);
+                Shader.SetUniform("directionalLight.color", directionalLight.Color);
+                Shader.SetUniform("directionalLight.followCamera", directionalLight.FollowCamera);
+            }
 
             // Set the light color uniforms
             Shader.SetUniform("lightColor", new Vector4(1.0f, 1.0f, 1.0f, 1.0f)); // TODO: Move to directional light

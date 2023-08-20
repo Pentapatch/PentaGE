@@ -12,7 +12,8 @@ namespace PentaGE.Core.Components
         /// </summary>
         public Transform Transform { get; set; }
 
-        public override bool CanHaveMultiple => false;
+        /// <inheritdoc />
+        public override bool CanHaveMultiple => true;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TransformComponent"/> class with a default transform.

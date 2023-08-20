@@ -19,6 +19,11 @@ namespace PentaGE.Core.Scenes
         public string Name { get; }
 
         /// <summary>
+        /// Gets or sets the <see cref="DirectionalLightEntity"/> used for lighting the scene.
+        /// </summary>
+        public DirectionalLightEntity? DirectionalLight { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the Scene class.
         /// </summary>
         internal Scene(string name, SceneManager manager)
@@ -241,7 +246,7 @@ namespace PentaGE.Core.Scenes
             foreach (var entity in _entities)
             {
                 var meshRenderer = entity.Components.Get<MeshRenderComponent>();
-                meshRenderer?.Render(camera, window, wireframe);
+                meshRenderer?.Render(camera, window, wireframe, DirectionalLight);
             }
         }
 

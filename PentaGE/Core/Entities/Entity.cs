@@ -21,6 +21,11 @@ namespace PentaGE.Core.Entities
         public ComponentManager Components => _components;
 
         /// <summary>
+        /// Specifies if there can be more than one of this entity in the scene.
+        /// </summary>
+        public virtual bool CanHaveMultipleInstances => true;
+
+        /// <summary>
         /// Gets or sets if the entity is enabled and should recieve update events.
         /// </summary>
         public bool Enabled { get; set; } = true;
