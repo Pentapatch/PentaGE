@@ -27,11 +27,12 @@ The Penta Game Engine relies on [OpenGL](https://www.opengl.org/) and [GLFW](htt
 
 The engine aims to provide the following features:
 
-- Rendering using OpenGL: Rendering graphics with the power and flexibility of the OpenGL graphics library.
-- Event Handling: Implementing a central EventManager for efficient event management and event distribution.
-- Window Management: Utilizing GLFW for window creation and management.
-- Basic Physics: Implementing rudimentary physics simulations to handle simple interactions within the game.
-- Basic Particle System that is component based.
+- **Rendering using OpenGL**: Rendering graphics with the power and flexibility of the OpenGL graphics library.
+- **Event Handling**: Implementing a central EventManager for efficient event management and event distribution.
+- **Window Management**: Utilizing GLFW for window creation and management.
+- **Basic Physics**: Implementing rudimentary physics simulations to handle simple interactions within the game.
+- **Basic Particle System** that is component based.
+- **Asset management**: A system that manages all assets that might be needed in a project.
 
 ## Disclaimer
 
