@@ -26,8 +26,18 @@ namespace Sandbox
             Events.KeyBindings[Test2].Bind(Key.Enter, ModifierKey.Control);
             Events.KeyBindings[ToggleRotation].Bind(Key.R, ModifierKey.Control);
             Events.KeyBindings[ToggleMaterialModulator].Bind(Key.M, ModifierKey.Control);
+            Events.KeyBindings[ToggleFollowLight].Bind(Key.F, ModifierKey.Control);
+            Events.KeyBindings[ToggleDirectionalLight].Bind(Key.F1, ModifierKey.Control);
 
             return true;
+        }
+
+        public void ToggleDirectionalLight() =>
+            Scenes.CurrentScene.DirectionalLight!.Enabled = !Scenes.CurrentScene.DirectionalLight.Enabled;
+
+        public void ToggleFollowLight()
+        {
+            Scenes.CurrentScene.DirectionalLight!.FollowCamera = !Scenes.CurrentScene.DirectionalLight.FollowCamera;
         }
 
         public void ToggleMaterialModulator()

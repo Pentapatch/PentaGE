@@ -151,17 +151,16 @@ namespace PentaGE.Core.Rendering
             Shader.SetUniform("viewportSize", new Vector2(window.Viewport.Width, window.Viewport.Height));
 
             // Set up the directional light
-            if (directionalLight is not null)
+            var hasDirectionalLight = directionalLight is not null && directionalLight.Enabled;
+            if (hasDirectionalLight)
             {
-                Shader.SetUniform("directionalLight.direction", directionalLight.Direction);
+                Shader.SetUniform("directionalLight.direction", directionalLight!.Direction);
                 Shader.SetUniform("directionalLight.color", directionalLight.Color);
                 Shader.SetUniform("directionalLight.followCamera", directionalLight.FollowCamera);
             }
+            Shader.SetUniform("hasDirectionalLight", hasDirectionalLight);
 
-            // Set the light color uniforms
-            Shader.SetUniform("lightColor", new Vector4(1.0f, 1.0f, 1.0f, 1.0f)); // TODO: Move to directional light
-            Shader.SetUniform("lightPosition", new Vector3(10f, 10f, 10f));       // TODO: Move to directional light
-            //Shader.SetUniform("lightPosition", camera.Position); // If you want the light to follow the camera
+
             Shader.SetUniform("cameraPosition", camera.Position);
 
             // Set the material properties as uniforms in the shader
