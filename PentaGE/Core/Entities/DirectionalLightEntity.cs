@@ -48,8 +48,22 @@ namespace PentaGE.Core.Entities
         /// </summary>
         public bool FollowCamera { get; set; } = false;
 
-        public DirectionalLightEntity(Mesh mesh, Shader shader, Rotation? rotation = null, Transform? widgetTransform = null,
-                                      Vector4? color = null, bool followCamera = false)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DirectionalLightEntity"/> class.
+        /// </summary>
+        /// <param name="mesh">The mesh for the widget.</param>
+        /// <param name="shader">The shader for rendering the widget.</param>
+        /// <param name="rotation">The initial rotation of the sun.</param>
+        /// <param name="widgetTransform">The initial transform of the widget.</param>
+        /// <param name="color">The color of the sun.</param>
+        /// <param name="followCamera">Indicates if the light should follow the camera.</param>
+        public DirectionalLightEntity(
+            Mesh mesh,
+            Shader shader,
+            Rotation? rotation = null,
+            Transform? widgetTransform = null,
+            Vector4? color = null,
+            bool followCamera = false)
         {
             Components.Add(new RotationComponent()
             {
@@ -66,15 +80,8 @@ namespace PentaGE.Core.Entities
                 Color = color is not null ? (Vector4)color : new(1, 1, 1, 1)
             });
 
-            var material = new PBRMaterial()
-            {
-                Albedo = Components.Get<ColorComponent>()!.Color3,
-                Metallic = 0.0f,
-                Roughness = 0.0f,
-                AmbientOcclusion = 1.0f
-            };
-
-            var renderableMeshComponent = new MeshRenderComponent(mesh, shader, texture: null, material);
+            // Add widget mesh
+            var renderableMeshComponent = new MeshRenderComponent(mesh, shader, texture: null, material: null);
             Components.Add(renderableMeshComponent);
 
             FollowCamera = followCamera;

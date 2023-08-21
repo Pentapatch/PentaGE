@@ -8,6 +8,11 @@ namespace PentaGE.Core.Components
     public abstract class Component : ICloneable
     {
         /// <summary>
+        /// Gets the unique identifier of the component.
+        /// </summary>
+        public Guid ID { get; private set; }
+
+        /// <summary>
         /// Specifies if the component can be attached to an entity multiple times.
         /// </summary>
         public abstract bool CanHaveMultiple { get; }
@@ -25,6 +30,26 @@ namespace PentaGE.Core.Components
         /// </summary>
         public bool Enabled { get; set; } = true;
 
+        public Component()
+        {
+            ID = Guid.NewGuid();
+        }
+
+        internal Component(Guid? id)
+        {
+            ID = id ?? Guid.NewGuid();
+        }
+
+        /// <summary>
+        /// Sets the component's unique identifier to the specified value.
+        /// </summary>
+        /// <remarks>This is only to be used when cloning components for the playable scene.</remarks>
+        /// <param name="id"></param>
+        internal void ReuseId(Guid id)
+        {
+            ID = id;
+        }
+
         /// <inheritdoc />
         public abstract object Clone();
 
@@ -33,15 +58,5 @@ namespace PentaGE.Core.Components
         /// </summary>
         /// <param name="deltaTime">The time elapsed since the last update in seconds.</param>
         public abstract void Update(float deltaTime);
-
-        /// <summary>
-        /// Called by the entity to which this component is attached to update the component's state and behavior over time.
-        /// </summary>
-        /// <remarks>If the component is disabled, <see cref="Update(float)"/> won't be called.</remarks>
-        /// <param name="deltaTime"></param>
-        internal void OnUpdate(float deltaTime)
-        {
-            if (Enabled) Update(deltaTime);
-        }
     }
 }

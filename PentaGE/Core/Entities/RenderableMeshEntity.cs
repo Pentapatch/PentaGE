@@ -1,4 +1,5 @@
-﻿using PentaGE.Core.Graphics;
+﻿using PentaGE.Core.Components;
+using PentaGE.Core.Graphics;
 using PentaGE.Core.Rendering;
 
 namespace PentaGE.Core.Entities
@@ -22,11 +23,12 @@ namespace PentaGE.Core.Entities
             Components.Add(meshRenderer);
         }
 
+        /// <inheritdoc />
         public override object Clone()
         {
             var clone = (RenderableMeshEntity)base.Clone();
 
-            var mesh = (Mesh)Components.Get<MeshRenderComponent>()!.Mesh.Clone();
+            var mesh = (Mesh)Components.AsEnumerable().Get<MeshRenderComponent>()!.Mesh.Clone();
             var material = (PBRMaterial)Components.Get<MeshRenderComponent>()!.Material.Clone();
 
             clone.Components.Get<MeshRenderComponent>()!.Mesh = mesh;

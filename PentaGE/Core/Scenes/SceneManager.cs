@@ -143,6 +143,8 @@ namespace PentaGE.Core.Scenes
             else if (State == SceneState.Idle)
                 CreatePlayableScene();
 
+            OnSceneBegin();
+
             State = SceneState.Running;
             Log.Information("Scene is running.");
 
@@ -207,6 +209,24 @@ namespace PentaGE.Core.Scenes
             if (_playableScene is null) return;
 
             _playableScene.Update(deltaTime);
+        }
+
+        /// <summary>
+        /// Invokes the <see cref="SceneBegin(Scene)"/> method for each entity in the playable scene,
+        /// allowing entities to establish references and perform initialization within the scene.
+        /// </summary>
+        private void OnSceneBegin()
+        {
+            if (_playableScene is null)
+            {
+                throw new InvalidOperationException(
+                    "Cannot invoke OnSceneBegin() when the playable scene is null. " +
+                    "This method should only be invoked when the scene is running.");
+            }
+            foreach (var entity in _playableScene)
+            {
+                entity.SceneBegin(_playableScene);
+            }
         }
 
         /// <summary>

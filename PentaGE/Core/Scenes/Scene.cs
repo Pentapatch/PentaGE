@@ -187,36 +187,6 @@ namespace PentaGE.Core.Scenes
         }
 
         /// <summary>
-        /// Gets a collection of entities of the specified type that are currently present in the scene.
-        /// </summary>
-        /// <typeparam name="T">The type of entities to retrieve.</typeparam>
-        /// <returns>An enumerable collection of entities of the specified type present in the scene.</returns>
-        public IEnumerable<T> GetEntitiesOf<T>() where T : Entity
-        {
-            if (_manager.State != SceneState.Running &&
-                _manager.State != SceneState.Paused) return new List<T>();
-
-            var entitiesOfType = _entities.Of<T>();
-
-            return entitiesOfType;
-        }
-
-        /// <summary>
-        /// Gets a collection of entities containing the specified component type that are currently present in the scene.
-        /// </summary>
-        /// <typeparam name="T">The type of component for which entities should be retrieved.</typeparam>
-        /// <returns>An enumerable collection of entities containing the specified component type present in the scene.</returns>
-        public IEnumerable<Entity> GetEntitiesWith<T>() where T : Component
-        {
-            if (_manager.State != SceneState.Running &&
-                _manager.State != SceneState.Paused) return new List<Entity>();
-
-            var entitiesOfType = _entities.With<T>();
-
-            return entitiesOfType;
-        }
-
-        /// <summary>
         /// Removes all entities from the scene.
         /// </summary>
         public void Clear() =>
@@ -239,9 +209,11 @@ namespace PentaGE.Core.Scenes
             {
                 if (!entity.Enabled) continue;
 
+                entity.Update(deltaTime);
+
                 foreach (var component in entity.Components)
                 {
-                    component.OnUpdate(deltaTime);
+                    if (component.Enabled) component.Update(deltaTime);
                 }
             }
         }
@@ -256,8 +228,10 @@ namespace PentaGE.Core.Scenes
             // Loop through entities and render entities with a MeshRendererComponent.
             foreach (var entity in _entities)
             {
-                var meshRenderer = entity.Components.Get<MeshRenderComponent>();
-                meshRenderer?.Render(camera, window, wireframe, DirectionalLight);
+                foreach (var meshRenderer in entity.Components.GetAll<MeshRenderComponent>())
+                {
+                    meshRenderer?.Render(camera, window, wireframe, DirectionalLight);
+                }
             }
         }
 

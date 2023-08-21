@@ -52,14 +52,14 @@ uniform struct DirectionalLight {
 
 vec3 calculateDiffuse(vec3 lightDirection, vec3 normalizedNormal) {
     float diffuse = max(dot(normalizedNormal, lightDirection), 0.0f);
-    return directionalLight.color.rgb * diffuse;
+    return directionalLight.color.rgb * diffuse * directionalLight.color.a;
 }
 
 vec3 calculateSpecular(vec3 viewDirection, vec3 lightDirection, vec3 normalizedNormal) {
     vec3 reflectDirection = reflect(-lightDirection, normalizedNormal);
     float specularAmount = pow(max(dot(viewDirection, reflectDirection), 0.0f), 8);
     float specularFactor = specularAmount * material.specularStrength;
-    return directionalLight.color.rgb * specularFactor;
+    return directionalLight.color.rgb * specularFactor * directionalLight.color.a;
 }
 
 void main()

@@ -173,22 +173,20 @@ namespace Sandbox
             renderableMesh.Components.Add(new MaterialModulator() { AlbedoEnabled = true, AlbedoModulatorFactors = new(1f, 0.75f, 0.25f), Enabled = false });
             Assets.Add("Subject", renderableMesh);
 
-            // Set up test light
-            var lightMesh = MeshFactory.CreateSphere(0.2f);
-            var transform2 = new Transform(new(2f, 2f, 2f), new(0, 0, 0), new(1f, 1f, 1f));
-            var renderableLight = new RenderableMeshEntity(lightMesh, Assets.Get<Shader>("Light")!);
-
-            renderableLight.Components.Add(new TransformComponent(transform2));
-            Assets.Add("LightEntity", renderableLight);
-
             // Set up test directional light
             var dirLightMesh = MeshFactory.CreateSphere(0.2f);
             var widgetTransform = new Transform(new Vector3(0f, 1f, 0f), Rotation.Zero, Vector3.One);
             var rotation = new Rotation(45f, -45f, 0f);
-            var color = new Vector4(1f, 0.8f, 0.8f, 1f);
+            var color = new Vector4(1f, 1f, 1f, 1f);
             var directionalLight = new DirectionalLightEntity(dirLightMesh, Assets.Get<Shader>("Default")!, rotation, widgetTransform, color);
+            // lightMesh, Assets.Get<Shader>("Light")!
             Assets.Add("DirectionalLightEntity", directionalLight);
 
+            // Set up test sun
+            var sunMesh = MeshFactory.CreateSphere(20f);
+            var sun = new SunEntity(sunMesh, Assets.Get<Shader>("Light")!, Windows[0].Viewport.CameraManager.ActiveController, directionalLight);
+            Assets.Add("SunEntity", sun);
+            
             // Initialize grid
             Grid gridA = new(10, 10, new(1, 1, 1), 0.2f);
             Grid gridB = new(10, 20, new(0, 0, 0), 0.15f);
@@ -207,11 +205,11 @@ namespace Sandbox
             // Add entities to the scene
             var scene = Scenes.Add("Main");
             scene.Add((Entity)Assets["Subject"]!);
-            scene.Add((Entity)Assets["LightEntity"]!);
             scene.Add((Entity)Assets["GridMajor"]!);
             scene.Add((Entity)Assets["GridMinor"]!);
             scene.Add((Entity)Assets["AxesGizmo"]!);
             scene.Add((Entity)Assets["DirectionalLightEntity"]!);
+            scene.Add((Entity)Assets["SunEntity"]!);
             scene.Load();
 
             return true;
