@@ -9,13 +9,15 @@ namespace PentaGE.Core.Entities
 {
     public sealed class DirectionalLightEntity : Entity
     {
+        private readonly Guid _rotationComponentId;
+
         // This entity can only have one instance in the scene
         public override bool CanHaveMultipleInstances => false;
 
         /// <summary>
         /// Gets the direction of the light.
         /// </summary>
-        internal Vector3 Direction => Components.Get<RotationComponent>()!.Rotation.GetForwardVector();
+        internal Vector3 Direction => GetReference<RotationComponent>(_rotationComponentId)!.Rotation.GetForwardVector();
 
         /// <summary>
         /// Gets or sets the position of the widget.
@@ -66,10 +68,13 @@ namespace PentaGE.Core.Entities
             Vector4? color = null,
             bool followCamera = false)
         {
-            Components.Add(new RotationComponent()
+            var rotationComponent = new RotationComponent()
             {
                 Rotation = rotation is not null ? (Rotation)rotation : new(45, -45, 0)
-            });
+            };
+
+            Components.Add(rotationComponent);
+            _rotationComponentId = SetReference(rotationComponent);
 
             Components.Add(new TransformComponent()
             {
@@ -86,6 +91,15 @@ namespace PentaGE.Core.Entities
             Components.Add(renderableMeshComponent);
 
             FollowCamera = followCamera;
+        }
+
+        public override void Update(float deltaTime)
+        {
+            // TODO: Remove this entire update method as its only for show
+            var rotationComponent = GetReference<RotationComponent>(_rotationComponentId);
+            var rot = rotationComponent!.Rotation;
+            rot = new(rot.Yaw + deltaTime * 10, rot.Pitch, rot.Roll);
+            rotationComponent.Rotation = rot;
         }
     }
 }
