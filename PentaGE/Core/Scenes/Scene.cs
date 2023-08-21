@@ -19,13 +19,19 @@ namespace PentaGE.Core.Scenes
         public string Name { get; }
 
         /// <summary>
+        /// Gets the <see cref="DirectionalLightEntity"/> used for lighting the scene if there is one.
+        /// </summary>
+        public DirectionalLightEntity? DirectionalLight { get; private set; }
+
+        /// <summary>
         /// Initializes a new instance of the Scene class.
         /// </summary>
-        internal Scene(string name, SceneManager manager)
+        internal Scene(string name, SceneManager manager, DirectionalLightEntity? directionalLight = null)
         {
             _entities = new();
             Name = name;
             _manager = manager;
+            DirectionalLight = directionalLight;
         }
 
         /// <summary>
@@ -45,11 +51,21 @@ namespace PentaGE.Core.Scenes
         public IEnumerable<Entity> Entities => _entities;
 
         /// <summary>
-        /// Adds an entity to the scene.
+        /// Adds an entity to the scene. 
+        /// If the entity is marked as single instance, ensures only one instance of that type exists in the scene.
         /// </summary>
         /// <param name="entity">The entity to add.</param>
-        public void Add(Entity entity) =>
+        /// <returns><see langword="true"/> if the entity was successfully added, <see langword="false"/> if it was 
+        /// not added due to already existing or other reasons.</returns>
+        public bool Add(Entity entity)
+        {
+            // Make sure that single instance entities are not added more than once.
+            if (!entity.CanHaveMultipleInstances && _entities.Of(entity).Any()) return false;
+
             _entities.Add(entity);
+
+            return true;
+        }
 
         /// <summary>
         /// Removes an entity from the scene.
@@ -171,36 +187,6 @@ namespace PentaGE.Core.Scenes
         }
 
         /// <summary>
-        /// Gets a collection of entities of the specified type that are currently present in the scene.
-        /// </summary>
-        /// <typeparam name="T">The type of entities to retrieve.</typeparam>
-        /// <returns>An enumerable collection of entities of the specified type present in the scene.</returns>
-        public IEnumerable<T> GetEntitiesOf<T>() where T : Entity
-        {
-            if (_manager.State != SceneState.Running &&
-                _manager.State != SceneState.Paused) return new List<T>();
-
-            var entitiesOfType = _entities.Of<T>();
-
-            return entitiesOfType;
-        }
-
-        /// <summary>
-        /// Gets a collection of entities containing the specified component type that are currently present in the scene.
-        /// </summary>
-        /// <typeparam name="T">The type of component for which entities should be retrieved.</typeparam>
-        /// <returns>An enumerable collection of entities containing the specified component type present in the scene.</returns>
-        public IEnumerable<Entity> GetEntitiesWith<T>() where T : Component
-        {
-            if (_manager.State != SceneState.Running &&
-                _manager.State != SceneState.Paused) return new List<Entity>();
-
-            var entitiesOfType = _entities.With<T>();
-
-            return entitiesOfType;
-        }
-
-        /// <summary>
         /// Removes all entities from the scene.
         /// </summary>
         public void Clear() =>
@@ -216,16 +202,21 @@ namespace PentaGE.Core.Scenes
         /// Updates all entities and their components in the scene.
         /// </summary>
         /// <param name="deltaTime">The time passed since the last frame.</param>
-        public void Update(float deltaTime)
+        internal void Update(float deltaTime)
         {
             // Loop through entities and update their components.
             foreach (var entity in _entities)
             {
                 if (!entity.Enabled) continue;
 
+                if (entity.UpdateMode == UpdateMode.WhenPlaying && _manager.State != SceneState.Running) continue;
+                if (entity.UpdateMode == UpdateMode.WhenEditing && _manager.State != SceneState.Idle) continue;
+
+                entity.Update(deltaTime);
+
                 foreach (var component in entity.Components)
                 {
-                    component.OnUpdate(deltaTime);
+                    if (component.Enabled) component.Update(deltaTime);
                 }
             }
         }
@@ -235,15 +226,31 @@ namespace PentaGE.Core.Scenes
         /// </summary>
         /// <param name="camera">The camera used for rendering.</param>
         /// <param name="window">The window used for rendering.</param>
-        public void Render(Camera camera, Window window, bool wireframe = false)
+        internal void Render(Camera camera, Window window, bool wireframe = false)
         {
             // Loop through entities and render entities with a MeshRendererComponent.
             foreach (var entity in _entities)
             {
-                var meshRenderer = entity.Components.Get<MeshRenderComponent>();
-                meshRenderer?.Render(camera, window, wireframe);
+                if (!entity.Visible) continue;
+
+                if (entity.DisplayMode == DisplayMode.WhenPlaying &&
+                    _manager.State != SceneState.Running &&
+                    _manager.State != SceneState.Paused)
+                    continue;
+
+                if (entity.DisplayMode == DisplayMode.WhenEditing &&
+                    _manager.State != SceneState.Idle)
+                    continue;
+
+                foreach (var meshRenderer in entity.Components.GetAll<MeshRenderComponent>())
+                {
+                    meshRenderer?.Render(camera, window, wireframe, DirectionalLight);
+                }
             }
         }
+
+        internal void SetDirectionalLight(DirectionalLightEntity directionalLight) =>
+            DirectionalLight = directionalLight;
 
         /// <inheritdoc />
         public IEnumerator<Entity> GetEnumerator() =>

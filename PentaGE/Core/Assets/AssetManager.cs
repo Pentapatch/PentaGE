@@ -170,7 +170,7 @@ namespace PentaGE.Core.Assets
             // Load the asset
             if (!asset.Load())
             {
-                Log.Warning($"Failed to load {typeName} asset '{name}'");
+                Log.Error($"Failed to load {typeName} asset '{name}'");
                 return false; // TODO: Throw exception or change return type?
             }
 
@@ -181,7 +181,7 @@ namespace PentaGE.Core.Assets
             }
             catch (Exception ex)
             {
-                Log.Warning($"Failed to add {typeName} asset '{name}': {ex}");
+                Log.Error($"Failed to add {typeName} asset '{name}': {ex}");
                 return false;
             }
 

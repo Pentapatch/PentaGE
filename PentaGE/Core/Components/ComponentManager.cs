@@ -38,6 +38,14 @@ namespace PentaGE.Core.Components
             _components.FirstOrDefault(c => c.GetType() == type);
 
         /// <summary>
+        /// Gets the component with the specified unique identifier within the manager.
+        /// </summary>
+        /// <param name="id">The unique identifier of the component to get.</param>
+        /// <returns>The component with the specified ID, or null if not found.</returns>
+        public Component? this[Guid id] =>
+            _components.FirstOrDefault(c => c.ID == id);
+
+        /// <summary>
         /// Gets the first component with the specified type name within the manager.
         /// </summary>
         /// <param name="typeName">The case insensitive name of the component type to get.</param>
@@ -49,42 +57,26 @@ namespace PentaGE.Core.Components
         /// Adds a component to the entity.
         /// </summary>
         /// <param name="component">The component to be added.</param>
-        /// <returns><see langword="true"/> if the component was successfully added; otherwise, <see langword="false"/>.</returns>
-        public bool Add(Component component)
+        /// <returns>The unique identifier of the added component if successful; otherwise, <see langword="null"/>.</returns>
+        public Guid? Add(Component component)
         {
             // Check if the component is already attached to an entity.
-            if (!component.CanHaveMultiple && Has(component.GetType()))
-                return false;
+            if (!component.CanHaveMultiple && this.Has(component.GetType()))
+                return null;
 
             component.Entity = _entity;
 
             _components.Add(component);
-            return true;
+            return component.ID;
         }
 
         /// <summary>
         /// Adds a new empty component of the specified type to the entity.
         /// </summary>
         /// <typeparam name="T">The type of component to add.</typeparam>
-        /// <returns><see langword="true"/> if the component was successfully added; otherwise, <see langword="false"/>.</returns>
-        public bool Add<T>() where T : Component, new() =>
+        /// <returns>The unique identifier of the added component if successful; otherwise, <see langword="null"/>.</returns>
+        public Guid? Add<T>() where T : Component, new() =>
             Add(new T());
-
-        /// <summary>
-        /// Tests if the entity has a component of a specific type.
-        /// </summary>
-        /// <typeparam name="T">The type of component to test.</typeparam>
-        /// <returns></returns>
-        public bool Has<T>() where T : Component =>
-            Get<T>() is not null;
-
-        /// <summary>
-        /// Tests if the entity has a component of a specific type.
-        /// </summary>
-        /// <param name="type">The type of component to test.</param>
-        /// <returns></returns>
-        public bool Has(Type type) =>
-            _components.Any(c => c.GetType() == type);
 
         /// <summary>
         /// Removes a component from the entity.
@@ -93,7 +85,7 @@ namespace PentaGE.Core.Components
         /// <returns><see langword="true"/> if the component was successfully removed; otherwise, <see langword="false"/>.</returns>
         public bool Remove(Component component)
         {
-            if (!ReferenceEquals(component.Entity, this)) return false;
+            if (!ReferenceEquals(component.Entity, _entity)) return false;
             if (!_components.Contains(component)) return false;
 
             component.Entity = null;
@@ -102,33 +94,45 @@ namespace PentaGE.Core.Components
         }
 
         /// <summary>
-        /// Removes a component of a specific type from the entity.
+        /// Removes the first component of a specific type from the entity.
         /// </summary>
         /// <typeparam name="T">The type of component to remove.</typeparam>
-        /// <returns><see langword="true"/> if the component was removed or was not present; otherwise, <see langword="false"/>.</returns>
+        /// <returns><see langword="true"/> if a component was found and removed; otherwise, <see langword="false"/>.</returns>
         public bool Remove<T>() where T : Component
         {
-            var component = Get<T>();
+            var component = this.Get<T>();
             if (component is null) return true;
 
             return Remove(component);
         }
 
         /// <summary>
-        /// Gets a component of a specific type attached to the entity.
+        /// Removes a component attached to the entity by its unique identifier.
         /// </summary>
-        /// <typeparam name="T">The type of component to retrieve.</typeparam>
-        /// <returns>The component of the specified type, if found; otherwise, <see langword="null"/>.</returns>
-        public T? Get<T>() where T : Component =>
-            _components.FirstOrDefault(c => c is T) as T;
+        /// <param name="id">The unique identifier of the component to remove.</param>
+        /// <returns><see langword="true"/> if the component with the given ID was found and removed; otherwise, <see langword="false"/>.</returns>
+        public bool Remove(Guid id)
+        {
+            if (id == Guid.Empty) return false;
+
+            if (this.Get(id) is Component component)
+                return Remove(component);
+
+            return false;
+        }
 
         /// <summary>
-        /// Gets all components of a specific type attached to the entity.
+        /// Removes all components of a specific type from the entity.
         /// </summary>
-        /// <typeparam name="T">The type of component to retrieve.</typeparam>
-        /// <returns>A list of components of the specified type.</returns>
-        public List<T> GetAll<T>() where T : Component =>
-            _components.Where(c => c is T).Cast<T>().ToList();
+        /// <typeparam name="T">The type of components to remove.</typeparam>
+        public void RemoveAll<T>() where T : Component
+        {
+            var components = this.GetAll<T>();
+            if (components is null) return;
+
+            foreach (var component in components)
+                Remove(component);
+        }
 
         /// <inheritdoc />
         public IEnumerator<Component> GetEnumerator() =>

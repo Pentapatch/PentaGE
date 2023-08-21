@@ -108,6 +108,7 @@ namespace PentaGE.Core.Rendering
             _engine.Events.KeyBindings[SetActiveSubjectToEight].Bind(Key.Alpha8, ModifierKey.Control);
             _engine.Events.KeyBindings[SetActiveSubjectToNine].Bind(Key.Alpha9, ModifierKey.Control);
             _engine.Events.KeyBindings[Delete_Entity].Bind(Key.Delete);
+            _engine.Events.KeyBindings[ToggleVisible].Bind(Key.V, ModifierKey.Control);
 
             #endregion
 
@@ -157,6 +158,9 @@ namespace PentaGE.Core.Rendering
 
         // TODO: Remove these hotkeys when they are no longer needed
         //       or move them to a concrete implementation of the engine
+
+        private void ToggleVisible() =>
+            _engine.Scenes.CurrentScene[activeSubjectIndex].Visible = !_engine.Scenes.CurrentScene[activeSubjectIndex].Visible;
 
         private void Delete_Entity()
         {

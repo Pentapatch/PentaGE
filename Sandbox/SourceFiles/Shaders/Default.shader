@@ -31,8 +31,7 @@ in vec3 currentPos;
 
 uniform sampler2D tex0;
 uniform bool hasTexture;
-uniform vec4 lightColor;
-uniform vec3 lightPosition;
+uniform bool hasDirectionalLight;
 uniform vec3 cameraPosition;
 uniform mat4 model; // Model matrix
 
@@ -45,16 +44,22 @@ uniform struct Material {
     float opacity;
 } material;
 
+uniform struct DirectionalLight {
+    vec3 direction;
+    vec4 color;
+    int followCamera;
+} directionalLight;
+
 vec3 calculateDiffuse(vec3 lightDirection, vec3 normalizedNormal) {
     float diffuse = max(dot(normalizedNormal, lightDirection), 0.0f);
-    return lightColor.rgb * diffuse;
+    return directionalLight.color.rgb * diffuse * directionalLight.color.a;
 }
 
 vec3 calculateSpecular(vec3 viewDirection, vec3 lightDirection, vec3 normalizedNormal) {
     vec3 reflectDirection = reflect(-lightDirection, normalizedNormal);
     float specularAmount = pow(max(dot(viewDirection, reflectDirection), 0.0f), 8);
     float specularFactor = specularAmount * material.specularStrength;
-    return lightColor.rgb * specularFactor;
+    return directionalLight.color.rgb * specularFactor * directionalLight.color.a;
 }
 
 void main()
@@ -62,7 +67,15 @@ void main()
     float ambient = 0.05f;
     vec3 normalizedNormal = normalize(vec3(model * vec4(normal, 1)));
     vec3 viewDirection = normalize(cameraPosition - currentPos);
-    vec3 lightDirection = normalize(lightPosition - currentPos);
+    
+    vec3 lightDirection;
+    if (directionalLight.followCamera != 0) {
+		lightDirection = normalize(viewDirection);
+	}
+    else
+    {
+        lightDirection = normalize(directionalLight.direction);
+    }
     
     vec3 diffuseColor = vec3(0.0);
     vec3 specularColor = vec3(0.0);
@@ -78,5 +91,5 @@ void main()
     diffuseColor = calculateDiffuse(lightDirection, normalizedNormal);
     specularColor = calculateSpecular(viewDirection, lightDirection, normalizedNormal);
     
-    FragColor.rgb *= (diffuseColor + specularColor) + ambient;
+    if (hasDirectionalLight) FragColor.rgb *= (diffuseColor + specularColor) + ambient;
 }

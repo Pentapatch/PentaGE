@@ -1,5 +1,6 @@
 ﻿using PentaGE.Common;
 using PentaGE.Core.Components;
+using PentaGE.Core.Entities;
 using PentaGE.Core.Graphics;
 using System.Numerics;
 using static OpenGL.GL;
@@ -32,6 +33,12 @@ namespace PentaGE.Core.Rendering
         }
 
         /// <summary>
+        /// Gets or sets the transform applied to the mesh.
+        /// </summary>
+        /// <remarks>If no transform is specified, the owning entity's transform is used.</remarks>
+        public Transform? Transform { get; set; }
+
+        /// <summary>
         /// Gets or sets the shader used for rendering the mesh.
         /// </summary>
         public Shader Shader { get; set; }
@@ -57,7 +64,18 @@ namespace PentaGE.Core.Rendering
         /// </summary>
         public DrawMode DrawMode { get; set; }
 
-        public override bool CanHaveMultiple => false;
+        public override bool CanHaveMultiple => true;
+
+       
+        public Transform GetTransform()
+        {
+            if (Transform is Transform componentTransform)
+                return componentTransform;
+            else if (Entity is not null && Entity.Components.Get<TransformComponent>() is TransformComponent entityTransformComponent)
+                return entityTransformComponent.Transform;
+            else
+                return new();
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MeshRenderComponent"/> class.
@@ -66,13 +84,15 @@ namespace PentaGE.Core.Rendering
         /// <param name="shader">The shader used for rendering the mesh.</param>
         /// <param name="texture">The texture applied to the mesh (optional).</param>
         /// <param name="material">The PBR material applied to the mesh (optional).</param>
-        public unsafe MeshRenderComponent(Mesh mesh, Shader shader, Texture? texture = null, PBRMaterial? material = null)
+        /// <param name="transform">The transform applied to the mesh (optional).</param>
+        public unsafe MeshRenderComponent(Mesh mesh, Shader shader, Texture? texture = null, PBRMaterial? material = null, Transform? transform = null)
         {
             _mesh = mesh;
             Shader = shader;
             _texture = texture;
             Material = material ?? new();
             DrawMode = DrawMode.Triangles;
+            Transform = transform;
 
             InitializeBuffers();
         }
@@ -116,14 +136,15 @@ namespace PentaGE.Core.Rendering
         /// <param name="camera">The camera used for rendering.</param>
         /// <param name="window">The window to render onto.</param>
         /// <param name="wireframe">Whether to render the mesh in wireframe mode (optional, default is false).</param>
-        internal unsafe void Render(Camera camera, Window window, bool wireframe = false)
+        internal unsafe void Render(Camera camera, Window window, bool wireframe = false, DirectionalLightEntity? directionalLight = null)
         {
             // Use the shader program
             Shader.Use();
 
-            // Get the transform of the object (if applicable)
+            // Get the transform of the component (if applicable)
+            // otherwise the transform component of the entity (if applicable)
             // or create a new default transform
-            Transform transform = Entity?.Components.Get<TransformComponent>()?.Transform ?? new Transform();
+            Transform transform = GetTransform();
 
             // Calculate the view and projection matrices from the camera
             // ViewMatrix means "camera space" (or "eye space") and is used for moving the camera.
@@ -149,10 +170,17 @@ namespace PentaGE.Core.Rendering
             Shader.SetUniform("projection", projectionMatrix);
             Shader.SetUniform("viewportSize", new Vector2(window.Viewport.Width, window.Viewport.Height));
 
-            // Set the light color uniforms
-            Shader.SetUniform("lightColor", new Vector4(1.0f, 1.0f, 1.0f, 1.0f)); // TODO: Move to directional light
-            Shader.SetUniform("lightPosition", new Vector3(10f, 10f, 10f));       // TODO: Move to directional light
-            //Shader.SetUniform("lightPosition", camera.Position); // If you want the light to follow the camera
+            // Set up the directional light
+            var hasDirectionalLight = directionalLight is not null && directionalLight.Enabled;
+            if (hasDirectionalLight)
+            {
+                Shader.SetUniform("directionalLight.direction", directionalLight!.Direction);
+                Shader.SetUniform("directionalLight.color", directionalLight.Color);
+                Shader.SetUniform("directionalLight.followCamera", directionalLight.FollowCamera);
+            }
+            Shader.SetUniform("hasDirectionalLight", hasDirectionalLight);
+
+            Shader.SetUniform("lightColor", new Vector4(1f, 1f, 1f, 1f));
             Shader.SetUniform("cameraPosition", camera.Position);
 
             // Set the material properties as uniforms in the shader
@@ -216,7 +244,8 @@ namespace PentaGE.Core.Rendering
             var clonedComponent = new MeshRenderComponent(Mesh, Shader, Texture, Material.Clone() as PBRMaterial)
             {
                 DrawMode = DrawMode, // Copy the draw mode directly
-                Enabled = true
+                Enabled = true,
+                Transform = Transform
             };
 
             return clonedComponent;
