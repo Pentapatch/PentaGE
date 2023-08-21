@@ -25,13 +25,11 @@ namespace Sandbox.Components
         /// <param name="yaw">Set whether yaw rotation is enabled.</param>
         /// <param name="pitch">Set whether pitch rotation is enabled.</param>
         /// <param name="roll">Set whether roll rotation is enabled.</param>
-        public ConstantRotator(bool yaw, bool pitch, bool roll)
+        public ConstantRotator(bool yaw, bool pitch, bool roll) : this()
         {
             YawEnabled = yaw;
             PitchEnabled = pitch;
             RollEnabled = roll;
-            Range = 360;
-            Speed = 1f;
         }
 
         /// <summary>

@@ -21,7 +21,7 @@ namespace PentaGE.Core.Scenes
         /// <summary>
         /// Gets the <see cref="DirectionalLightEntity"/> used for lighting the scene if there is one.
         /// </summary>
-        public DirectionalLightEntity? DirectionalLight { get; }
+        public DirectionalLightEntity? DirectionalLight { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the Scene class.
@@ -202,12 +202,15 @@ namespace PentaGE.Core.Scenes
         /// Updates all entities and their components in the scene.
         /// </summary>
         /// <param name="deltaTime">The time passed since the last frame.</param>
-        public void Update(float deltaTime)
+        internal void Update(float deltaTime)
         {
             // Loop through entities and update their components.
             foreach (var entity in _entities)
             {
                 if (!entity.Enabled) continue;
+
+                if (entity.UpdateMode == UpdateMode.WhenPlaying && _manager.State != SceneState.Running) continue;
+                if (entity.UpdateMode == UpdateMode.WhenEditing && _manager.State != SceneState.Idle) continue;
 
                 entity.Update(deltaTime);
 
@@ -223,17 +226,31 @@ namespace PentaGE.Core.Scenes
         /// </summary>
         /// <param name="camera">The camera used for rendering.</param>
         /// <param name="window">The window used for rendering.</param>
-        public void Render(Camera camera, Window window, bool wireframe = false)
+        internal void Render(Camera camera, Window window, bool wireframe = false)
         {
             // Loop through entities and render entities with a MeshRendererComponent.
             foreach (var entity in _entities)
             {
+                if (!entity.Visible) continue;
+
+                if (entity.DisplayMode == DisplayMode.WhenPlaying &&
+                    _manager.State != SceneState.Running &&
+                    _manager.State != SceneState.Paused)
+                    continue;
+
+                if (entity.DisplayMode == DisplayMode.WhenEditing &&
+                    _manager.State != SceneState.Idle)
+                    continue;
+
                 foreach (var meshRenderer in entity.Components.GetAll<MeshRenderComponent>())
                 {
                     meshRenderer?.Render(camera, window, wireframe, DirectionalLight);
                 }
             }
         }
+
+        internal void SetDirectionalLight(DirectionalLightEntity directionalLight) =>
+            DirectionalLight = directionalLight;
 
         /// <inheritdoc />
         public IEnumerator<Entity> GetEnumerator() =>

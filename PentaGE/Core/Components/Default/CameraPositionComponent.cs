@@ -30,11 +30,5 @@ namespace PentaGE.Core.Components
 
         /// <inheritdoc />
         public override object Clone() => MemberwiseClone();
-
-        /// <inheritdoc />
-        public override void Update(float deltaTime)
-        {
-            // Do nothing
-        }
     }
 }

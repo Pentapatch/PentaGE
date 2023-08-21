@@ -1,5 +1,6 @@
 ﻿using PentaGE.Common;
 using PentaGE.Core.Components;
+using PentaGE.Core.Entities;
 using PentaGE.Core.Graphics;
 using PentaGE.Core.Rendering;
 using System.Numerics;

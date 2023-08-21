@@ -29,16 +29,16 @@ namespace Sandbox
             Events.KeyBindings[ToggleFollowLight].Bind(Key.F, ModifierKey.Control);
             Events.KeyBindings[ToggleDirectionalLight].Bind(Key.F1, ModifierKey.Control);
 
+            AutoPlay = false;
+
             return true;
         }
 
         public void ToggleDirectionalLight() =>
             Scenes.CurrentScene.DirectionalLight!.Enabled = !Scenes.CurrentScene.DirectionalLight.Enabled;
 
-        public void ToggleFollowLight()
-        {
+        public void ToggleFollowLight() => 
             Scenes.CurrentScene.DirectionalLight!.FollowCamera = !Scenes.CurrentScene.DirectionalLight.FollowCamera;
-        }
 
         public void ToggleMaterialModulator()
         {
@@ -139,7 +139,7 @@ namespace Sandbox
             if (!Assets.AddShader("Normal", $"{shaderPath}Normal.shader")) return false;
             if (!Assets.AddShader("Light", $"{shaderPath}Light.shader")) return false;
             if (!Assets.AddShader("Grid", $"{shaderPath}Grid.shader")) return false;
-            if (!Assets.AddShader("Axes", $"{shaderPath}Axes.shader")) return false;
+            if (!Assets.AddShader("AxesShader", $"{shaderPath}Axes.shader")) return false;
 
             // Initialize test texture
             var texturePath = @"C:\Users\newsi\source\repos\PentaGE\Sandbox\SourceFiles\Textures\";
@@ -179,7 +179,6 @@ namespace Sandbox
             var rotation = new Rotation(45f, -45f, 0f);
             var color = new Vector4(1f, 1f, 1f, 1f);
             var directionalLight = new DirectionalLightEntity(dirLightMesh, Assets.Get<Shader>("Default")!, rotation, widgetTransform, color);
-            // lightMesh, Assets.Get<Shader>("Light")!
             Assets.Add("DirectionalLightEntity", directionalLight);
 
             // Set up test sun
@@ -197,17 +196,16 @@ namespace Sandbox
             Assets.Add("GridMinor", renderableGridMinor);
 
             // Initialize axes gizmo
-            var axesGizmoMesh = MeshFactory.CreateAxesGizmo(0.1f);
-            var renderableAxesGizmo = new RenderableMeshEntity(axesGizmoMesh, Assets.Get<Shader>("Axes")!);
-            renderableAxesGizmo.Components.Get<MeshRenderComponent>()!.DrawMode = DrawMode.Lines;
-            Assets.Add("AxesGizmo", renderableAxesGizmo);
+            var cameraOrientationWidgetMesh = MeshFactory.CreateAxesGizmo(0.1f);
+            var cameraOrientationWidgetEntity = new CameraOrientationWidgetEntity(cameraOrientationWidgetMesh, Assets.Get<Shader>("AxesShader")!);
+            Assets.Add("CameraOrientationWidget", cameraOrientationWidgetEntity);
 
             // Add entities to the scene
             var scene = Scenes.Add("Main");
             scene.Add((Entity)Assets["Subject"]!);
             scene.Add((Entity)Assets["GridMajor"]!);
             scene.Add((Entity)Assets["GridMinor"]!);
-            scene.Add((Entity)Assets["AxesGizmo"]!);
+            scene.Add((Entity)Assets["CameraOrientationWidget"]!);
             scene.Add((Entity)Assets["DirectionalLightEntity"]!);
             scene.Add((Entity)Assets["SunEntity"]!);
             scene.Load();

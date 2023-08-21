@@ -2,7 +2,6 @@
 using PentaGE.Core.Components;
 using PentaGE.Core.Graphics;
 using PentaGE.Core.Rendering;
-using PentaGE.Core.Scenes;
 
 namespace PentaGE.Core.Entities
 {
@@ -12,12 +11,12 @@ namespace PentaGE.Core.Entities
     /// </summary>
     public class SunEntity : Entity
     {
-        private readonly Guid? _directionalLightId;
-        private readonly Guid _meshRenderComponentId;
+        private readonly Guid _directionalLightId;
+        private readonly Guid _sunMeshRenderComponentId;
         private readonly Guid _cameraPositionComponentId;
-        private DirectionalLightEntity? _directionalLight;
-        private MeshRenderComponent? _sun;
-        private CameraPositionComponent? _cameraPosition;
+
+        // This entity should always recieve update events
+        public override UpdateMode UpdateMode => UpdateMode.Always;
 
         /// <summary>
         /// Gets or sets the distance of the sun from the camera.
@@ -39,48 +38,31 @@ namespace PentaGE.Core.Entities
             DirectionalLightEntity? directionalLightEntity = null,
             Transform? transform = null)
         {
-            _directionalLightId = directionalLightEntity?.ID;
+            _directionalLightId = SetReference(directionalLightEntity);
 
             // Add sun mesh
             var meshRenderComponent = new MeshRenderComponent(mesh, shader, texture: null, material: null, transform ?? Transform.Identity);
-            if (Components.Add(meshRenderComponent) is Guid meshRenderId)
-            {
-                _meshRenderComponentId = meshRenderId;
-            };
+            Components.Add(meshRenderComponent);
+            _sunMeshRenderComponentId = SetReference(meshRenderComponent);
 
             Distance = 100;
 
             var cameraPositionComponent = new CameraPositionComponent(cameraController);
-            if (Components.Add(cameraPositionComponent) is Guid cameraPositionId)
-            {
-                _cameraPositionComponentId = cameraPositionId;
-            };
-        }
-
-        /// <inheritdoc />
-        public override void SceneBegin(Scene scene)
-        {
-            if (_directionalLightId is Guid directionalLightId)
-                _directionalLight = scene.Get<DirectionalLightEntity>(directionalLightId);
-
-            if (_meshRenderComponentId is Guid meshRenderComponentId)
-                _sun = Components.Get<MeshRenderComponent>(meshRenderComponentId);
-
-            if (_cameraPositionComponentId is Guid cameraPositionId)
-                _cameraPosition = Components.Get<CameraPositionComponent>(cameraPositionId);
+            Components.Add(cameraPositionComponent);
+            _cameraPositionComponentId = SetReference(cameraPositionComponent);
         }
 
         /// <inheritdoc />
         public override void Update(float deltaTime)
         {
-            var direction = _directionalLight is DirectionalLightEntity directionalLight ? 
+            var direction = GetReference<DirectionalLightEntity>(_directionalLightId) is DirectionalLightEntity directionalLight ?
                 directionalLight.Direction : World.ForwardVector;
 
             // Update the transform of the sun
-            if (_sun is not MeshRenderComponent sun) return;
+            if (GetReference<MeshRenderComponent>(_sunMeshRenderComponentId) is not MeshRenderComponent sun) return;
             if (sun.Transform is not Transform transform) return;
 
-            if (_cameraPosition is not CameraPositionComponent cameraPosition) return;
+            if (GetReference<CameraPositionComponent>(_cameraPositionComponentId) is not CameraPositionComponent cameraPosition) return;
 
             transform.Position = cameraPosition.Position + direction * Distance;
 

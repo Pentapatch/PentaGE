@@ -79,7 +79,15 @@ namespace PentaGE.Core.Scenes
         public void SetActiveScene(Scene scene)
         {
             _activeScene = scene;
+
+            // Set the directional light of the scene as the active directional light
+            if (_activeScene.Entities.Of<DirectionalLightEntity>().FirstOrDefault() is DirectionalLightEntity directionalLight)
+            {
+                _activeScene.SetDirectionalLight(directionalLight);
+            }
+
             Stop();
+
             Log.Information("Current scene is set to {SceneName}.", scene.Name);
         }
 
@@ -161,6 +169,8 @@ namespace PentaGE.Core.Scenes
 
             _playableScene = null;
 
+            OnSceneEnd();
+
             State = SceneState.Idle;
             Log.Information("Scene is stopped.");
 
@@ -200,20 +210,17 @@ namespace PentaGE.Core.Scenes
         #endregion
 
         /// <summary>
-        /// Updates the playable scene if the current state of the <see cref="SceneManager"/> is <see cref="SceneState.Running"/>.
+        /// Send update events to all entities of the active scene.
         /// </summary>
         /// <param name="deltaTime">The time elapsed since the last frame.</param>
         internal void Update(float deltaTime)
         {
-            if (State != SceneState.Running) return;
-            if (_playableScene is null) return;
-
-            _playableScene.Update(deltaTime);
+            CurrentScene?.Update(deltaTime);
         }
 
         /// <summary>
         /// Invokes the <see cref="SceneBegin(Scene)"/> method for each entity in the playable scene,
-        /// allowing entities to establish references and perform initialization within the scene.
+        /// allowing entities to perform initialization and settings within the scene.
         /// </summary>
         private void OnSceneBegin()
         {
@@ -225,7 +232,27 @@ namespace PentaGE.Core.Scenes
             }
             foreach (var entity in _playableScene)
             {
+                entity.UpdateReferences(_playableScene);
                 entity.SceneBegin(_playableScene);
+            }
+        }
+
+        /// <summary>
+        /// Invokes the <see cref="SceneEnd(Scene)"/> method for each entity in the active scene,
+        /// allowing entities to perform cleanup and finalize scene-related operations.
+        /// </summary>
+        private void OnSceneEnd()
+        {
+            if (_activeScene is null)
+            {
+                throw new InvalidOperationException(
+                    "Cannot invoke OnSceneEnd() when the active scene is null. " +
+                    "This method should only be invoked when the scene is stopped.");
+            }
+            foreach (var entity in _activeScene)
+            {
+                entity.UpdateReferences(_activeScene);
+                entity.SceneEnd(_activeScene);
             }
         }
 

@@ -30,14 +30,12 @@ namespace PentaGE.Core.Components
         /// </summary>
         public bool Enabled { get; set; } = true;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Component"/> class with a new unique identifier.
+        /// </summary>
         public Component()
         {
             ID = Guid.NewGuid();
-        }
-
-        internal Component(Guid? id)
-        {
-            ID = id ?? Guid.NewGuid();
         }
 
         /// <summary>
@@ -57,6 +55,6 @@ namespace PentaGE.Core.Components
         /// Called to update the component's state and behavior over time.
         /// </summary>
         /// <param name="deltaTime">The time elapsed since the last update in seconds.</param>
-        public abstract void Update(float deltaTime);
+        public virtual void Update(float deltaTime) { }
     }
 }
