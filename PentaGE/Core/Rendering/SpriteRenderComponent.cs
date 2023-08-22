@@ -4,10 +4,14 @@ using PentaGE.Core.Entities;
 using PentaGE.Core.Graphics;
 using PentaGE.Core.Rendering.Sprites;
 using System.Numerics;
+using System.Transactions;
 using static OpenGL.GL;
 
 namespace PentaGE.Core.Rendering
 {
+    /// <summary>
+    /// Represents a component for rendering sprites using OpenGL.
+    /// </summary>
     public sealed class SpriteRenderComponent : Component, IDisposable
     {
         private readonly Mesh _mesh;
@@ -26,6 +30,17 @@ namespace PentaGE.Core.Rendering
         /// <remarks>If no transform is specified, the owning entity's transform is used.</remarks>
         public Transform? Transform { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether backface culling is enabled for rendering.
+        /// </summary>
+        public bool EnableCulling { get; set; } = false;
+
+        /// <summary>
+        /// Gets the transform applied to the mesh.
+        /// </summary>
+        /// <remarks>
+        /// If no transform is specified, the owning entity's transform is used.
+        /// </remarks>
         public Transform GetTransform()
         {
             if (Transform is Transform componentTransform)
@@ -36,17 +51,34 @@ namespace PentaGE.Core.Rendering
                 return new();
         }
 
-        public SpriteRenderComponent(Sprite sprite, Shader shader, Transform? transform = null)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SpriteRenderComponent"/> class.
+        /// </summary>
+        /// <param name="sprite">The sprite to render.</param>
+        /// <param name="shader">The shader program used for rendering.</param>
+        /// <param name="mesh">The mesh representing the sprite's geometry (optional).</param>
+        /// <param name="transform">The transform applied to the sprite (optional).</param>
+        /// <param name="meshTransform">The transform applied to the mesh (optional).</param>
+        public SpriteRenderComponent(
+            Sprite sprite,
+            Shader shader,
+            Mesh? mesh = null,
+            Transform? transform = null,
+            Transform? meshTransform = null)
         {
             Transform = transform;
 
             _sprite = sprite;
             _shader = shader;
-            _mesh = MeshFactory.CreateRectangle(GetTransform().Scale.X, GetTransform().Scale.Y);
+            var tfm = meshTransform ?? new Transform(Vector3.Zero, new Rotation(0, -90, 0), Vector3.One);
+            _mesh = mesh ?? MeshFactory.CreateRectangle(tfm.Scale.X, tfm.Scale.Y, tfm.Rotation);
 
             InitializeBuffers();
         }
 
+        /// <summary>
+        /// Initializes the vertex and index buffers for rendering the sprite mesh.
+        /// </summary>
         private unsafe void InitializeBuffers()
         {
             // Dispose of the old buffers (if applicable)
@@ -148,7 +180,7 @@ namespace PentaGE.Core.Rendering
 
             // Enable culling
             bool disableCulling = false;
-            if (!glIsEnabled(GL_CULL_FACE))
+            if (EnableCulling && !glIsEnabled(GL_CULL_FACE))
             {
                 glEnable(GL_CULL_FACE);
                 glCullFace(GL_BACK);
@@ -180,9 +212,11 @@ namespace PentaGE.Core.Rendering
 
         /// <inheritdoc />
         public override object Clone() =>
-            new SpriteRenderComponent(_sprite, _shader)
+            new SpriteRenderComponent(_sprite, _shader, _mesh)
             {
-                Enabled = true
+                Enabled = true,
+                Transform = Transform,
+                EnableCulling = EnableCulling,
             };
 
         /// <inheritdoc />

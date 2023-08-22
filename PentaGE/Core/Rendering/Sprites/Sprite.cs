@@ -41,8 +41,14 @@ namespace PentaGE.Core.Rendering.Sprites
             _texture.Dispose();
 
         /// <inheritdoc />
-        public bool Load() => 
-            _texture.Load();
+        public bool Load()
+        {
+            if (_texture.Id == 0)
+            {
+                return _texture.Load();
+            }
+            return true;
+        }
 
         /// <inheritdoc />
         public bool Reload() =>

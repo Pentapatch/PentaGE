@@ -9,7 +9,7 @@ namespace PentaGE.Core.Entities
     /// Represents a sun entity in the game world that emulates the position of the sun
     /// based on a directional light and camera position.
     /// </summary>
-    public class SunEntity : Entity
+    public sealed class SunEntity : Entity
     {
         private readonly Guid _directionalLightId;
         private readonly Guid _sunMeshRenderComponentId;
@@ -65,6 +65,7 @@ namespace PentaGE.Core.Entities
             if (GetReference<CameraPositionComponent>(_cameraPositionComponentId) is not CameraPositionComponent cameraPosition) return;
 
             transform.Position = cameraPosition.Position + direction * Distance;
+            transform.Rotation = Rotation.GetLookAt(transform.Position, cameraPosition.Position);
 
             sun.Transform = transform;
         }

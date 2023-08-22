@@ -64,8 +64,15 @@ namespace PentaGE.Core.Rendering
         /// </summary>
         public DrawMode DrawMode { get; set; }
 
+        /// <inheritdoc />
         public override bool CanHaveMultiple => true;
 
+        /// <summary>
+        /// Gets the transform applied to the mesh.
+        /// </summary>
+        /// <remarks>
+        /// If no transform is specified, the owning entity's transform is used.
+        /// </remarks>
         public Transform GetTransform()
         {
             if (Transform is Transform componentTransform)
@@ -96,6 +103,9 @@ namespace PentaGE.Core.Rendering
             InitializeBuffers();
         }
 
+        /// <summary>
+        /// Initializes the vertex and index buffers for rendering the sprite mesh.
+        /// </summary>
         private unsafe void InitializeBuffers()
         {
             // Dispose of the old buffers (if applicable)

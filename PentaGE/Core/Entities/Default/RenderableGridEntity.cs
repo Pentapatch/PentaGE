@@ -7,6 +7,8 @@ namespace PentaGE.Core.Entities
     /// </summary>
     public sealed class RenderableGridEntity : Entity
     {
+        public override DisplayMode DisplayMode => DisplayMode.WhenEditing;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RenderableGridEntity"/> class with the specified grid and shader.
         /// </summary>

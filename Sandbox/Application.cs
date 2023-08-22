@@ -141,8 +141,9 @@ namespace Sandbox
             if (!Assets.AddShader("Light", $"{shaderPath}Light.shader")) return false;
             if (!Assets.AddShader("Grid", $"{shaderPath}Grid.shader")) return false;
             if (!Assets.AddShader("AxesShader", $"{shaderPath}Axes.shader")) return false;
+            if (!Assets.AddShader("SpritesShader", $"{shaderPath}Sprites.shader")) return false;
 
-            // Initialize test texture
+            // Initialize test textures
             var texturePath = @"C:\Users\newsi\source\repos\PentaGE\Sandbox\SourceFiles\Textures\";
             if (!Assets.AddTexture("BlackPentaTexture",
                     $"{texturePath}Pentapatch_Texture_2k_A.jpg",
@@ -159,6 +160,10 @@ namespace Sandbox
                     GL_RGBA,
                     GL_UNSIGNED_BYTE))
                 return false;
+
+            // Initialize test sprites
+            // TODO: Need custom AddSprite() method
+            if (!Assets.Add("WhitePentaSprite", new Sprite($"{texturePath}Pentapatch_Texture_2k_B.jpg", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE), $"{texturePath}Pentapatch_Texture_2k_B.jpg")) return false;
 
             // Set up subject mesh
             var subjectMesh = MeshFactory.CreateCube(1f);
@@ -179,12 +184,12 @@ namespace Sandbox
             var widgetTransform = new Transform(new Vector3(0f, 1f, 0f), Rotation.Zero, Vector3.One);
             var rotation = new Rotation(45f, -45f, 0f);
             var color = new Vector4(1f, 1f, 1f, 1f);
-            var directionalLight = new DirectionalLightEntity(dirLightMesh, Assets.Get<Shader>("Default")!, rotation, widgetTransform, color);
+            var directionalLight = new DirectionalLightEntity(dirLightMesh, Assets.Get<Shader>("Light")!, rotation, widgetTransform, color);
             Assets.Add("DirectionalLightEntity", directionalLight);
 
             // Set up test sun
-            var sunMesh = MeshFactory.CreateSphere(10f);
-            var sun = new SunEntity(sunMesh, Assets.Get<Shader>("Light")!, Windows[0].Viewport.CameraManager.ActiveController, directionalLight);
+            var sunMesh = MeshFactory.CreateCircle(10f, 64, new(0f, -90f, 0f));
+            var sun = new SunEntity(sunMesh, Assets.Get<Shader>("Default")!, Windows[0].Viewport.CameraManager.ActiveController, directionalLight);
             Assets.Add("SunEntity", sun);
             
             // Initialize grid
@@ -201,17 +206,9 @@ namespace Sandbox
             var cameraOrientationWidgetEntity = new CameraOrientationWidgetEntity(cameraOrientationWidgetMesh, Assets.Get<Shader>("AxesShader")!);
             Assets.Add("CameraOrientationWidget", cameraOrientationWidgetEntity);
 
-            // Testing polygon plane
-            //var circleTransformComponent = new TransformComponent(new Transform(new(0f, 0f, 0.6f), Rotation.Zero, Vector3.One));
-            //var circlePlaneMesh = MeshFactory.CreateRegularPolygon(4, 0.5f, new Rotation(0f, -90f, 0f));
-            //var renderableCirclePlane = new RenderableMeshEntity(circlePlaneMesh, Assets.Get<Shader>("Default")!, Assets.Get<Texture>("WhitePentaTexture")!);
-            //renderableCirclePlane.Components.Add(circleTransformComponent);
-            //Assets.Add("CirclePlaneEntity", renderableCirclePlane);
-
             // Testing sprite
             var sprite = new Sprite(Assets.Get<Texture>("WhitePentaTexture")!);
-            var spriteEntity = new SpriteEntity(sprite, Assets.Get<Shader>("Default")!);
-            spriteEntity.Components.Add(new TransformComponent(new Transform(new(0f, 0f, -2f), new Rotation(0f, 90f, 0f), new(3f))));
+            var spriteEntity = new BillboardEntity(sprite, Assets.Get<Shader>("SpritesShader")!, Windows[0].Viewport.CameraManager.ActiveController, null, new Transform(new(0f, 0f, -2f), Rotation.Zero, Vector3.One), new Transform(Vector3.Zero, new(0f, -90f, 0f), new(5f, 5f, 5f)));
             Assets.Add("SpriteEntity", spriteEntity);
 
             // Add entities to the scene
@@ -223,7 +220,6 @@ namespace Sandbox
             scene.Add((Entity)Assets["DirectionalLightEntity"]!);
             scene.Add((Entity)Assets["SunEntity"]!);
             scene.Add((Entity)Assets["SpriteEntity"]!);
-            //scene.Add((Entity)Assets["CirclePlaneEntity"]!);
             scene.Load();
 
             return true;
