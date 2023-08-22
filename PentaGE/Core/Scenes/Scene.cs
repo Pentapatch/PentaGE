@@ -246,6 +246,11 @@ namespace PentaGE.Core.Scenes
                 {
                     meshRenderer?.Render(camera, window, wireframe, DirectionalLight);
                 }
+
+                foreach (var spriteRenderer in entity.Components.GetAll<SpriteRenderComponent>())
+                {
+                    spriteRenderer?.Render(camera, window, wireframe, DirectionalLight);
+                }
             }
         }
 

@@ -5,6 +5,7 @@ using PentaGE.Core.Entities;
 using PentaGE.Core.Events;
 using PentaGE.Core.Graphics;
 using PentaGE.Core.Rendering;
+using PentaGE.Core.Rendering.Sprites;
 using Sandbox.Components;
 using System.Numerics;
 using static OpenGL.GL;
@@ -200,12 +201,18 @@ namespace Sandbox
             var cameraOrientationWidgetEntity = new CameraOrientationWidgetEntity(cameraOrientationWidgetMesh, Assets.Get<Shader>("AxesShader")!);
             Assets.Add("CameraOrientationWidget", cameraOrientationWidgetEntity);
 
-            // Testing circle plane
+            // Testing polygon plane
             //var circleTransformComponent = new TransformComponent(new Transform(new(0f, 0f, 0.6f), Rotation.Zero, Vector3.One));
-            //var circlePlaneMesh = MeshFactory.CreateCircle(0.5f, 64, new Rotation(0f, -90f, 0f));
-            //var renderableCirclePlane = new RenderableMeshEntity(circlePlaneMesh, Assets.Get<Shader>("Default")!, Assets.Get<Texture>("BlackPentaTexture")!);
+            //var circlePlaneMesh = MeshFactory.CreateRegularPolygon(4, 0.5f, new Rotation(0f, -90f, 0f));
+            //var renderableCirclePlane = new RenderableMeshEntity(circlePlaneMesh, Assets.Get<Shader>("Default")!, Assets.Get<Texture>("WhitePentaTexture")!);
             //renderableCirclePlane.Components.Add(circleTransformComponent);
             //Assets.Add("CirclePlaneEntity", renderableCirclePlane);
+
+            // Testing sprite
+            var sprite = new Sprite(Assets.Get<Texture>("WhitePentaTexture")!);
+            var spriteEntity = new SpriteEntity(sprite, Assets.Get<Shader>("Default")!);
+            spriteEntity.Components.Add(new TransformComponent(new Transform(new(0f, 0f, -2f), new Rotation(0f, 90f, 0f), new(3f))));
+            Assets.Add("SpriteEntity", spriteEntity);
 
             // Add entities to the scene
             var scene = Scenes.Add("Main");
@@ -215,6 +222,7 @@ namespace Sandbox
             scene.Add((Entity)Assets["CameraOrientationWidget"]!);
             scene.Add((Entity)Assets["DirectionalLightEntity"]!);
             scene.Add((Entity)Assets["SunEntity"]!);
+            scene.Add((Entity)Assets["SpriteEntity"]!);
             //scene.Add((Entity)Assets["CirclePlaneEntity"]!);
             scene.Load();
 
