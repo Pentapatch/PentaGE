@@ -604,6 +604,64 @@ namespace PentaGE.Core.Graphics
         }
 
         /// <summary>
+        /// Creates a regular polygon mesh with the specified number of sides and radius.
+        /// </summary>
+        /// <param name="sides">The number of sides of the polygon.</param>
+        /// <param name="radius">The radius of the circumscribed circle of the polygon.</param>
+        /// <param name="rotation">Optional rotation applied to the polygon.</param>
+        /// <returns>A regular polygon mesh with the specified number of sides and radius.</returns>
+        public static Mesh CreateRegularPolygon(int sides, float radius, Rotation? rotation = null)
+        {
+            if (sides < 3)
+                throw new ArgumentOutOfRangeException(nameof(sides), "Number of sides must be greater than or equal to three.");
+
+            if (radius <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(radius), "Radius must be greater than zero.");
+
+            List<Vertex> vertices = new();
+            List<uint> indices = new();
+
+            // Calculate the center vertex position
+            Vector3 centerPosition = Vector3.Zero;
+
+            // Add the center vertex once
+            vertices.Add(new Vertex(centerPosition, World.UpVector, CenterUV));
+
+            float angleIncrement = MathF.PI * 2f / sides;
+
+            // Calculate the angle to start creating vertices from the top
+            float startAngle = MathF.PI / 2f - angleIncrement / 2f;
+
+            for (int i = 0; i < sides; i++)
+            {
+                // Calculate the position of the vertex on the polygon
+                float angle = startAngle + i * angleIncrement;
+                Vector3 vertexPosition = new(MathF.Cos(angle) * radius, 0f, MathF.Sin(angle) * radius);
+
+                // Calculate texture coordinates based on vertex position
+                float u = 1f - (vertexPosition.X / (radius * 2) + 0.5f); // Invert and map [-1, 1] to [0, 1]
+                float v = 1f - (vertexPosition.Z / (radius * 2) + 0.5f); // -- " --
+                Vector2 vertexUV = new(u, v);
+
+                // Define vertices of the polygon
+                vertices.Add(new Vertex(vertexPosition, World.UpVector, vertexUV));
+
+                // Define indices of the polygon
+                indices.Add(0);                                  // Center vertex
+                indices.Add((uint)(i == sides - 1 ? 1 : i + 2)); // Next vertex (loop around)
+                indices.Add((uint)(i + 1));                      // Current vertex
+            }
+
+            var mesh = new Mesh(vertices, indices);
+            if (rotation is not null)
+            {
+                mesh.Rotate(rotation.Value);
+            }
+
+            return mesh;
+        }
+
+        /// <summary>
         /// Creates a square 2D plane mesh with the specified size.
         /// </summary>
         /// <param name="size">The size of the square (both width and height).</param>
@@ -611,6 +669,42 @@ namespace PentaGE.Core.Graphics
         /// <returns>A plane mesh representing a square with the specified size.</returns>
         public static Mesh CreateSquare(float size, Rotation? rotation = null) =>
             CreateRectangle(size, size, rotation);
+
+        /// <summary>
+        /// Creates a regular 2D triangle mesh with the specified radius.
+        /// </summary>
+        /// <param name="radius">The radius of the triangle.</param>
+        /// <param name="rotation">Optional rotation applied to the triangle.</param>
+        /// <returns>A regular triangle mesh with the specified radius.</returns>
+        public static Mesh CreateTriangle(float radius, Rotation? rotation = null) =>
+            CreateRegularPolygon(3, radius, rotation);
+
+        /// <summary>
+        /// Creates a regular 2D pentagon mesh with the specified radius.
+        /// </summary>
+        /// <param name="radius">The radius of the pentagon.</param>
+        /// <param name="rotation">Optional rotation applied to the pentagon.</param>
+        /// <returns>A regular pentagon mesh with the specified radius.</returns>
+        public static Mesh CreatePentagon(float radius, Rotation? rotation = null) =>
+            CreateRegularPolygon(5, radius, rotation);
+
+        /// <summary>
+        /// Creates a regular 2D hexagon mesh with the specified radius.
+        /// </summary>
+        /// <param name="radius">The radius of the hexagon.</param>
+        /// <param name="rotation">Optional rotation applied to the hexagon.</param>
+        /// <returns>A regular hexagon mesh with the specified radius.</returns>
+        public static Mesh CreateHexagon(float radius, Rotation? rotation = null) =>
+            CreateRegularPolygon(6, radius, rotation);
+
+        /// <summary>
+        /// Creates a regular 2D octagon mesh with the specified radius.
+        /// </summary>
+        /// <param name="radius">The radius of the octagon.</param>
+        /// <param name="rotation">Optional rotation applied to the octagon.</param>
+        /// <returns>A regular octagon mesh with the specified radius.</returns>
+        public static Mesh CreateOctagon(float radius, Rotation? rotation = null) =>
+            CreateRegularPolygon(8, radius, rotation);
 
         #endregion
     }
