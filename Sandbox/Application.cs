@@ -174,7 +174,7 @@ namespace Sandbox
             Assets.Add("Subject", renderableMesh);
 
             // Set up test directional light
-            var dirLightMesh = MeshFactory.CreateSphere(0.2f);
+            var dirLightMesh = MeshFactory.CreateSphere(0.1f);
             var widgetTransform = new Transform(new Vector3(0f, 1f, 0f), Rotation.Zero, Vector3.One);
             var rotation = new Rotation(45f, -45f, 0f);
             var color = new Vector4(1f, 1f, 1f, 1f);
@@ -182,7 +182,7 @@ namespace Sandbox
             Assets.Add("DirectionalLightEntity", directionalLight);
 
             // Set up test sun
-            var sunMesh = MeshFactory.CreateSphere(20f);
+            var sunMesh = MeshFactory.CreateSphere(10f);
             var sun = new SunEntity(sunMesh, Assets.Get<Shader>("Light")!, Windows[0].Viewport.CameraManager.ActiveController, directionalLight);
             Assets.Add("SunEntity", sun);
             
@@ -196,9 +196,16 @@ namespace Sandbox
             Assets.Add("GridMinor", renderableGridMinor);
 
             // Initialize axes gizmo
-            var cameraOrientationWidgetMesh = MeshFactory.CreateAxesGizmo(0.1f);
+            var cameraOrientationWidgetMesh = MeshFactory.CreateAxesWidget(0.1f);
             var cameraOrientationWidgetEntity = new CameraOrientationWidgetEntity(cameraOrientationWidgetMesh, Assets.Get<Shader>("AxesShader")!);
             Assets.Add("CameraOrientationWidget", cameraOrientationWidgetEntity);
+
+            // Testing circle plane
+            //var circleTransformComponent = new TransformComponent(new Transform(new(0f, 0f, 0.6f), Rotation.Zero, Vector3.One));
+            //var circlePlaneMesh = MeshFactory.CreateCircle(0.5f, 64, new Rotation(0f, -90f, 0f));
+            //var renderableCirclePlane = new RenderableMeshEntity(circlePlaneMesh, Assets.Get<Shader>("Default")!, Assets.Get<Texture>("BlackPentaTexture")!);
+            //renderableCirclePlane.Components.Add(circleTransformComponent);
+            //Assets.Add("CirclePlaneEntity", renderableCirclePlane);
 
             // Add entities to the scene
             var scene = Scenes.Add("Main");
@@ -208,6 +215,7 @@ namespace Sandbox
             scene.Add((Entity)Assets["CameraOrientationWidget"]!);
             scene.Add((Entity)Assets["DirectionalLightEntity"]!);
             scene.Add((Entity)Assets["SunEntity"]!);
+            //scene.Add((Entity)Assets["CirclePlaneEntity"]!);
             scene.Load();
 
             return true;

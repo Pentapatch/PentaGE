@@ -85,6 +85,7 @@ namespace PentaGE.Core.Rendering
             _engine.Events.HotKeys[Key.Alpha4].Event += CreatePyramid_HotKey;
             _engine.Events.HotKeys[Key.Alpha5].Event += CreateSphere_HotKey;
             _engine.Events.HotKeys[Key.Alpha6].Event += CreatePlane_HotKey;
+            _engine.Events.HotKeys[Key.Alpha7].Event += CreateCircle_HotKey;
             _engine.Events.HotKeys[Key.Backspace, ModifierKey.Control].Event += OrbitLight_HotKey;
             _engine.Events.HotKeys[Key.L, ModifierKey.Control].Event += GenerateLandscape_HotKey;
             _engine.Events.HotKeys[Key.T, ModifierKey.Control].Event += PerformTest_HotKey;
@@ -258,7 +259,7 @@ namespace PentaGE.Core.Rendering
 
         private void CreateSphere_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
-            var mesh = MeshFactory.CreateSphere(1f);
+            var mesh = MeshFactory.CreateSphere(0.5f);
             _engine.Scenes.CurrentScene[activeSubjectIndex].Components.Get<MeshRenderComponent>()!.Mesh = mesh;
         }
 
@@ -282,7 +283,13 @@ namespace PentaGE.Core.Rendering
 
         private void CreatePlane_HotKey(object? sender, Events.HotKeyEventArgs e)
         {
-            var mesh = MeshFactory.CreatePlane(1f, 1f, new Rotation(0, -90, 0));
+            var mesh = MeshFactory.CreateRectangle(1f, 1f, new Rotation(0, -90, 0));
+            _engine.Scenes.CurrentScene[activeSubjectIndex].Components.Get<MeshRenderComponent>()!.Mesh = mesh;
+        }
+
+        private void CreateCircle_HotKey(object? sender, Events.HotKeyEventArgs e)
+        {
+            var mesh = MeshFactory.CreateCircle(0.5f, 64, new Rotation(0, -90, 0));
             _engine.Scenes.CurrentScene[activeSubjectIndex].Components.Get<MeshRenderComponent>()!.Mesh = mesh;
         }
 
@@ -303,7 +310,7 @@ namespace PentaGE.Core.Rendering
                     controller.SetPosition(new Vector3(0f, 5f, 3f));
                     controller.SetOrbitTarget(new Vector3(0f, 0f, 0f));
                 }
-                var mesh = MeshFactory.CreatePlane(40f, 40f);
+                var mesh = MeshFactory.CreateRectangle(40f, 40f);
                 mesh.Offset(0f, -2f, 0f);
                 mesh.Subdivide();
                 mesh.Roughen(2f);
