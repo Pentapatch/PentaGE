@@ -78,7 +78,7 @@ namespace PentaGE.Core.Assets
             }
             catch (FileNotFoundException ex)
             {
-                Log.Error($"Failed to add shader '{name}': {ex}");
+                Log.Error("Failed to add shader '{name}': {ex}", name, ex);
                 return false;
             }
         }
@@ -118,7 +118,7 @@ namespace PentaGE.Core.Assets
             }
             catch (FileNotFoundException ex)
             {
-                Log.Error($"Failed to add sprite '{name}': {ex}");
+                Log.Error("Failed to add sprite '{name}': {ex}", name, ex);
                 return false;
             }
         }
@@ -142,7 +142,7 @@ namespace PentaGE.Core.Assets
             }
             catch (FileNotFoundException ex)
             {
-                Log.Error($"Failed to add texture '{name}': {ex}");
+                Log.Error("Failed to add texture '{name}': {ex}", name, ex);
                 return false;
             }
         }
@@ -207,12 +207,12 @@ namespace PentaGE.Core.Assets
         public bool Add(string name, IAsset asset, string? filePath = null)
         {
             string typeName = asset.GetType().Name;
-            using var logger = Log.Logger.BeginPerfLogger($"Adding {typeName} asset '{name}'");
+            using var logger = Log.Logger.BeginPerfLogger("Adding {typeName} asset '{name}'", typeName, name);
 
             // Load the asset
             if (!asset.Load())
             {
-                Log.Error($"Failed to load {typeName} asset '{name}'");
+                Log.Error("Failed to load {typeName} asset '{name}'", typeName, asset);
                 return false; // TODO: Throw exception or change return type?
             }
 
@@ -223,7 +223,7 @@ namespace PentaGE.Core.Assets
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to add {typeName} asset '{name}': {ex}");
+                Log.Error("Failed to add {typeName} asset '{name}': {ex}", typeName, name);
                 return false;
             }
 
@@ -233,7 +233,7 @@ namespace PentaGE.Core.Assets
                 if (filePath is not null)
                     RegisterPath(name, filePath, hotReloadable);
                 else
-                    Log.Warning($"Failed to register {typeName} asset '{name}' for hot reload: No file path provided");
+                    Log.Warning("Failed to register {typeName} asset '{name}' for hot reload: No file path provided", typeName, name);
             }
 
             return true;
@@ -400,10 +400,10 @@ namespace PentaGE.Core.Assets
         private static void ReloadAsset(string name, IHotReloadable asset)
         {
             string typeName = asset.GetType().Name;
-            Log.Information($"Hot-Reloading {typeName} asset '{name}'");
+            Log.Information("Hot-Reloading {typeName} asset '{name}'", typeName, name);
 
             if (!asset.Reload())
-                Log.Warning($"Failed to hot-reload {typeName} asset '{name}'");
+                Log.Warning("Failed to hot-reload {typeName} asset '{name}'", typeName, name);
         }
     }
 }

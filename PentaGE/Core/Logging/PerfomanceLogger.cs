@@ -9,6 +9,7 @@ namespace PentaGE.Core.Logging
     {
         private readonly ILogger _logger;
         private readonly string _message;
+        private readonly object[] propertyValues;
         private readonly DateTimeOffset _startTime;
 
         /// <summary>
@@ -16,13 +17,14 @@ namespace PentaGE.Core.Logging
         /// </summary>
         /// <param name="logger">The logger instance used for logging.</param>
         /// <param name="message">The message or description of the operation being logged.</param>
-        public PerformanceLogger(ILogger logger, string message)
+        public PerformanceLogger(ILogger logger, string message, params object[] propertyValues)
         {
             _logger = logger;
             _message = message;
+            this.propertyValues = propertyValues;
             _startTime = DateTimeOffset.UtcNow;
 
-            _logger.Information($"{_message}..");
+            _logger.Information(message + "..", propertyValues);
         }
 
         /// <summary>
@@ -31,7 +33,10 @@ namespace PentaGE.Core.Logging
         public void Dispose()
         {
             var elapsedMilliseconds = (DateTimeOffset.UtcNow - _startTime).TotalMilliseconds;
-            _logger.Information($"Done {_message} [in {elapsedMilliseconds}ms].");
+            object[] propVals = new object[propertyValues.Length + 1];
+            propertyValues.CopyTo(propVals, 0);
+            propVals[propVals.Length - 1] = elapsedMilliseconds;
+            _logger.Information("Done \"" + _message + "\" in {elapsedMilliseconds}ms.", propVals);
         }
     }
 }

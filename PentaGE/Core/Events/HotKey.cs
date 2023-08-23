@@ -61,7 +61,7 @@ namespace PentaGE.Core.Events
             if (Action is not null) Action();
 
             var eventArgs = new HotKeyEventArgs(OnEvent, window, Key, ModifierKeys, false);
-            if (log) Log.Information($"Event [{eventArgs.Type}]: {eventArgs}");
+            if (log) Log.Information("Event [{Type}]: {eventArgs}", eventArgs.Type, eventArgs);
 
             eventArgs.RaiseEvent();
         }

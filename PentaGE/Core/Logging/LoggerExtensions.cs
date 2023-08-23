@@ -13,7 +13,7 @@ namespace PentaGE.Core.Logging
         /// <param name="logger">The logger instance used for logging.</param>
         /// <param name="message">The message or description of the operation being logged.</param>
         /// <returns>A disposable object representing the performance logging block. When disposed, the block will log the elapsed time.</returns>
-        public static IDisposable BeginPerfLogger(this ILogger logger, string message) =>
-            new PerformanceLogger(logger, message);
+        public static IDisposable BeginPerfLogger(this ILogger logger, string message, params object[] propertyValues) =>
+            new PerformanceLogger(logger, message, propertyValues);
     }
 }

@@ -7,6 +7,7 @@ using PentaGE.Core.Graphics;
 using PentaGE.Core.Rendering;
 using PentaGE.Core.Rendering.Sprites;
 using Sandbox.Components;
+using Serilog;
 using System.Numerics;
 using static OpenGL.GL;
 

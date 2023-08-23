@@ -1,4 +1,5 @@
-﻿using GLFW;
+﻿
+using GLFW;
 using PentaGE.Common;
 using Serilog;
 using System.Drawing;
@@ -66,7 +67,7 @@ namespace PentaGE.Core.Events
         /// <summary>
         /// Gets or sets the category or categories of events to log.
         /// </summary>
-        internal EventCategory CategoriesToLog { get; set; } = EventCategory.None;
+        internal EventCategory CategoriesToLog { get; set; } = EventCategory.Keyboard;
 
         /// <summary>
         /// Gets or sets a value indicating whether to suspend event dispatching.
@@ -696,7 +697,7 @@ namespace PentaGE.Core.Events
 
             if (currentEvent.BelongsToCategory(CategoriesToLog))
             {
-                Log.Information($"Event [{currentEvent.Type}]: {currentEvent}");
+                Log.Information("Event [{Type}]: {currentEvent}", currentEvent.Type, currentEvent);
             }
         }
 

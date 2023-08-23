@@ -20,7 +20,7 @@ namespace PentaGE.Core.Events
         /// <summary>
         /// Gets or sets wether to log the triggered events.
         /// </summary>
-        internal bool LoggingEnabled { get; set; } = false;
+        internal bool LoggingEnabled { get; set; } = true;
 
         /// <summary>
         /// Gets the <see cref="HotKey"/> instance associated with the specified combination of key and modifier key(s).
