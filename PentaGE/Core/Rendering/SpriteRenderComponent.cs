@@ -4,7 +4,6 @@ using PentaGE.Core.Entities;
 using PentaGE.Core.Graphics;
 using PentaGE.Core.Rendering.Sprites;
 using System.Numerics;
-using System.Transactions;
 using static OpenGL.GL;
 
 namespace PentaGE.Core.Rendering
@@ -14,7 +13,6 @@ namespace PentaGE.Core.Rendering
     /// </summary>
     public sealed class SpriteRenderComponent : Component, IDisposable
     {
-        private readonly Mesh _mesh;
         private readonly Sprite _sprite;
         private readonly Shader _shader;
         private VertexArray _vao;
@@ -56,22 +54,16 @@ namespace PentaGE.Core.Rendering
         /// </summary>
         /// <param name="sprite">The sprite to render.</param>
         /// <param name="shader">The shader program used for rendering.</param>
-        /// <param name="mesh">The mesh representing the sprite's geometry (optional).</param>
-        /// <param name="transform">The transform applied to the sprite (optional).</param>
-        /// <param name="meshTransform">The transform applied to the mesh (optional).</param>
+        /// <param name="transform">The transform applied to the component (optional).</param>
         public SpriteRenderComponent(
             Sprite sprite,
             Shader shader,
-            Mesh? mesh = null,
-            Transform? transform = null,
-            Transform? meshTransform = null)
+            Transform? transform = null)
         {
             Transform = transform;
 
             _sprite = sprite;
             _shader = shader;
-            var tfm = meshTransform ?? new Transform(Vector3.Zero, new Rotation(0, -90, 0), Vector3.One);
-            _mesh = mesh ?? MeshFactory.CreateRectangle(tfm.Scale.X, tfm.Scale.Y, tfm.Rotation);
 
             InitializeBuffers();
         }
@@ -88,11 +80,11 @@ namespace PentaGE.Core.Rendering
 
             // Create a VAO, VBO, and (optionally) EBO
             _vao = new();
-            _vbo = new(_mesh.Vertices);
+            _vbo = new(_sprite.Mesh.Vertices);
 
-            if (_mesh.Indices is not null)
+            if (_sprite.Mesh.Indices is not null)
             {
-                _ebo = new(_mesh.Indices);
+                _ebo = new(_sprite.Mesh.Indices);
             }
 
             // Bind the VAO, VBO, and EBO to the current context
@@ -188,14 +180,14 @@ namespace PentaGE.Core.Rendering
                 disableCulling = true;
             }
 
-            if (_ebo is not null && _mesh.Indices is not null)
+            if (_ebo is not null && _sprite.Mesh.Indices is not null)
             {
                 _ebo.Bind();
-                glDrawElements((int)DrawMode.Triangles, _mesh.Indices.Count, GL_UNSIGNED_INT, null);
+                glDrawElements((int)DrawMode.Triangles, _sprite.Mesh.Indices.Count, GL_UNSIGNED_INT, null);
             }
             else
             {
-                glDrawArrays((int)DrawMode.Triangles, 0, _mesh.Vertices.Count);
+                glDrawArrays((int)DrawMode.Triangles, 0, _sprite.Mesh.Vertices.Count);
             }
 
             // Disable culling
@@ -212,7 +204,7 @@ namespace PentaGE.Core.Rendering
 
         /// <inheritdoc />
         public override object Clone() =>
-            new SpriteRenderComponent(_sprite, _shader, _mesh)
+            new SpriteRenderComponent(_sprite, _shader)
             {
                 Enabled = true,
                 Transform = Transform,

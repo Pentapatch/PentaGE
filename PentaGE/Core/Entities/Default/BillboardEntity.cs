@@ -1,8 +1,8 @@
 ﻿using PentaGE.Common;
 using PentaGE.Core.Components;
-using PentaGE.Core.Graphics;
 using PentaGE.Core.Rendering;
 using PentaGE.Core.Rendering.Sprites;
+using System.Numerics;
 
 namespace PentaGE.Core.Entities
 {
@@ -14,7 +14,7 @@ namespace PentaGE.Core.Entities
         // This entity should always recieve update events
         public override UpdateMode UpdateMode => UpdateMode.Always;
 
-        public bool OnlyYaw { get; set; } = false;
+        public bool OnlyYaw { get; set; } = true;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BillboardEntity"/> class with the specified sprite and shader.
@@ -22,21 +22,18 @@ namespace PentaGE.Core.Entities
         /// <param name="sprite">The sprite to be rendered by the entity.</param>
         /// <param name="shader">The shader used for rendering.</param>
         /// <param name="cameraController">The camera controller for camera-related data.</param>
-        /// <param name="mesh">The mesh for the entity.</param>'
-        /// <param name="transform">The transform of the entity.</param>
-        /// <param name="meshTransform">The transform of the mesh.</param>
-        public BillboardEntity(
-            Sprite sprite,
-            Shader shader,
-            CameraController cameraController,
-            Mesh? mesh = null,
-            Transform? transform = null,
-            Transform? meshTransform = null)
+        /// <param name="position">The position applied to the <see cref="SpriteRenderComponent"/> (optional).</param>
+        /// <param name="scale">The scale applied to the <see cref="SpriteRenderComponent"/> (optional).</param>
+        public BillboardEntity(Sprite sprite, Shader shader, CameraController cameraController, Vector3? position = null, Vector2? scale = null)
         {
-            var spriteRenderComponent = new SpriteRenderComponent(sprite, shader, mesh, transform, meshTransform)
+            Transform? transform = position is Vector3 pos
+                ? new Transform(pos, Rotation.Zero, scale is Vector2 v2scale ? new(v2scale.X, v2scale.Y, 0f) : Vector3.One) : null;
+
+            var spriteRenderComponent = new SpriteRenderComponent(sprite, shader, transform)
             {
                 EnableCulling = true
             };
+
             Components.Add(spriteRenderComponent);
             _SpriteRenderComponentId = SetReference(spriteRenderComponent);
 

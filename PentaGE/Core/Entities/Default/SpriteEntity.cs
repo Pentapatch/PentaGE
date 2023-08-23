@@ -1,7 +1,7 @@
 ﻿using PentaGE.Common;
-using PentaGE.Core.Graphics;
 using PentaGE.Core.Rendering;
 using PentaGE.Core.Rendering.Sprites;
+using System.Numerics;
 
 namespace PentaGE.Core.Entities
 {
@@ -15,12 +15,14 @@ namespace PentaGE.Core.Entities
         /// </summary>
         /// <param name="sprite">The sprite to be rendered by the entity.</param>
         /// <param name="shader">The shader used for rendering.</param>
-        /// <param name="mesh">The mesh representing the sprite's geometry (optional).</param>
-        /// <param name="transform">The transform of the entity (optional).</param>
-        /// <param name="meshTransform">The transform of the mesh (optional).</param>
-        public SpriteEntity(Sprite sprite, Shader shader, Mesh? mesh = null, Transform? transform = null, Transform? meshTransform = null)
+        /// <param name="position">The position of the <see cref="SpriteRenderComponent"/> (optional).</param>
+        /// <param name="scale">The scale of the <see cref="SpriteRenderComponent"/> (optional).</param>
+        public SpriteEntity(Sprite sprite, Shader shader, Vector3? position = null, Vector2? scale = null)
         {
-            Components.Add(new SpriteRenderComponent(sprite, shader, mesh, transform, meshTransform));
+            Transform? transform = position is Vector3 pos
+                ? new Transform(pos, Rotation.Zero, scale is Vector2 v2scale ? new(v2scale.X, v2scale.Y, 0f) : Vector3.One) : null;
+
+            Components.Add(new SpriteRenderComponent(sprite, shader, transform));
         }
     }
 }

@@ -321,17 +321,17 @@ namespace PentaGE.Core.Rendering
                 mesh.Subdivide(2);
                 mesh.Roughen(0.1f);
 
-                if (_engine.Assets["Landscape"] is RenderableMeshEntity landscape)
+                if (_engine.Assets["Landscape"] is MeshEntity landscape)
                 {
                     landscape.Components.Get<MeshRenderComponent>()!.Mesh = mesh;
                 }
                 else
                 {
-                    _engine.Assets.Add("Landscape", new RenderableMeshEntity(
+                    _engine.Assets.Add("Landscape", new MeshEntity(
                         mesh,
                         _engine.Assets.Get<Shader>("Default")!,
                         _engine.Assets.Get<Texture>("BlackPentaTexture")));
-                    _engine.Scenes.CurrentScene.Add((RenderableMeshEntity)_engine.Assets["Landscape"]!);
+                    _engine.Scenes.CurrentScene.Add((MeshEntity)_engine.Assets["Landscape"]!);
                 }
             }
         }

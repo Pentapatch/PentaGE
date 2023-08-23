@@ -1,8 +1,12 @@
-﻿using PentaGE.Core.Entities;
+﻿using PentaGE.Common;
+using PentaGE.Core.Entities;
+using PentaGE.Core.Graphics;
 using PentaGE.Core.Logging;
 using PentaGE.Core.Rendering;
+using PentaGE.Core.Rendering.Sprites;
 using Serilog;
 using StbImageSharp;
+using System.Numerics;
 
 namespace PentaGE.Core.Assets
 {
@@ -91,6 +95,35 @@ namespace PentaGE.Core.Assets
             Add(name, new Shader(vertexSourceCode, fragmentSourceCode, geometrySourceCode));
 
         /// <summary>
+        /// Adds a <see cref="Sprite"/> asset to the asset manager.
+        /// </summary>
+        /// <param name="name">The name to assign to the sprite.</param>
+        /// <param name="filePath">The path to the sprite image file.</param>
+        /// <returns><c>true</c> if the sprite was added successfully; otherwise, <c>false</c>.</returns>
+        public bool AddSprite(
+            string name,
+            string filePath,
+            int type,
+            int slot,
+            int format,
+            int pixelFormat,
+            Mesh? mesh = null,
+            Vector2? scale = null,
+            Rotation? rotation = null)
+        {
+            try
+            {
+                Sprite sprite = new(filePath, type, slot, format, pixelFormat, mesh, scale, rotation);
+                return Add(name, sprite, filePath);
+            }
+            catch (FileNotFoundException ex)
+            {
+                Log.Error($"Failed to add sprite '{name}': {ex}");
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Adds a texture asset to the asset manager using a file path.
         /// </summary>
         /// <param name="name">The name to assign to the texture.</param>
@@ -144,6 +177,15 @@ namespace PentaGE.Core.Assets
         /// <returns><c>true</c> if the shader was added successfully; otherwise, <c>false</c>.</returns>
         public bool Add(string name, Shader shader) =>
             Add(name, (IAsset)shader);
+
+        /// <summary>
+        /// Adds a <see cref="Sprite"/> asset to the asset manager.
+        /// </summary>
+        /// <param name="name">The name to assign to the shader.</param>
+        /// <param name="sprite">The sprite to be added as an asset.</param>
+        /// <returns><c>true</c> if the sprite was added successfully; otherwise, <c>false</c>.</returns>
+        public bool Add(string name, Sprite sprite) =>
+            Add(name, (IAsset)sprite);
 
         /// <summary>
         /// Adds a <see cref="Texture"/> asset to the asset manager.

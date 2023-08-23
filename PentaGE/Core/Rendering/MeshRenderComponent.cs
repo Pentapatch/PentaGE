@@ -242,7 +242,7 @@ namespace PentaGE.Core.Rendering
         }
 
         /// <inheritdoc />
-        public override object Clone() => 
+        public override object Clone() =>
             new MeshRenderComponent(Mesh, Shader, Texture, Material.Clone() as PBRMaterial)
             {
                 DrawMode = DrawMode, // Copy the draw mode directly
