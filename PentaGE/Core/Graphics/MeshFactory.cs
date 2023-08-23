@@ -36,11 +36,146 @@ namespace PentaGE.Core.Graphics
     /// </summary>
     public static class MeshFactory
     {
-        private static Vector2 TopLeft => new(1f, 1f);
-        private static Vector2 TopRight => new(0f, 1f);
-        private static Vector2 BottomLeft => new(1f, 0f);
-        private static Vector2 BottomRight => new(0f, 0f);
-        private static Vector2 TopCenter => new(0.5f, 1f);
+        private static Vector2 TopLeftUV => new(1f, 1f);
+        private static Vector2 TopRightUV => new(0f, 1f);
+        private static Vector2 BottomLeftUV => new(1f, 0f);
+        private static Vector2 BottomRightUV => new(0f, 0f);
+        private static Vector2 TopCenterUV => new(0.5f, 1f);
+        private static Vector2 CenterUV => new(0.5f, 0.5f);
+
+        #region 3D Primitives
+
+        /// <summary>
+        /// Creates an axes widget mesh with a specified scale for each axis.
+        /// </summary>
+        /// <param name="scale">The scale to be applied to the axes.</param>
+        /// <returns>The axes widget mesh.</returns>
+        // TODO: Should probably be moved to the Sandbox project?
+        public static Mesh CreateAxesWidget(float scale)
+        {
+            // Define vertices of the axes gizmo
+            List<Vertex> vertices = new()
+            {
+                // X axis
+                new Vertex(new Vector3(0, 0, 0),     World.RightVector),
+                new Vertex(new Vector3(scale, 0, 0), World.RightVector),
+                // Y axis
+                new Vertex(new Vector3(0, 0, 0),     World.UpVector),
+                new Vertex(new Vector3(0, scale, 0), World.UpVector),
+                // Z axis
+                new Vertex(new Vector3(0, 0, 0),     World.ForwardVector),
+                new Vertex(new Vector3(0, 0, scale), World.ForwardVector),
+            };
+
+            // Define indices for the axes gizmo
+            List<uint> indices = new()
+            {
+                0, 1,
+                2, 3,
+                4, 5,
+            };
+
+            return new Mesh(vertices, indices);
+        }
+
+        /// <summary>
+        /// Creates a cone mesh with the specified radius and height.
+        /// </summary>
+        /// <param name="radius">The radius at the base of the cylinder.</param>
+        /// <param name="height">The height of the cylinder.</param>
+        /// <param name="segments">The number of segments used to approximate the cylinder's sides.</param>
+        /// <param name="textureAspectRatio">The aspect ratio to adjust the texture mapping.</param>
+        /// <returns>A cone mesh.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when radius, height, segments, or textureAspectRatio is out of valid range.</exception>
+        public static Mesh CreateCone(float radius, float height, int segments = 64, float textureAspectRatio = 1f)
+        {
+            // TODO: Known issues:
+            // - Not sure that the normals are correct for the cone sides
+            //   Behaves wierd when subdivide is called on the mesh
+            if (radius <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(radius), "Radius must be greater than zero.");
+            if (height <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(height), "Height must be greater than zero.");
+            if (segments < 3)
+                throw new ArgumentOutOfRangeException(nameof(segments), "Segments must be greater than or equal to three.");
+
+            if (textureAspectRatio <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(textureAspectRatio), "Texture aspect ratio must be greater than zero.");
+
+            // Calculate half height
+            float halfHeight = height * 0.5f;
+
+            // Define vertices of the cylinder
+            List<Vertex> vertices = new();
+            Vector3 topCenter = new(0f, halfHeight, 0f);
+            Vector3 bottomCenter = new(0f, -halfHeight, 0f);
+            for (int i = 0; i <= segments; i++)
+            {
+                float angle = 2 * MathF.PI * i / segments;
+                float nextAngle = 2 * MathF.PI * (i + 1) / segments; // Calculate the angle for the next vertex
+                float x = radius * MathF.Cos(angle);
+                float z = radius * MathF.Sin(angle);
+
+                // Calculate texture coordinates based on vertex position
+                Vector2 yTexCoord = new(x / (radius * -2) + 0.5f, z / (radius * 2) + 0.5f);
+
+                // Calculate the azimuthal angle (φ) for the longitude
+                float phi = i * 2 * MathF.PI / segments;
+
+                // Calculate azimuthal angle (φ) for texture mapping
+                float phiForTexture = phi + MathF.PI / 2; // Adjust by 90 degrees
+                float u = phiForTexture / (2 * MathF.PI);
+
+                // Adjust for texture aspect ratio
+                u *= textureAspectRatio;
+
+                // Side face vertex
+                Vector3 sidePosition = new(x, -halfHeight, z);
+
+                // Calculate the next position along the side
+                float nextX = radius * MathF.Cos(nextAngle);
+                float nextZ = radius * MathF.Sin(nextAngle);
+                Vector3 nextSidePosition = new(nextX, -halfHeight, nextZ);
+
+                Vector3 topPosition = new(0f, halfHeight, 0f);
+
+                // Calculate two vectors for the cross product
+                Vector3 sideVector = nextSidePosition - sidePosition;
+                Vector3 slantVector = topPosition - sidePosition;
+
+                // Calculate the side normal using the cross product
+                Vector3 sideNormal = -Vector3.Cross(sideVector, slantVector).Normalize();
+
+                Vector2 sideTexCoord = new(u, 0f);
+                vertices.Add(new Vertex(sidePosition, sideNormal, sideTexCoord));
+
+                // Top face vertex
+                vertices.Add(new Vertex(topCenter, World.UpVector, new Vector2(u, 1f)));
+
+                // Bottom face vertices
+                vertices.Add(new Vertex(new Vector3(x, -halfHeight, z), World.DownVector, yTexCoord));
+                vertices.Add(new Vertex(bottomCenter, World.DownVector, new Vector2(0.5f, 0.5f)));
+            }
+
+            // Define indices for the cylinder
+            List<uint> indices = new();
+
+            int stride = 4;
+            for (int i = 0; i < segments * stride; i += stride)
+            {
+                // Side face
+                indices.Add((uint)(i));                 //   X
+                indices.Add((uint)(i + 1));             //  XXX
+                indices.Add((uint)(i + stride));        // XXXXX
+
+                // Bottom face
+                indices.Add((uint)(i + 2));             //   X
+                indices.Add((uint)(i + stride + 2));    //  XXX
+                indices.Add((uint)(i + 3));             // XXXXX
+            }
+
+            return new Mesh(vertices, indices);
+        }
 
         /// <summary>
         /// Creates a cube mesh with the specified diameter.
@@ -67,35 +202,35 @@ namespace PentaGE.Core.Graphics
             // Define vertices of the cuboid
             List<Vertex> vertices = new()
             {
-                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.ForwardVector, BottomLeft),       // 0
-                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.ForwardVector, BottomRight),       // 1
-                new Vertex(new Vector3(halfWidth, halfHeight, halfDepth), World.ForwardVector, TopRight),           // 2
-                new Vertex(new Vector3(-halfWidth, halfHeight, halfDepth), World.ForwardVector, TopLeft),           // 3
+                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.ForwardVector, BottomLeftUV),       // 0
+                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.ForwardVector, BottomRightUV),       // 1
+                new Vertex(new Vector3(halfWidth, halfHeight, halfDepth), World.ForwardVector, TopRightUV),           // 2
+                new Vertex(new Vector3(-halfWidth, halfHeight, halfDepth), World.ForwardVector, TopLeftUV),           // 3
 
-                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.BackwardVector, BottomRight),    // 4
-                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.BackwardVector, BottomLeft),      // 5
-                new Vertex(new Vector3(halfWidth, halfHeight, -halfDepth), World.BackwardVector, TopLeft),          // 6
-                new Vertex(new Vector3(-halfWidth, halfHeight, -halfDepth), World.BackwardVector, TopRight),        // 7
+                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.BackwardVector, BottomRightUV),    // 4
+                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.BackwardVector, BottomLeftUV),      // 5
+                new Vertex(new Vector3(halfWidth, halfHeight, -halfDepth), World.BackwardVector, TopLeftUV),          // 6
+                new Vertex(new Vector3(-halfWidth, halfHeight, -halfDepth), World.BackwardVector, TopRightUV),        // 7
 
-                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.LeftVector, BottomLeft),         // 8
-                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.LeftVector, BottomRight),         // 9
-                new Vertex(new Vector3(-halfWidth, halfHeight, halfDepth), World.LeftVector, TopRight),             // 10
-                new Vertex(new Vector3(-halfWidth, halfHeight, -halfDepth), World.LeftVector, TopLeft),             // 11
+                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.LeftVector, BottomLeftUV),         // 8
+                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.LeftVector, BottomRightUV),         // 9
+                new Vertex(new Vector3(-halfWidth, halfHeight, halfDepth), World.LeftVector, TopRightUV),             // 10
+                new Vertex(new Vector3(-halfWidth, halfHeight, -halfDepth), World.LeftVector, TopLeftUV),             // 11
 
-                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.RightVector, BottomRight),        // 12
-                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.RightVector, BottomLeft),          // 13
-                new Vertex(new Vector3(halfWidth, halfHeight, halfDepth), World.RightVector, TopLeft),              // 14
-                new Vertex(new Vector3(halfWidth, halfHeight, -halfDepth), World.RightVector, TopRight),            // 15
+                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.RightVector, BottomRightUV),        // 12
+                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.RightVector, BottomLeftUV),          // 13
+                new Vertex(new Vector3(halfWidth, halfHeight, halfDepth), World.RightVector, TopLeftUV),              // 14
+                new Vertex(new Vector3(halfWidth, halfHeight, -halfDepth), World.RightVector, TopRightUV),            // 15
 
-                new Vertex(new Vector3(-halfWidth, halfHeight, halfDepth), World.UpVector, BottomLeft),             // 16
-                new Vertex(new Vector3(halfWidth, halfHeight, halfDepth), World.UpVector, BottomRight),             // 17
-                new Vertex(new Vector3(halfWidth, halfHeight, -halfDepth), World.UpVector, TopRight),               // 18
-                new Vertex(new Vector3(-halfWidth, halfHeight, -halfDepth), World.UpVector, TopLeft),               // 19
+                new Vertex(new Vector3(-halfWidth, halfHeight, halfDepth), World.UpVector, BottomLeftUV),             // 16
+                new Vertex(new Vector3(halfWidth, halfHeight, halfDepth), World.UpVector, BottomRightUV),             // 17
+                new Vertex(new Vector3(halfWidth, halfHeight, -halfDepth), World.UpVector, TopRightUV),               // 18
+                new Vertex(new Vector3(-halfWidth, halfHeight, -halfDepth), World.UpVector, TopLeftUV),               // 19
 
-                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.DownVector, TopLeft),             // 20
-                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.DownVector, TopRight),             // 21
-                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.DownVector, BottomRight),         // 22
-                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.DownVector, BottomLeft),         // 23
+                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.DownVector, TopLeftUV),             // 20
+                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.DownVector, TopRightUV),             // 21
+                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.DownVector, BottomRightUV),         // 22
+                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.DownVector, BottomLeftUV),         // 23
             };
 
             // Define indices for the cuboid
@@ -116,120 +251,6 @@ namespace PentaGE.Core.Graphics
             };
 
             return new Mesh(vertices, indices);
-        }
-
-        /// <summary>
-        /// Creates a pyramid mesh with the specified dimensions.
-        /// </summary>
-        /// <param name="width">The width of the pyramid base.</param>
-        /// <param name="height">The height of the pyramid.</param>
-        /// <param name="depth">The depth of the pyramid base.</param>
-        /// <returns>A pyramid mesh with the specified dimensions.</returns>
-        public static Mesh CreatePyramid(float width, float height, float depth)
-        {
-            // Calculate half extents for each dimension
-            float halfWidth = width * 0.5f;
-            float halfHeight = height * 0.5f;
-            float halfDepth = depth * 0.5f;
-
-            Vector3 upVector = new(0f, halfHeight, 0f);
-
-            // Define vertices of the pyramid
-            List<Vertex> vertices = new()
-            {
-                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.ForwardVector, BottomLeft),
-                new Vertex(upVector, World.ForwardVector, TopCenter),
-                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.ForwardVector, BottomRight),
-
-                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.BackwardVector, BottomLeft),
-                new Vertex(upVector, World.BackwardVector, TopCenter),
-                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.BackwardVector, BottomRight),
-
-                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.LeftVector, BottomLeft),
-                new Vertex(upVector, World.LeftVector, TopCenter),
-                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.LeftVector, BottomRight),
-
-                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.RightVector, BottomLeft),
-                new Vertex(upVector, World.RightVector, TopCenter),
-                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.RightVector, BottomRight),
-
-                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.DownVector, TopLeft),
-                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.DownVector, TopRight),
-                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.DownVector, BottomRight),
-                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.DownVector, BottomLeft),
-            };
-
-            // Recalculate the normals for the front, back, left and right faces
-            for (int i = 0; i < 12; i += 3)
-            {
-                Vector3 a = vertices[i].Coordinates;
-                Vector3 b = vertices[i + 1].Coordinates;
-                Vector3 c = vertices[i + 2].Coordinates;
-                Vector3 normal = Vector3.Cross(c - a, b - a).Normalize();
-                vertices[i] = new Vertex(vertices[i].Coordinates, normal, vertices[i].TextureCoordinates);
-                vertices[i + 1] = new Vertex(vertices[i + 1].Coordinates, normal, vertices[i + 1].TextureCoordinates);
-                vertices[i + 2] = new Vertex(vertices[i + 2].Coordinates, normal, vertices[i + 2].TextureCoordinates);
-            }
-
-            // Define indices for the pyramid
-            List<uint> indices = new()
-            {
-                2, 1, 0,    // Front face
-                3, 5, 4,    // Back face
-                8, 7, 6,    // Left face
-                11, 10, 9,  // Right face
-                12, 15, 13, // Bottom face
-                13, 15, 14, // Bottom face
-            };
-
-            return new Mesh(vertices, indices);
-        }
-
-        /// <summary>
-        /// Creates a plane mesh with a square shape and the specified size.
-        /// </summary>
-        /// <param name="size">The size of the plane (both width and height).</param>
-        /// <param name="rotation">Optional rotation applied to the plane.</param>
-        /// <returns>A plane mesh with the specified size.</returns>
-        public static Mesh CreatePlane(float size, Rotation? rotation = null) =>
-            CreatePlane(size, size, rotation);
-
-        /// <summary>
-        /// Creates a plane mesh with the specified width and height.
-        /// </summary>
-        /// <param name="width">The width of the plane.</param>
-        /// <param name="height">The height of the plane.</param>
-        /// <param name="rotation">Optional rotation applied to the plane.</param>
-        /// <returns>A plane mesh with the specified width and height.</returns>
-        public static Mesh CreatePlane(float width, float height, Rotation? rotation = null)
-        {
-            // Calculate half extents for each dimension
-            float halfWidth = width * 0.5f;
-            float halfHeight = height * 0.5f;
-
-            // Define vertices of the plane
-            List<Vertex> vertices = new()
-            {
-                new Vertex(new Vector3(-halfWidth, 0f, halfHeight), World.UpVector, BottomLeft),
-                new Vertex(new Vector3(halfWidth, 0f, halfHeight), World.UpVector, BottomRight),
-                new Vertex(new Vector3(halfWidth, 0f, -halfHeight), World.UpVector, TopRight),
-                new Vertex(new Vector3(-halfWidth, 0f, -halfHeight), World.UpVector, TopLeft),
-            };
-
-            // Define indices for the plane
-            List<uint> indices = new()
-            {
-                0, 1, 3,
-                1, 2, 3
-            };
-
-            Mesh mesh = new(vertices, indices);
-            if (rotation is not null)
-            {
-                mesh.Rotate(rotation.Value);
-            }
-
-            return mesh;
         }
 
         /// <summary>
@@ -332,100 +353,68 @@ namespace PentaGE.Core.Graphics
         }
 
         /// <summary>
-        /// Creates a cone mesh with the specified radius and height.
+        /// Creates a pyramid mesh with the specified dimensions.
         /// </summary>
-        /// <param name="radius">The radius of the cylinder.</param>
-        /// <param name="height">The height of the cylinder.</param>
-        /// <param name="segments">The number of segments used to approximate the cylinder's sides.</param>
-        /// <param name="textureAspectRatio">The aspect ratio to adjust the texture mapping.</param>
-        /// <returns>A cone mesh.</returns>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown when radius, height, segments, or textureAspectRatio is out of valid range.</exception>
-        public static Mesh CreateCone(float radius, float height, int segments = 64, float textureAspectRatio = 1f)
+        /// <param name="width">The width of the pyramid base.</param>
+        /// <param name="height">The height of the pyramid.</param>
+        /// <param name="depth">The depth of the pyramid base.</param>
+        /// <returns>A pyramid mesh with the specified dimensions.</returns>
+        public static Mesh CreatePyramid(float width, float height, float depth)
         {
-            // TODO: Known issues:
-            // - Not sure that the normals are correct for the cone sides
-            //   Behaves wierd when subdivide is called on the mesh
-            if (radius <= 0f)
-                throw new ArgumentOutOfRangeException(nameof(radius), "Radius must be greater than zero.");
-            if (height <= 0f)
-                throw new ArgumentOutOfRangeException(nameof(height), "Height must be greater than zero.");
-            if (segments < 3)
-                throw new ArgumentOutOfRangeException(nameof(segments), "Segments must be greater than or equal to three.");
-
-            if (textureAspectRatio <= 0f)
-                throw new ArgumentOutOfRangeException(nameof(textureAspectRatio), "Texture aspect ratio must be greater than zero.");
-
-            // Calculate half height
+            // Calculate half extents for each dimension
+            float halfWidth = width * 0.5f;
             float halfHeight = height * 0.5f;
+            float halfDepth = depth * 0.5f;
 
-            // Define vertices of the cylinder
-            List<Vertex> vertices = new();
-            Vector3 topCenter = new(0f, halfHeight, 0f);
-            Vector3 bottomCenter = new(0f, -halfHeight, 0f);
-            for (int i = 0; i <= segments; i++)
+            Vector3 upVector = new(0f, halfHeight, 0f);
+
+            // Define vertices of the pyramid
+            List<Vertex> vertices = new()
             {
-                float angle = 2 * MathF.PI * i / segments;
-                float nextAngle = 2 * MathF.PI * (i + 1) / segments; // Calculate the angle for the next vertex
-                float x = radius * MathF.Cos(angle);
-                float z = radius * MathF.Sin(angle);
+                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.ForwardVector, BottomLeftUV),
+                new Vertex(upVector, World.ForwardVector, TopCenterUV),
+                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.ForwardVector, BottomRightUV),
 
-                // Calculate texture coordinates based on vertex position
-                Vector2 yTexCoord = new(x / (radius * -2) + 0.5f, z / (radius * 2) + 0.5f);
+                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.BackwardVector, BottomLeftUV),
+                new Vertex(upVector, World.BackwardVector, TopCenterUV),
+                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.BackwardVector, BottomRightUV),
 
-                // Calculate the azimuthal angle (φ) for the longitude
-                float phi = i * 2 * MathF.PI / segments;
+                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.LeftVector, BottomLeftUV),
+                new Vertex(upVector, World.LeftVector, TopCenterUV),
+                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.LeftVector, BottomRightUV),
 
-                // Calculate azimuthal angle (φ) for texture mapping
-                float phiForTexture = phi + MathF.PI / 2; // Adjust by 90 degrees
-                float u = phiForTexture / (2 * MathF.PI);
+                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.RightVector, BottomLeftUV),
+                new Vertex(upVector, World.RightVector, TopCenterUV),
+                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.RightVector, BottomRightUV),
 
-                // Adjust for texture aspect ratio
-                u *= textureAspectRatio;
+                new Vertex(new Vector3(-halfWidth, -halfHeight, halfDepth), World.DownVector, TopLeftUV),
+                new Vertex(new Vector3(halfWidth, -halfHeight, halfDepth), World.DownVector, TopRightUV),
+                new Vertex(new Vector3(halfWidth, -halfHeight, -halfDepth), World.DownVector, BottomRightUV),
+                new Vertex(new Vector3(-halfWidth, -halfHeight, -halfDepth), World.DownVector, BottomLeftUV),
+            };
 
-                // Side face vertex
-                Vector3 sidePosition = new(x, -halfHeight, z);
-
-                // Calculate the next position along the side
-                float nextX = radius * MathF.Cos(nextAngle);
-                float nextZ = radius * MathF.Sin(nextAngle);
-                Vector3 nextSidePosition = new(nextX, -halfHeight, nextZ);
-
-                Vector3 topPosition = new(0f, halfHeight, 0f);
-
-                // Calculate two vectors for the cross product
-                Vector3 sideVector = nextSidePosition - sidePosition;
-                Vector3 slantVector = topPosition - sidePosition;
-
-                // Calculate the side normal using the cross product
-                Vector3 sideNormal = -Vector3.Cross(sideVector, slantVector).Normalize();
-
-                Vector2 sideTexCoord = new(u, 0f);
-                vertices.Add(new Vertex(sidePosition, sideNormal, sideTexCoord));
-
-                // Top face vertex
-                vertices.Add(new Vertex(topCenter, World.UpVector, new Vector2(u, 1f)));
-
-                // Bottom face vertices
-                vertices.Add(new Vertex(new Vector3(x, -halfHeight, z), World.DownVector, yTexCoord));
-                vertices.Add(new Vertex(bottomCenter, World.DownVector, new Vector2(0.5f, 0.5f)));
+            // Recalculate the normals for the front, back, left and right faces
+            for (int i = 0; i < 12; i += 3)
+            {
+                Vector3 a = vertices[i].Coordinates;
+                Vector3 b = vertices[i + 1].Coordinates;
+                Vector3 c = vertices[i + 2].Coordinates;
+                Vector3 normal = Vector3.Cross(c - a, b - a).Normalize();
+                vertices[i] = new Vertex(vertices[i].Coordinates, normal, vertices[i].TextureCoordinates);
+                vertices[i + 1] = new Vertex(vertices[i + 1].Coordinates, normal, vertices[i + 1].TextureCoordinates);
+                vertices[i + 2] = new Vertex(vertices[i + 2].Coordinates, normal, vertices[i + 2].TextureCoordinates);
             }
 
-            // Define indices for the cylinder
-            List<uint> indices = new();
-
-            int stride = 4;
-            for (int i = 0; i < segments * stride; i += stride)
+            // Define indices for the pyramid
+            List<uint> indices = new()
             {
-                // Side face
-                indices.Add((uint)(i));                 //   X
-                indices.Add((uint)(i + 1));             //  XXX
-                indices.Add((uint)(i + stride));        // XXXXX
-
-                // Bottom face
-                indices.Add((uint)(i + 2));             //   X
-                indices.Add((uint)(i + stride + 2));    //  XXX
-                indices.Add((uint)(i + 3));             // XXXXX
-            }
+                2, 1, 0,    // Front face
+                3, 5, 4,    // Back face
+                8, 7, 6,    // Left face
+                11, 10, 9,  // Right face
+                12, 15, 13, // Bottom face
+                13, 15, 14, // Bottom face
+            };
 
             return new Mesh(vertices, indices);
         }
@@ -433,14 +422,14 @@ namespace PentaGE.Core.Graphics
         /// <summary>
         /// Creates a sphere mesh with the specified diameter using spherical coordinates mapping.
         /// </summary>
-        /// <param name="diameter">The diameter of the sphere.</param>
+        /// <param name="radius">The radius of the sphere.</param>
         /// <param name="latitudeSegments">The number of segments used to approximate the sphere's latitude.</param>
         /// <param name="longitudeSegments">The number of segments used to approximate the sphere's longitude.</param>
         /// <returns>A sphere mesh with the specified diameter.</returns>
-        public static Mesh CreateSphere(float diameter, int latitudeSegments = 16, int longitudeSegments = 32)
+        public static Mesh CreateSphere(float radius, int latitudeSegments = 16, int longitudeSegments = 32)
         {
-            // Calculate radius
-            float radius = diameter * 0.5f;
+            if (radius <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(radius), "Radius must be greater than zero.");
 
             // Define vertices of the sphere
             List<Vertex> vertices = new();
@@ -503,37 +492,220 @@ namespace PentaGE.Core.Graphics
             return new Mesh(vertices, indices);
         }
 
+        #endregion
+
+        #region 2D Primitives
+
         /// <summary>
-        /// Creates an axes gizmo mesh with a specified scale for each axis.
+        /// Creates a circular 2D mesh with the specified diameter and number of segments.
         /// </summary>
-        /// <param name="scale">The scale to be applied to the axes.</param>
-        /// <returns>The axes gizmo mesh.</returns>
-        // TODO: Should probably be moved to the Sandbox project?
-        public static Mesh CreateAxesGizmo(float scale)
+        /// <param name="radius">The diameter of the circle.</param>
+        /// <param name="segments">The number of segments used to approximate the circle.</param>
+        /// <param name="rotation">Optional rotation applied to the circle.</param>
+        /// <returns>A circular mesh with the specified diameter and number of segments.</returns>
+        public static Mesh CreateCircle(float radius, int segments = 64, Rotation? rotation = null) =>
+            CreateEllipse(radius, radius, segments, rotation);
+
+        /// <summary>
+        /// Creates an elliptical 2D mesh with the specified radii and number of segments.
+        /// </summary>
+        /// <param name="radiusX">The X-axis radius of the ellipse.</param>
+        /// <param name="radiusY">The Y-axis radius of the ellipse.</param>
+        /// <param name="segments">The number of segments used to approximate the ellipse.</param>
+        /// <param name="rotation">Optional rotation applied to the ellipse.</param>
+        /// <returns>An elliptical mesh with the specified radii and number of segments.</returns>
+        public static Mesh CreateEllipse(float radiusX, float radiusY, int segments = 64, Rotation? rotation = null)
         {
-            // Define vertices of the axes gizmo
+            if (radiusX <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(radiusX), "Radius X must be greater than zero.");
+            if (radiusY <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(radiusY), "Radius Y must be greater than zero.");
+            if (segments < 5)
+                throw new ArgumentOutOfRangeException(nameof(segments), "Segments must be greater than or equal to five.");
+
+            List<Vertex> vertices = new();
+            List<uint> indices = new();
+
+            // Calculate center position
+            Vector3 centerPosition = Vector3.Zero;
+
+            // Add center vertex
+            vertices.Add(new Vertex(centerPosition, World.UpVector, CenterUV));
+
+            // Calculate the aspect ratio of the ellipse
+            float aspectRatio = radiusY / radiusX;
+
+            // Generate vertices and indices
+            for (int i = 0; i < segments + 1; i++)
+            {
+                // Calculate the position of the point on the ellipse
+                float angle = i * (MathF.PI * 2f / segments);
+                Vector3 vertexPosition = new(MathF.Cos(angle) * radiusX, 0f, MathF.Sin(angle) * radiusY);
+
+                // Calculate texture coordinates based on vertex position
+                float u = 1f - (vertexPosition.X / (radiusX * 2 * aspectRatio) + 0.5f); // Adjust for aspect ratio
+                float v = 1f - (vertexPosition.Z / (radiusY * 2) + 0.5f);               // Map [-1, 1] to [0, 1]
+                Vector2 vertexUV = new(u, v);
+
+                // Define vertices of the ellipse
+                vertices.Add(new Vertex(vertexPosition, World.UpVector, vertexUV));
+
+                // Define indices of the ellipse
+                indices.Add(0);                                 // Center vertex
+                indices.Add((uint)(i == segments ? 1 : i + 2)); // Next vertex (loop around)
+                indices.Add((uint)(i + 1));                     // Current vertex
+            }
+
+            var mesh = new Mesh(vertices, indices);
+            if (rotation is not null)
+            {
+                mesh.Rotate(rotation.Value);
+            }
+
+            return mesh;
+        }
+
+        /// <summary>
+        /// Creates a rectangle 2D plane mesh with the specified width and height.
+        /// </summary>
+        /// <param name="width">The width of the rectangle.</param>
+        /// <param name="height">The height of the rectangle.</param>
+        /// <param name="rotation">Optional rotation applied to the rectangle.</param>
+        /// <returns>A plane mesh representing a rectangle with the specified width and height.</returns>
+        public static Mesh CreateRectangle(float width, float height, Rotation? rotation = null)
+        {
+            // Calculate half extents for each dimension
+            float halfWidth = width * 0.5f;
+            float halfHeight = height * 0.5f;
+
+            // Define vertices of the plane
             List<Vertex> vertices = new()
             {
-                // X axis
-                new Vertex(new Vector3(0, 0, 0),     World.RightVector),
-                new Vertex(new Vector3(scale, 0, 0), World.RightVector),
-                // Y axis
-                new Vertex(new Vector3(0, 0, 0),     World.UpVector),
-                new Vertex(new Vector3(0, scale, 0), World.UpVector),
-                // Z axis
-                new Vertex(new Vector3(0, 0, 0),     World.ForwardVector),
-                new Vertex(new Vector3(0, 0, scale), World.ForwardVector),
+                new Vertex(new Vector3(-halfWidth, 0f, halfHeight), World.UpVector, BottomLeftUV),
+                new Vertex(new Vector3(halfWidth, 0f, halfHeight), World.UpVector, BottomRightUV),
+                new Vertex(new Vector3(halfWidth, 0f, -halfHeight), World.UpVector, TopRightUV),
+                new Vertex(new Vector3(-halfWidth, 0f, -halfHeight), World.UpVector, TopLeftUV),
             };
 
-            // Define indices for the axes gizmo
+            // Define indices for the plane
             List<uint> indices = new()
             {
-                0, 1,
-                2, 3,
-                4, 5,
+                0, 1, 3,
+                1, 2, 3
             };
 
-            return new Mesh(vertices, indices);
+            Mesh mesh = new(vertices, indices);
+            if (rotation is not null)
+            {
+                mesh.Rotate(rotation.Value);
+            }
+
+            return mesh;
         }
+
+        /// <summary>
+        /// Creates a regular polygon mesh with the specified number of sides and radius.
+        /// </summary>
+        /// <param name="sides">The number of sides of the polygon.</param>
+        /// <param name="radius">The radius of the circumscribed circle of the polygon.</param>
+        /// <param name="rotation">Optional rotation applied to the polygon.</param>
+        /// <returns>A regular polygon mesh with the specified number of sides and radius.</returns>
+        public static Mesh CreateRegularPolygon(int sides, float radius, Rotation? rotation = null)
+        {
+            if (sides < 3)
+                throw new ArgumentOutOfRangeException(nameof(sides), "Number of sides must be greater than or equal to three.");
+
+            if (radius <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(radius), "Radius must be greater than zero.");
+
+            List<Vertex> vertices = new();
+            List<uint> indices = new();
+
+            // Calculate the center vertex position
+            Vector3 centerPosition = Vector3.Zero;
+
+            // Add the center vertex once
+            vertices.Add(new Vertex(centerPosition, World.UpVector, CenterUV));
+
+            float angleIncrement = MathF.PI * 2f / sides;
+
+            // Calculate the angle to start creating vertices from the top
+            float startAngle = MathF.PI / 2f - angleIncrement / 2f;
+
+            for (int i = 0; i < sides; i++)
+            {
+                // Calculate the position of the vertex on the polygon
+                float angle = startAngle + i * angleIncrement;
+                Vector3 vertexPosition = new(MathF.Cos(angle) * radius, 0f, MathF.Sin(angle) * radius);
+
+                // Calculate texture coordinates based on vertex position
+                float u = 1f - (vertexPosition.X / (radius * 2) + 0.5f); // Invert and map [-1, 1] to [0, 1]
+                float v = 1f - (vertexPosition.Z / (radius * 2) + 0.5f); // -- " --
+                Vector2 vertexUV = new(u, v);
+
+                // Define vertices of the polygon
+                vertices.Add(new Vertex(vertexPosition, World.UpVector, vertexUV));
+
+                // Define indices of the polygon
+                indices.Add(0);                                  // Center vertex
+                indices.Add((uint)(i == sides - 1 ? 1 : i + 2)); // Next vertex (loop around)
+                indices.Add((uint)(i + 1));                      // Current vertex
+            }
+
+            var mesh = new Mesh(vertices, indices);
+            if (rotation is not null)
+            {
+                mesh.Rotate(rotation.Value);
+            }
+
+            return mesh;
+        }
+
+        /// <summary>
+        /// Creates a square 2D plane mesh with the specified size.
+        /// </summary>
+        /// <param name="size">The size of the square (both width and height).</param>
+        /// <param name="rotation">Optional rotation applied to the square.</param>
+        /// <returns>A plane mesh representing a square with the specified size.</returns>
+        public static Mesh CreateSquare(float size, Rotation? rotation = null) =>
+            CreateRectangle(size, size, rotation);
+
+        /// <summary>
+        /// Creates a regular 2D triangle mesh with the specified radius.
+        /// </summary>
+        /// <param name="radius">The radius of the triangle.</param>
+        /// <param name="rotation">Optional rotation applied to the triangle.</param>
+        /// <returns>A regular triangle mesh with the specified radius.</returns>
+        public static Mesh CreateTriangle(float radius, Rotation? rotation = null) =>
+            CreateRegularPolygon(3, radius, rotation);
+
+        /// <summary>
+        /// Creates a regular 2D pentagon mesh with the specified radius.
+        /// </summary>
+        /// <param name="radius">The radius of the pentagon.</param>
+        /// <param name="rotation">Optional rotation applied to the pentagon.</param>
+        /// <returns>A regular pentagon mesh with the specified radius.</returns>
+        public static Mesh CreatePentagon(float radius, Rotation? rotation = null) =>
+            CreateRegularPolygon(5, radius, rotation);
+
+        /// <summary>
+        /// Creates a regular 2D hexagon mesh with the specified radius.
+        /// </summary>
+        /// <param name="radius">The radius of the hexagon.</param>
+        /// <param name="rotation">Optional rotation applied to the hexagon.</param>
+        /// <returns>A regular hexagon mesh with the specified radius.</returns>
+        public static Mesh CreateHexagon(float radius, Rotation? rotation = null) =>
+            CreateRegularPolygon(6, radius, rotation);
+
+        /// <summary>
+        /// Creates a regular 2D octagon mesh with the specified radius.
+        /// </summary>
+        /// <param name="radius">The radius of the octagon.</param>
+        /// <param name="rotation">Optional rotation applied to the octagon.</param>
+        /// <returns>A regular octagon mesh with the specified radius.</returns>
+        public static Mesh CreateOctagon(float radius, Rotation? rotation = null) =>
+            CreateRegularPolygon(8, radius, rotation);
+
+        #endregion
     }
 }

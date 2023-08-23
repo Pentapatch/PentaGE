@@ -5,6 +5,7 @@ using PentaGE.Core.Entities;
 using PentaGE.Core.Events;
 using PentaGE.Core.Graphics;
 using PentaGE.Core.Rendering;
+using PentaGE.Core.Rendering.Sprites;
 using Sandbox.Components;
 using System.Numerics;
 using static OpenGL.GL;
@@ -37,7 +38,7 @@ namespace Sandbox
         public void ToggleDirectionalLight() =>
             Scenes.CurrentScene.DirectionalLight!.Enabled = !Scenes.CurrentScene.DirectionalLight.Enabled;
 
-        public void ToggleFollowLight() => 
+        public void ToggleFollowLight() =>
             Scenes.CurrentScene.DirectionalLight!.FollowCamera = !Scenes.CurrentScene.DirectionalLight.FollowCamera;
 
         public void ToggleMaterialModulator()
@@ -76,7 +77,7 @@ namespace Sandbox
                 var mesh = MeshFactory.CreateSphere((float)Random.Shared.NextDouble() * 0.15f + 0.05f);
                 var shader = Assets.Get<Shader>("Default")!;
                 var texture = Assets.Get<Texture>("WhitePentaTexture")!;
-                var entity = new RenderableMeshEntity(mesh, shader, texture);
+                var entity = new MeshEntity(mesh, shader, texture);
                 var transform = new Transform
                 {
                     Position = new Vector3(
@@ -104,7 +105,7 @@ namespace Sandbox
             };
             var shader = Assets.Get<Shader>("Default")!;
             var texture = Assets.Get<Texture>("BlackPentaTexture")!;
-            var entity = new RenderableMeshEntity(mesh, shader, texture);
+            var entity = new MeshEntity(mesh, shader, texture);
             entity.Components.Add<TransformComponent>();
             entity.Components.Add<ConstantRotator>();
             scene.Clear();
@@ -140,8 +141,9 @@ namespace Sandbox
             if (!Assets.AddShader("Light", $"{shaderPath}Light.shader")) return false;
             if (!Assets.AddShader("Grid", $"{shaderPath}Grid.shader")) return false;
             if (!Assets.AddShader("AxesShader", $"{shaderPath}Axes.shader")) return false;
+            if (!Assets.AddShader("SpritesShader", $"{shaderPath}Sprites.shader")) return false;
 
-            // Initialize test texture
+            // Initialize test textures
             var texturePath = @"C:\Users\newsi\source\repos\PentaGE\Sandbox\SourceFiles\Textures\";
             if (!Assets.AddTexture("BlackPentaTexture",
                     $"{texturePath}Pentapatch_Texture_2k_A.jpg",
@@ -159,10 +161,23 @@ namespace Sandbox
                     GL_UNSIGNED_BYTE))
                 return false;
 
+            // Initialize test sprites
+            if (!Assets.AddSprite(
+                "WhitePentaSprite",
+                $"{texturePath}Pentapatch_Texture_2k_B.jpg",
+                GL_TEXTURE_2D,
+                GL_TEXTURE0,
+                GL_RGBA,
+                GL_UNSIGNED_BYTE,
+                null,
+                new(6f, 6f),
+                new(0f, -90f, 0f)))
+                return false;
+
             // Set up subject mesh
             var subjectMesh = MeshFactory.CreateCube(1f);
             var transform = new Transform(new(0, 0, 0), new(0, 0, 0), new(1f, 1f, 1f));
-            var renderableMesh = new RenderableMeshEntity(
+            var renderableMesh = new MeshEntity(
                 subjectMesh,
                 Assets.Get<Shader>("Default")!,
                 Assets.Get<Texture>("BlackPentaTexture"));
@@ -174,31 +189,44 @@ namespace Sandbox
             Assets.Add("Subject", renderableMesh);
 
             // Set up test directional light
-            var dirLightMesh = MeshFactory.CreateSphere(0.2f);
+            var dirLightMesh = MeshFactory.CreateSphere(0.1f);
             var widgetTransform = new Transform(new Vector3(0f, 1f, 0f), Rotation.Zero, Vector3.One);
             var rotation = new Rotation(45f, -45f, 0f);
             var color = new Vector4(1f, 1f, 1f, 1f);
-            var directionalLight = new DirectionalLightEntity(dirLightMesh, Assets.Get<Shader>("Default")!, rotation, widgetTransform, color);
+            var directionalLight = new DirectionalLightEntity(dirLightMesh, Assets.Get<Shader>("Light")!, rotation, widgetTransform, color);
             Assets.Add("DirectionalLightEntity", directionalLight);
 
             // Set up test sun
-            var sunMesh = MeshFactory.CreateSphere(20f);
-            var sun = new SunEntity(sunMesh, Assets.Get<Shader>("Light")!, Windows[0].Viewport.CameraManager.ActiveController, directionalLight);
+            var sunMesh = MeshFactory.CreateCircle(10f, 64, new(0f, -90f, 0f));
+            var sun = new SunEntity(sunMesh, Assets.Get<Shader>("Default")!, Windows[0].Viewport.CameraManager.ActiveController, directionalLight);
             Assets.Add("SunEntity", sun);
-            
+
             // Initialize grid
             Grid gridA = new(10, 10, new(1, 1, 1), 0.2f);
             Grid gridB = new(10, 20, new(0, 0, 0), 0.15f);
             var gridShader = Assets.Get<Shader>("Grid")!;
-            var renderableGridMajor = new RenderableGridEntity(gridA, gridShader);
-            var renderableGridMinor = new RenderableGridEntity(gridB, gridShader);
+            var renderableGridMajor = new GridEntity(gridA, gridShader);
+            var renderableGridMinor = new GridEntity(gridB, gridShader);
             Assets.Add("GridMajor", renderableGridMajor);
             Assets.Add("GridMinor", renderableGridMinor);
 
             // Initialize axes gizmo
-            var cameraOrientationWidgetMesh = MeshFactory.CreateAxesGizmo(0.1f);
+            var cameraOrientationWidgetMesh = MeshFactory.CreateAxesWidget(0.1f);
             var cameraOrientationWidgetEntity = new CameraOrientationWidgetEntity(cameraOrientationWidgetMesh, Assets.Get<Shader>("AxesShader")!);
             Assets.Add("CameraOrientationWidget", cameraOrientationWidgetEntity);
+
+            // Testing billboard and sprite
+            var sprite = Assets.Get<Sprite>("WhitePentaSprite")!;
+            var billboardEntity = new BillboardEntity(
+                sprite,
+                Assets.Get<Shader>("SpritesShader")!,
+                Windows[0].Viewport.CameraManager.ActiveController,
+                new(0f, 0f, -4f),
+                new(2f, 2f))
+            {
+                OnlyYaw = false
+            };
+            Assets.Add("SpriteEntity", billboardEntity);
 
             // Add entities to the scene
             var scene = Scenes.Add("Main");
@@ -208,6 +236,7 @@ namespace Sandbox
             scene.Add((Entity)Assets["CameraOrientationWidget"]!);
             scene.Add((Entity)Assets["DirectionalLightEntity"]!);
             scene.Add((Entity)Assets["SunEntity"]!);
+            scene.Add((Entity)Assets["SpriteEntity"]!);
             scene.Load();
 
             return true;

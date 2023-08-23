@@ -2,35 +2,25 @@
 using PentaGE.Core.Components;
 using PentaGE.Core.Entities;
 using PentaGE.Core.Graphics;
+using PentaGE.Core.Rendering.Sprites;
 using System.Numerics;
 using static OpenGL.GL;
 
 namespace PentaGE.Core.Rendering
 {
     /// <summary>
-    /// Represents a component for rendering a mesh using OpenGL.
+    /// Represents a component for rendering sprites using OpenGL.
     /// </summary>
-    public sealed class MeshRenderComponent : Component, IDisposable
+    public sealed class SpriteRenderComponent : Component, IDisposable
     {
-        private Mesh _mesh;
-        private Texture? _texture;
+        private readonly Sprite _sprite;
+        private readonly Shader _shader;
         private VertexArray _vao;
         private VertexBuffer _vbo;
         private ElementBuffer? _ebo = null;
 
-        // TODO: Changing the mesh should update the VBO and EBO.
-        /// <summary>
-        /// Gets or sets the mesh to be rendered.
-        /// </summary>
-        public Mesh Mesh
-        {
-            get => _mesh;
-            set
-            {
-                _mesh = value;
-                InitializeBuffers();
-            }
-        }
+        /// <inheritdoc />
+        public override bool CanHaveMultiple => true;
 
         /// <summary>
         /// Gets or sets the transform applied to the mesh.
@@ -39,38 +29,9 @@ namespace PentaGE.Core.Rendering
         public Transform? Transform { get; set; }
 
         /// <summary>
-        /// Gets or sets the shader used for rendering the mesh.
-        /// </summary>
-        public Shader Shader { get; set; }
-
-        /// <summary>
-        /// Gets or sets the texture applied to the mesh (optional).
-        /// </summary>
-        public Texture? Texture
-        {
-            get => _texture; set
-            {
-                _texture = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the PBR material applied to the mesh.
-        /// </summary>
-        public PBRMaterial Material { get; set; }
-
-        /// <summary>
-        /// Gets or sets the draw mode used for rendering the mesh.
-        /// </summary>
-        public DrawMode DrawMode { get; set; }
-
-        /// <summary>
         /// Gets or sets a value indicating whether backface culling is enabled for rendering.
         /// </summary>
         public bool EnableCulling { get; set; } = false;
-
-        /// <inheritdoc />
-        public override bool CanHaveMultiple => true;
 
         /// <summary>
         /// Gets the transform applied to the mesh.
@@ -89,21 +50,20 @@ namespace PentaGE.Core.Rendering
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MeshRenderComponent"/> class.
+        /// Initializes a new instance of the <see cref="SpriteRenderComponent"/> class.
         /// </summary>
-        /// <param name="mesh">The mesh to be rendered.</param>
-        /// <param name="shader">The shader used for rendering the mesh.</param>
-        /// <param name="texture">The texture applied to the mesh (optional).</param>
-        /// <param name="material">The PBR material applied to the mesh (optional).</param>
-        /// <param name="transform">The transform applied to the mesh (optional).</param>
-        public unsafe MeshRenderComponent(Mesh mesh, Shader shader, Texture? texture = null, PBRMaterial? material = null, Transform? transform = null)
+        /// <param name="sprite">The sprite to render.</param>
+        /// <param name="shader">The shader program used for rendering.</param>
+        /// <param name="transform">The transform applied to the component (optional).</param>
+        public SpriteRenderComponent(
+            Sprite sprite,
+            Shader shader,
+            Transform? transform = null)
         {
-            _mesh = mesh;
-            Shader = shader;
-            _texture = texture;
-            Material = material ?? new();
-            DrawMode = DrawMode.Triangles;
             Transform = transform;
+
+            _sprite = sprite;
+            _shader = shader;
 
             InitializeBuffers();
         }
@@ -120,11 +80,11 @@ namespace PentaGE.Core.Rendering
 
             // Create a VAO, VBO, and (optionally) EBO
             _vao = new();
-            _vbo = new(Mesh.Vertices);
+            _vbo = new(_sprite.Mesh.Vertices);
 
-            if (Mesh.Indices is not null)
+            if (_sprite.Mesh.Indices is not null)
             {
-                _ebo = new(Mesh.Indices);
+                _ebo = new(_sprite.Mesh.Indices);
             }
 
             // Bind the VAO, VBO, and EBO to the current context
@@ -145,15 +105,15 @@ namespace PentaGE.Core.Rendering
         }
 
         /// <summary>
-        /// Renders the mesh using the specified camera and window.
+        /// Renders the sprite using the specified camera and window.
         /// </summary>
         /// <param name="camera">The camera used for rendering.</param>
         /// <param name="window">The window to render onto.</param>
-        /// <param name="wireframe">Whether to render the mesh in wireframe mode (optional, default is false).</param>
+        /// <param name="wireframe">Whether to render the sprite in wireframe mode (optional, default is false).</param>
         internal unsafe void Render(Camera camera, Window window, bool wireframe = false, DirectionalLightEntity? directionalLight = null)
         {
             // Use the shader program
-            Shader.Use();
+            _shader.Use();
 
             // Get the transform of the component (if applicable)
             // otherwise the transform component of the entity (if applicable)
@@ -174,50 +134,41 @@ namespace PentaGE.Core.Rendering
             // Combine the model, view, and projection matrices to get the final MVP matrix
             var mvpMatrix = modelMatrix * viewMatrix * projectionMatrix;
 
-            // Tell the shader if the object has a texture or not
-            Shader.SetUniform("hasTexture", Texture is not null);
+            // Tell the shader if that the sprite has a texture
+            _shader.SetUniform("hasTexture", true);
 
             // Pass the matrices to the shader (must be done after shader.Use())
-            Shader.SetUniform("mvp", mvpMatrix);
-            Shader.SetUniform("model", modelMatrix);
-            Shader.SetUniform("view", viewMatrix);
-            Shader.SetUniform("projection", projectionMatrix);
-            Shader.SetUniform("viewportSize", new Vector2(window.Viewport.Width, window.Viewport.Height));
+            _shader.SetUniform("mvp", mvpMatrix);
+            _shader.SetUniform("model", modelMatrix);
+            _shader.SetUniform("view", viewMatrix);
+            _shader.SetUniform("projection", projectionMatrix);
+            _shader.SetUniform("viewportSize", new Vector2(window.Viewport.Width, window.Viewport.Height));
 
             // Set up the directional light
             var hasDirectionalLight = directionalLight is not null && directionalLight.Enabled;
             if (hasDirectionalLight)
             {
-                Shader.SetUniform("directionalLight.direction", directionalLight!.Direction);
-                Shader.SetUniform("directionalLight.color", directionalLight.Color);
-                Shader.SetUniform("directionalLight.followCamera", directionalLight.FollowCamera);
+                _shader.SetUniform("directionalLight.direction", directionalLight!.Direction);
+                _shader.SetUniform("directionalLight.color", directionalLight.Color);
+                _shader.SetUniform("directionalLight.followCamera", directionalLight.FollowCamera);
             }
-            Shader.SetUniform("hasDirectionalLight", hasDirectionalLight);
+            _shader.SetUniform("hasDirectionalLight", hasDirectionalLight);
 
-            Shader.SetUniform("lightColor", new Vector4(1f, 1f, 1f, 1f));
-            Shader.SetUniform("cameraPosition", camera.Position);
-
-            // Set the material properties as uniforms in the shader
-            Shader.SetUniform("material.albedo", Material.Albedo);
-            Shader.SetUniform("material.roughness", Material.Roughness);
-            Shader.SetUniform("material.metalness", Material.Metallic);
-            Shader.SetUniform("material.ambientOcclusion", Material.AmbientOcclusion);
-            Shader.SetUniform("material.specularStrength", Material.SpecularStrength);
-            Shader.SetUniform("material.opacity", Material.Opacity);
+            _shader.SetUniform("lightColor", new Vector4(1f, 1f, 1f, 1f));
+            _shader.SetUniform("cameraPosition", camera.Position);
 
             // Set the texture slot uniform in the shader
-            // TODO: Make this more flexible and support multiple textures
-            if (Texture is not null)
-            {
-                Shader.SetUniform("tex0", 0);
-            }
+            _shader.SetUniform("tex0", 0);
 
             // Bind the texture to the current context
-            Texture?.Bind();
+            _sprite.Texture.Bind();
 
             // Bind the Vertex Array Object (VAO) to use the configuration
             // of vertex attributes stored in it.
             _vao.Bind();
+
+            // Draw the object using the indices of the EBO or the vertices of the VBO.
+            glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
 
             // Enable culling
             bool disableCulling = false;
@@ -229,17 +180,14 @@ namespace PentaGE.Core.Rendering
                 disableCulling = true;
             }
 
-            // Draw the object using the indices of the EBO or the vertices of the VBO.
-            glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
-
-            if (_ebo is not null && Mesh.Indices is not null)
+            if (_ebo is not null && _sprite.Mesh.Indices is not null)
             {
                 _ebo.Bind();
-                glDrawElements((int)DrawMode, Mesh.Indices.Count, GL_UNSIGNED_INT, null);
+                glDrawElements((int)DrawMode.Triangles, _sprite.Mesh.Indices.Count, GL_UNSIGNED_INT, null);
             }
             else
             {
-                glDrawArrays((int)DrawMode, 0, Mesh.Vertices.Count);
+                glDrawArrays((int)DrawMode.Triangles, 0, _sprite.Mesh.Vertices.Count);
             }
 
             // Disable culling
@@ -249,7 +197,19 @@ namespace PentaGE.Core.Rendering
             VertexArray.Unbind();   // Unbind the VAO
             VertexBuffer.Unbind();  // Unbind the VBO (not necessary, but good practice)
             ElementBuffer.Unbind(); // Unbind the EBO (not necessary, but good practice)
+
+            // Unbind the texture from the current context
+            _sprite.Texture.Unbind();
         }
+
+        /// <inheritdoc />
+        public override object Clone() =>
+            new SpriteRenderComponent(_sprite, _shader)
+            {
+                Enabled = true,
+                Transform = Transform,
+                EnableCulling = EnableCulling,
+            };
 
         /// <inheritdoc />
         public void Dispose()
@@ -258,14 +218,5 @@ namespace PentaGE.Core.Rendering
             _vbo.Dispose();
             _ebo?.Dispose();
         }
-
-        /// <inheritdoc />
-        public override object Clone() =>
-            new MeshRenderComponent(Mesh, Shader, Texture, Material.Clone() as PBRMaterial)
-            {
-                DrawMode = DrawMode, // Copy the draw mode directly
-                Enabled = true,
-                Transform = Transform
-            };
     }
 }
