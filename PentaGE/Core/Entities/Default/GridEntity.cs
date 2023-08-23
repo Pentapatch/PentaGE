@@ -7,6 +7,7 @@ namespace PentaGE.Core.Entities
     /// </summary>
     public sealed class GridEntity : Entity
     {
+        /// <inheritdoc />
         public override DisplayMode DisplayMode => DisplayMode.WhenEditing;
 
         /// <summary>

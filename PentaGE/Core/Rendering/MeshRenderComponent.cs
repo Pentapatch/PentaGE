@@ -64,6 +64,11 @@ namespace PentaGE.Core.Rendering
         /// </summary>
         public DrawMode DrawMode { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether backface culling is enabled for rendering.
+        /// </summary>
+        public bool EnableCulling { get; set; } = false;
+
         /// <inheritdoc />
         public override bool CanHaveMultiple => true;
 
@@ -214,6 +219,16 @@ namespace PentaGE.Core.Rendering
             // of vertex attributes stored in it.
             _vao.Bind();
 
+            // Enable culling
+            bool disableCulling = false;
+            if (EnableCulling && !glIsEnabled(GL_CULL_FACE))
+            {
+                glEnable(GL_CULL_FACE);
+                glCullFace(GL_BACK);
+                glFrontFace(GL_CCW);
+                disableCulling = true;
+            }
+
             // Draw the object using the indices of the EBO or the vertices of the VBO.
             glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
 
@@ -226,6 +241,9 @@ namespace PentaGE.Core.Rendering
             {
                 glDrawArrays((int)DrawMode, 0, Mesh.Vertices.Count);
             }
+
+            // Disable culling
+            if (disableCulling) glDisable(GL_CULL_FACE);
 
             // Unbind the VAO, VBO & EBO to prevent accidental modification.
             VertexArray.Unbind();   // Unbind the VAO
