@@ -35,7 +35,6 @@ namespace PentaGE.Core
         private MouseModeEnum _mouseMode = MouseModeEnum.None;
         private Point _mouseInitialPosition = new(0, 0);
         private Point _mouseOffsetPosition = new(0, 0);
-        private bool _mouseOffsetPositionSet = false;
         private Rotation _cameraRotationOffset = new(0, 0, 0);
         private int _mouseLastY = 0;
         private int _mouseLastX = 0;
@@ -372,17 +371,20 @@ namespace PentaGE.Core
         {
             if (e.Button == Common.MouseButton.Left && _mouseMode == MouseModeEnum.None)
             {
-                _mouseOffsetPositionSet = false;
+                _mouseOffsetPosition = e.Position;
+                _mouseInitialPosition = e.Position;
+                _mouseLastY = e.Position.Y;
+                _mouseLastX = e.Position.X;
+                if (ActiveCamera is Camera3d camera) _cameraRotationOffset = camera.Rotation.Normalize();
+
                 _mouseMode = MouseModeEnum.YawAndPitch;
             }
             else if (e.Button == Common.MouseButton.Right && _mouseMode == MouseModeEnum.None)
             {
-                _mouseOffsetPositionSet = false;
                 _mouseMode = MouseModeEnum.MoveZAndYaw;
             }
             else if (e.Button == Common.MouseButton.Middle)
             {
-                _mouseOffsetPositionSet = false;
                 _mouseMode = MouseModeEnum.MoveXAndY;
             }
 
@@ -420,48 +422,46 @@ namespace PentaGE.Core
         {
             if (ActiveCamera is not Camera3d camera) return;
 
-            // If the mouse initial location has not been set, 
-            // set it to the current mouse position
-            if (!_mouseOffsetPositionSet)
-            {
-                _mouseOffsetPosition = e.Position;
-                _mouseInitialPosition = e.Position;
-                _mouseOffsetPositionSet = true;
-                _mouseLastY = e.Position.Y;
-                _mouseLastX = e.Position.X;
-                _cameraRotationOffset = camera.Rotation;
-            }
-
-            // Perform the appropriate rotation and/or movement based on the mouse mode
-            if (_mouseMode == MouseModeEnum.YawAndPitch)
-                YawAndPitch(e, camera);
-            else if (_mouseMode == MouseModeEnum.MoveZAndYaw)
-                MoveZAndYaw(e, camera);
-            else if (_mouseMode == MouseModeEnum.MoveXAndY)
-                MoveXAndY(e, camera);
+            int x = e.Position.X;
+            int y = e.Position.Y;
 
             // Reset the mouse position to the center of the screen
             // when the mouse cursor reaches the edge of the screen
             if (_mouseMode != MouseModeEnum.None &&
-                (e.Position.X >= e.Window.Size.Width || e.Position.X <= 0 ||
-                 e.Position.Y >= e.Window.Size.Height || e.Position.Y <= 0))
+                (x >= e.Window.Size.Width || x <= 0 ||
+                 y >= e.Window.Size.Height || y <= 0))
             {
-                Glfw.SetCursorPosition(e.Window.Handle, e.Window.Size.Width / 2, e.Window.Size.Height / 2);
-                _mouseOffsetPosition = new(e.Window.Size.Width / 2, e.Window.Size.Height / 2);
-                _cameraRotationOffset = camera.Rotation;
+                x = e.Window.Size.Width / 2;
+                y = e.Window.Size.Height / 2;
+
+                _cameraRotationOffset = camera.Rotation.Normalize();
+                _mouseOffsetPosition = new(x, y);
+
+                Glfw.SetCursorPosition(e.Window.Handle, x, y);
             }
+
+            // Perform the appropriate rotation and/or movement based on the mouse mode
+            if (_mouseMode == MouseModeEnum.YawAndPitch)
+                YawAndPitch(x, y, e.Window.Size.Width, e.Window.Size.Height, camera);
+            else if (_mouseMode == MouseModeEnum.MoveZAndYaw)
+                MoveZAndYaw(x, y, e.Window.Size.Width, camera);
+            else if (_mouseMode == MouseModeEnum.MoveXAndY)
+                MoveXAndY(x, y, camera);
         }
 
         /// <summary>
         /// Updates the camera's orientation based on yaw and pitch angles.
         /// </summary>
-        /// <param name="e">The mouse movement event arguments.</param>
+        /// <param name="x">The current mouse X position.</param>
+        /// <param name="y">The current mouse Y position.</param>
+        /// <param name="width">The width of the window.</param>
+        /// <param name="height">The height of the window.</param>
         /// <param name="camera">The camera to be updated.</param>
-        private void YawAndPitch(MouseMovedEventArgs e, Camera3d camera)
+        private void YawAndPitch(int x, int y, int width, int height, Camera3d camera)
         {
             // Calculate the yaw and pitch angles
-            float yaw = CalculateYaw(e);
-            float pitch = CalculatePitch(e);
+            float yaw = CalculateYaw(x, width);
+            float pitch = CalculatePitch(y, height);
 
             // Update the yaw and pitch angles
             camera.Rotation = new(yaw, pitch, camera.Rotation.Roll);
@@ -470,12 +470,14 @@ namespace PentaGE.Core
         /// <summary>
         /// Moves the camera along the Z-axis and updates its yaw angle.
         /// </summary>
-        /// <param name="e">The mouse movement event arguments.</param>
+        /// <param name="x">The current mouse X position.</param>
+        /// <param name="y">The current mouse Y position.</param>
+        /// <param name="width">The width of the window.</param>
         /// <param name="camera">The camera to be updated.</param>
-        private void MoveZAndYaw(MouseMovedEventArgs e, Camera3d camera)
+        private void MoveZAndYaw(int x, int y, int width, Camera3d camera)
         {
             // Calculate the yaw angle
-            float yaw = CalculateYaw(e);
+            float yaw = CalculateYaw(x, width);
 
             // Update the yaw angle
             camera.Rotation = new(yaw, camera.Rotation.Pitch, camera.Rotation.Roll);
@@ -488,9 +490,9 @@ namespace PentaGE.Core
             // Calculate the direction to move the camera
             Vector3 direction = Vector3.Zero;
 
-            if (e.Position.Y > _mouseLastY)
+            if (y > _mouseLastY)
                 direction += camera.Rotation.GetForwardVector();
-            else if (e.Position.Y < _mouseLastY)
+            else if (y < _mouseLastY)
                 direction += camera.Rotation.GetBackwardVector();
 
             // Reset the pitch angle
@@ -501,15 +503,16 @@ namespace PentaGE.Core
             camera.Position += direction * movementSpeed;
 
             // Update the last mouse position
-            _mouseLastY = e.Position.Y;
+            _mouseLastY = y;
         }
 
         /// <summary>
         /// Moves the camera along the X and Y axes based on mouse movement.
         /// </summary>
-        /// <param name="e">The mouse movement event arguments.</param>
+        /// <param name="x">The current mouse X position.</param>
+        /// <param name="y">The current mouse Y position.</param>
         /// <param name="camera">The camera to be updated.</param>
-        private void MoveXAndY(MouseMovedEventArgs e, Camera3d camera)
+        private void MoveXAndY(int x, int y, Camera3d camera)
         {
             // Temporarily set the pitch angle to zero since this
             // mode is ignoring the pitch angle
@@ -519,14 +522,14 @@ namespace PentaGE.Core
             // Calculate the direction to move the camera
             Vector3 direction = Vector3.Zero;
 
-            if (e.Position.X > _mouseLastX)
+            if (x > _mouseLastX)
                 direction += camera.Rotation.GetRightVector();
-            else if (e.Position.X < _mouseLastX)
+            else if (x < _mouseLastX)
                 direction += camera.Rotation.GetLeftVector();
 
-            if (e.Position.Y > _mouseLastY)
+            if (y > _mouseLastY)
                 direction -= camera.Rotation.GetUpVector();
-            else if (e.Position.Y < _mouseLastY)
+            else if (y < _mouseLastY)
                 direction -= camera.Rotation.GetDownVector();
 
             // Reset the pitch angle
@@ -537,29 +540,31 @@ namespace PentaGE.Core
             camera.Position += direction * movementSpeed;
 
             // Update the last mouse position
-            _mouseLastX = e.Position.X;
-            _mouseLastY = e.Position.Y;
+            _mouseLastX = x;
+            _mouseLastY = y;
         }
 
         /// <summary>
         /// Calculates the yaw angle based on mouse movement.
         /// </summary>
-        /// <param name="e">The mouse movement event arguments.</param>
+        /// <param name="x">The X-coordinate of the mouse cursor.</param>
+        /// <param name="width">The width of the window.</param>
         /// <returns>The calculated yaw angle.</returns>
-        private float CalculateYaw(MouseMovedEventArgs e)
+        private float CalculateYaw(int x, int width)
         {
-            float xDiff = (e.Position.X - _mouseOffsetPosition.X) / (e.Window.Size.Width / 2f) * MouseSensitivity;
+            float xDiff = (x - _mouseOffsetPosition.X) / (width / 2f) * MouseSensitivity;
             return _cameraRotationOffset.Yaw - (xDiff * 90);
         }
 
         /// <summary>
         /// Calculates the pitch angle based on mouse movement.
         /// </summary>
-        /// <param name="e">The mouse movement event arguments.</param>
+        /// <param name="y">The Y-coordinate of the mouse cursor.</param>
+        /// <param name="height">The height of the window.</param>
         /// <returns>The calculated pitch angle.</returns>
-        private float CalculatePitch(MouseMovedEventArgs e)
+        private float CalculatePitch(int y, int height)
         {
-            float yDiff = (e.Position.Y - _mouseOffsetPosition.Y) / (e.Window.Size.Height / 2f) * MouseSensitivity;
+            float yDiff = (y - _mouseOffsetPosition.Y) / (height / 2f) * MouseSensitivity;
             return _cameraRotationOffset.Pitch - (yDiff * 90);
         }
 

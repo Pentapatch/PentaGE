@@ -1,4 +1,5 @@
 ﻿using PentaGE.Common;
+using System.Drawing;
 
 namespace PentaGE.Core.Events
 {
@@ -31,12 +32,18 @@ namespace PentaGE.Core.Events
         public ModifierKey ModifierKeys { get; init; }
 
         /// <summary>
+        /// Gets the position of the mouse cursor when the event occurred.
+        /// </summary>
+        public Point Position { get; init; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="MouseButtonEventArgs"/> class with the associated window.
         /// </summary>
         /// <param name="onEvent">The event handler to be invoked when the event is raised.</param>
         /// <param name="window">The window associated with the event.</param>
         /// <param name="button">The mouse button associated with the event.</param>
         /// <param name="modifierKeys">The modifier keys that were pressed in combination with the key event.</param>
+        /// <param name="position">The position of the mouse cursor when the event occurred.</param>
         /// <param name="categories">The category or categories of the event.</param>
         /// <param name="type">The type of the event.</param>
         internal MouseButtonEventArgs(
@@ -44,12 +51,14 @@ namespace PentaGE.Core.Events
             Window window,
             MouseButton button,
             ModifierKey modifierKeys,
+            Point position,
             EventCategory categories,
             EventType type) :
             base(onEvent, window)
         {
             Button = button;
             ModifierKeys = modifierKeys;
+            Position = position;
             _categories = categories;
             _type = type;
         }
@@ -67,6 +76,6 @@ namespace PentaGE.Core.Events
         /// </summary>
         /// <returns>A string representing the mouse button event with its associated data.</returns>
         public override string ToString() =>
-            $"{{Button={Button}, ModifierKeys={ModifierKeys}}}";
+            $"{{Button={Button}, ModifierKeys={ModifierKeys}, Position={Position}}}";
     }
 }

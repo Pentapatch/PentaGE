@@ -29,6 +29,8 @@ namespace PentaGE.Core.Events
         private readonly HotKeyManager _hotKeyManager = new();
         private readonly KeyBindingManager _keyBindingManager;
 
+        private Point _lastPosition;
+
         // NOTE: We need to keep a reference to the callbacks to prevent them from
         //       being garbage collected and crash the engine during runtime.
         private KeyCallback _keyCallback;
@@ -64,7 +66,12 @@ namespace PentaGE.Core.Events
         /// <summary>
         /// Gets or sets the category or categories of events to log.
         /// </summary>
-        internal EventCategory CategoriesToLog { get; set; } = EventCategory.HotKey;
+        internal EventCategory CategoriesToLog { get; set; } = EventCategory.None;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to suspend event dispatching.
+        /// </summary>
+        internal bool SuspendEvents { get; set; } = false;
 
         /// <summary>
         /// Provides access to the <see cref="HotKeyManager"/> instance for managing hotkeys.
@@ -168,7 +175,7 @@ namespace PentaGE.Core.Events
             if (pollEvents) Glfw.PollEvents();
 
             // Execute the event buffer
-            ExecuteEvents();
+            if (!SuspendEvents) ExecuteEvents();
         }
 
         #endregion
@@ -440,6 +447,7 @@ namespace PentaGE.Core.Events
                     GetWindow(windowHandle),
                     (Common.MouseButton)button,
                     (ModifierKey)mods,
+                    _lastPosition,
                     EventCategory.Input | EventCategory.Mouse | EventCategory.Button,
                     EventType.MouseButtonDown));
             }
@@ -450,6 +458,7 @@ namespace PentaGE.Core.Events
                     GetWindow(windowHandle),
                     (Common.MouseButton)button,
                     (ModifierKey)mods,
+                    _lastPosition,
                     EventCategory.Input | EventCategory.Mouse | EventCategory.Button,
                     EventType.MouseButtonUp));
             }
@@ -463,11 +472,16 @@ namespace PentaGE.Core.Events
         /// <param name="windowHandle">The handle of the GLFW window that received the input.</param>
         /// <param name="xPos">The new cursor x-coordinate, relative to the left edge of the client area.</param>
         /// <param name="yPos">The new cursor y-coordinate, relative to the top edge of the client area.</param>
-        private void MousePositionCallback(GLFW.Window windowHandle, double xPos, double yPos) =>
+        private void MousePositionCallback(GLFW.Window windowHandle, double xPos, double yPos)
+        {
+            // Store the last position of the cursor for use in other events
+            _lastPosition = new((int)xPos, (int)yPos);
+
             _eventBuffer.Add(new MouseMovedEventArgs(
                     OnMouseMoved,
                     GetWindow(windowHandle),
                     new((int)xPos, (int)yPos)));
+        }
 
         /// <summary>
         /// Callback method for handling mouse enter/leave input events from GLFW.
