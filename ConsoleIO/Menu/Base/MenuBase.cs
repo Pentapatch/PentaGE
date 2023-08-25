@@ -55,46 +55,56 @@
     public abstract class MenuBase<T> : IDisposable 
         where T : MenuBase<T>
     {
-        private readonly List<MenuItem> _items = new();
+        protected readonly List<MenuItem> _items = new();
+        private int _selectedIndex = 0;
         private ConsoleColor _initialBackground;
         private ConsoleColor _initialForeground;
         private string _initialTitle = string.Empty;
 
-        public ConsoleColor Background { get; private set; } = ConsoleColor.Black;
+        public ConsoleColor Background { get; set; } = ConsoleColor.Black;
 
-        public ConsoleColor Foreground { get; private set; } = ConsoleColor.Gray;
+        public ConsoleColor Foreground { get; set; } = ConsoleColor.Gray;
 
-        public string Title { get; private set; } = "ConsoleIO";
+        public string Title { get; set; } = "ConsoleIO";
 
         public MenuBase() => StoreInitialSettings();
 
-        public MenuBase(Action<ConsoleMenuSettings> settings)
+        public MenuBase(Action<ConsoleMenuSettings>? settings)
         {
             StoreInitialSettings();
 
+            if (settings is null) return;
+
             var menuSettings = new ConsoleMenuSettings();
-            settings(menuSettings); // Invoke the setup delegate
-            ApplySettings(menuSettings); // Apply the options to the console
+
+            // Invoke the setup delegate
+            settings(menuSettings);
+
+            // Apply the options to the console
+            ApplySettings(menuSettings);
         }
 
         ~MenuBase() => RestoreInitialSettings();
 
         protected void AddItem(MenuItem item) => _items.Add(item);
 
-        public T Enter()
-        {
-            return (T)this;
-        }
+        #region Add message
 
+        // name, (settings)
         public T AddMessage(string name, Action<MenuItemSettings>? settings = null) =>
             AddMessage(name, out _, settings);
 
+        // name, out var, (settings)
         public T AddMessage(string name, out MenuMessage message, Action<MenuItemSettings>? settings = null)
         {
             message = new MenuMessage(name, settings);
             _items.Add(message);
             return (T)this;
         }
+
+        #endregion
+
+        #region Apply individual settings
 
         public T SetBackground(ConsoleColor color)
         {
@@ -117,6 +127,8 @@
             return (T)this;
         }
 
+        #endregion
+
         public T Restore()
         {
             RestoreInitialSettings();
@@ -135,6 +147,7 @@
             _initialBackground = Console.BackgroundColor;
             _initialForeground = Console.ForegroundColor;
             _initialTitle = Console.Title;
+            Console.Clear();
         }
 
         private void RestoreInitialSettings()
@@ -142,6 +155,7 @@
             Console.BackgroundColor = _initialBackground;
             Console.ForegroundColor = _initialForeground;
             Console.Title = _initialTitle;
+            Console.Clear();
         }
 
         public void Dispose() => RestoreInitialSettings();

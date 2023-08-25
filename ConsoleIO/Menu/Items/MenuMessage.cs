@@ -2,13 +2,21 @@
 {
     public sealed class MenuMessage : MenuItem
     {
-        internal MenuMessage(string text, Action<MenuItemSettings>? settings) : base(text, null)
+        // TODO: Should not inherit from MenuItem
+        //       as it does not share common properties and does not
+        //       need to be selectable and have an action
+
+        internal MenuMessage(string text, Action<MenuItemSettings>? settings) : base(null!, text, null)
         {
             if (settings is null) return;
 
             var itemSettings = new MenuItemSettings();
-            settings(itemSettings);      // Invoke the setup delegate
-            ApplySettings(itemSettings); // Apply the derived settings to the menu item
+
+            // Invoke the setup delegate
+            settings(itemSettings);
+
+            // Apply the derived settings to the menu item
+            ApplySettings(itemSettings);
         }
     }
 }

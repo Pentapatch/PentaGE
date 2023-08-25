@@ -4,7 +4,7 @@
     {
         public bool Checked { get; set; } = false;
 
-        public MenuCheck(string text, Action<MenuCheckSettings>? settings, Action? action = null) : base(text, action)
+        public MenuCheck(ConsoleMenu owner, string text, Action<MenuCheckSettings>? settings, Action? action = null) : base(owner, text, action)
         {
             if (settings is null) return;
 

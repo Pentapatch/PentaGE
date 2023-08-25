@@ -2,25 +2,32 @@
 {
     public abstract class MenuItem
     {
-        public bool Enabled { get; private set; } = true;
+        private readonly ConsoleMenu _owner;
 
-        public bool Selected { get; private set; } = false;
+        public bool Enabled { get; set; } = true;
+
+        public bool Selected { get; internal set; } = false;
 
         public string Text { get; set; } = string.Empty;
 
+        public ConsoleKey? Shortcut { get; set; } = null;
+
+        public ConsoleColor? Foreground { get; set; } = null;
+
+        public ConsoleColor? Background { get; set; } = null;
+
         public Action? Action { get; set; } = null;
 
-        public ConsoleKey? Shortcut { get; private set; } = null;
-
-        public ConsoleColor? Foreground { get; private set; } = null;
-
-        public ConsoleColor? Background { get; private set; } = null;
-
-        internal MenuItem(string text, Action? action)
+        internal MenuItem(ConsoleMenu owner, string text, Action? action)
         {
+            _owner = owner;
             Text = text;
             Action = action;
         }
+
+        public void Select() => _owner.Select(this);
+
+        public void Remove() => _owner.Remove(this);
 
         protected virtual void ApplySettings(MenuItemSettings options)
         {

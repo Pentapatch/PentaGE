@@ -1,4 +1,5 @@
 ﻿using ConsoleIO;
+using System.Net.Http.Headers;
 
 namespace Utilities
 {
@@ -7,28 +8,48 @@ namespace Utilities
         public void Run()
         {
             // Test the ConsoleIO library
-            using (var menu = new ConsoleMenu(settings =>
+            ConsoleMenu menu = null!;
+            MenuCheck agreeToTerms = null!;
+
+            using (ConsoleMenu.Create(out menu,
+            settings =>
             {
                 settings.Title = "Test Menu";
                 settings.Background = ConsoleColor.DarkBlue;
                 settings.Foreground = ConsoleColor.White;
             })
-            .AddMessage("Hello world!", settings =>
+            .AddMessage("Please agree to the terms and conditions:", 
+            out var message,
+            settings =>
             {
                 settings.Background = ConsoleColor.DarkGreen;
                 settings.Foreground = ConsoleColor.White;
             })
-            .AddCheckbox("I agree to the terms and conditions", out var agreeToTerms, 
+            .AddCheckbox("I agree to the terms and conditions", 
+            out agreeToTerms,
             settings =>
             {
+                settings.Selected = true;
                 settings.Checked = false;
                 settings.Foreground = ConsoleColor.Red;
+            },
+            action: () =>
+            {
+                message.Text = agreeToTerms.Checked
+                    ? "Thank you for agreeing to the terms and conditions."
+                    : "Please agree to the terms and conditions:";
             })
             .AddOption("Confirm", settings =>
             {
                 settings.Enabled = false;
+            },
+            action: () =>
+            {
+                // Perform final action here
             })
             .Enter()) { }
+
+            
 
             Console.WriteLine($"{Environment.UserName} @ {Environment.MachineName}");
 

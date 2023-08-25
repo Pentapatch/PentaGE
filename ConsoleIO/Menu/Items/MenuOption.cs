@@ -2,7 +2,7 @@
 {
     public sealed class MenuOption : MenuItem
     {
-        public MenuOption(string text, Action<MenuOptionSettings>? settings, Action? action = null) : base(text, action)
+        public MenuOption(ConsoleMenu owner, string text, Action<MenuOptionSettings>? settings, Action? action = null) : base(owner, text, action)
         {
             if (settings is null) return;
 
