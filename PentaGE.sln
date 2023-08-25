@@ -7,7 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PentaGE", "PentaGE\PentaGE.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sandbox", "Sandbox\Sandbox.csproj", "{29F6EA95-D696-4A48-B119-7A4D2AEA21F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GLFW", "GLFW\GLFW.csproj", "{B02D8394-56D7-4884-86C1-F9F54685E2C3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GLFW", "GLFW\GLFW.csproj", "{B02D8394-56D7-4884-86C1-F9F54685E2C3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utilities", "Utilities\Utilities.csproj", "{7C0A8F00-6B13-4590-A95E-48C79E7F79BB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleIO", "ConsoleIO\ConsoleIO.csproj", "{1233D1B9-8193-4CEA-9125-41E6E006556A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +31,14 @@ Global
 		{B02D8394-56D7-4884-86C1-F9F54685E2C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B02D8394-56D7-4884-86C1-F9F54685E2C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B02D8394-56D7-4884-86C1-F9F54685E2C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C0A8F00-6B13-4590-A95E-48C79E7F79BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C0A8F00-6B13-4590-A95E-48C79E7F79BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C0A8F00-6B13-4590-A95E-48C79E7F79BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C0A8F00-6B13-4590-A95E-48C79E7F79BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1233D1B9-8193-4CEA-9125-41E6E006556A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1233D1B9-8193-4CEA-9125-41E6E006556A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1233D1B9-8193-4CEA-9125-41E6E006556A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1233D1B9-8193-4CEA-9125-41E6E006556A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
