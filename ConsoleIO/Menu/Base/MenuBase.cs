@@ -1,65 +1,13 @@
 ﻿namespace ConsoleIO
 {
-    // Design goal pseudo code:
-    //private void EnterTestMenu() => new Menu()
-    //    .SetBackground(ConsoleColor.Blue)
-    //    .SetForeground(ConsoleColor.Gray)
-    //    .SetHeader("Test menu")
-    //    .AddMessage("Settings")
-    //    .AddCheckBox("Enable A", out var checkBoxA, settings => 
-    //    { 
-    //        settings.Enabled = false; 
-    //        settings.Checked = true; 
-    //    })
-    //    .AddCheckBox("Enable B", out var checkBoxB)
-    //    .AddInput("Target", out var inputField, settings => 
-    //    { 
-    //        settings.Value = "C:\\Users\\User\\Desktop\\test.txt"; 
-    //    })
-    //    .AddMessage("Actions")
-    //    .Add("Execute", settings =>
-    //    {
-    //        settings.Shorcut = ConsoleKey.F5;
-    //    },
-    //    () =>
-    //    {
-    //        if (checkBoxA.Checked)
-    //            Console.WriteLine($"A is enabled, executing at {inputField.Value}");
-    //    })
-    //    .Add("Override test", TestAction1)
-    //    .Add("Exit", () =>
-    //    {
-    //        Environment.Exit(0);
-    //    })
-    //    .Select(inputField) // Sets the item to be selected by default
-    //    .Enter(() =>
-    //    {
-    //        Console.WriteLine$"Menu exited");
-    //    });
-    //    );           
-
-    //private void TestAction1()
-    //{
-    //    Console.WriteLine("Test action 1");
-    //}
-
-    // Design goal pseudo code 2 - use it as a generic selector:
-    //private void EnterTestMenu2() => new Menu<Component>()
-    //    .Add("Comp 1", Component1)
-    //    .Add("Comp 2", Component2)
-    //    .Enter(result => 
-    //    {
-    //        Console.WriteLine($"Selected {result.Name}");
-    //    });
-
     public abstract class MenuBase<T> : IDisposable 
         where T : MenuBase<T>
     {
         protected readonly List<MenuItem> _items = new();
-        private int _selectedIndex = 0;
         private ConsoleColor _initialBackground;
         private ConsoleColor _initialForeground;
         private string _initialTitle = string.Empty;
+        private bool _initialCursorVisible;
 
         public ConsoleColor Background { get; set; } = ConsoleColor.Black;
 
@@ -69,9 +17,19 @@
 
         public ConsoleColor? SelectedForegroundColor { get; set; } = null;
 
+        public ConsoleColor? DisabledBackgroundColor { get; set; } = null;
+
+        public ConsoleColor? DisabledForegroundColor { get; set; } = ConsoleColor.DarkGray;
+
+        public ConsoleColor? MessageForeground { get; set; } = null;
+
+        public ConsoleColor? MessageBackground { get; set; } = null;
+
         public char? SelectorChar { get; set; } = '>';
 
         public string Title { get; set; } = "ConsoleIO";
+
+        public bool WrapArround { get; set; } = true;
 
         public MenuBase() => StoreInitialSettings();
 
@@ -151,6 +109,36 @@
             return (T)this;
         }
 
+        public T SetWrapArround(bool wrapArround)
+        {
+            WrapArround = wrapArround;
+            return (T)this;
+        }
+
+        public T SetDisabledForeground(ConsoleColor? color)
+        {
+            DisabledForegroundColor = color;
+            return (T)this;
+        }
+
+        public T SetDisabledBackground(ConsoleColor? color)
+        {
+            DisabledBackgroundColor = color;
+            return (T)this;
+        }
+
+        public T SetMessageForeground(ConsoleColor? color)
+        {
+            MessageForeground = color;
+            return (T)this;
+        }
+
+        public T SetMessageBackground(ConsoleColor? color)
+        {
+            MessageBackground = color;
+            return (T)this;
+        }
+
         #endregion
 
         public T Restore()
@@ -164,9 +152,10 @@
             SetBackground(options.Background);
             SetForeground(options.Foreground);
             SetTitle(options.Title);
-            SetSelectedBackgroundColor(options.SelectedBackcolor);
-            SetSelectedForegroundColor(options.SelectedForecolor);
+            SetSelectedBackgroundColor(options.SelectedBackground);
+            SetSelectedForegroundColor(options.SelectedForeground);
             SetSelectorChar(options.SelectorChar);
+            SetWrapArround(options.WrapArround);
             Console.Clear();
         }
 
@@ -175,6 +164,8 @@
             _initialBackground = Console.BackgroundColor;
             _initialForeground = Console.ForegroundColor;
             _initialTitle = Console.Title;
+            _initialCursorVisible = Console.CursorVisible;
+            Console.CursorVisible = false;
         }
 
         private void RestoreInitialSettings()
@@ -182,6 +173,7 @@
             Console.BackgroundColor = _initialBackground;
             Console.ForegroundColor = _initialForeground;
             Console.Title = _initialTitle;
+            Console.CursorVisible = _initialCursorVisible;
             Console.Clear();
         }
 

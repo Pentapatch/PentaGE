@@ -8,10 +8,20 @@
 
         public char? SelectorChar { get; set; } = '>';
 
-        public ConsoleColor? SelectedForecolor { get; set; } = null;
+        public ConsoleColor? SelectedForeground { get; set; } = null;
 
-        public ConsoleColor? SelectedBackcolor { get; set; } = null;
+        public ConsoleColor? SelectedBackground { get; set; } = null;
+
+        public ConsoleColor? DisabledForeground { get; set; } = ConsoleColor.DarkGray;
+
+        public ConsoleColor? DisabledBackground { get; set; } = null;
+
+        public ConsoleColor? MessageForeground { get; set; } = null;
+
+        public ConsoleColor? MessageBackground { get; set; } = null;
 
         public string Title { get; set; } = string.Empty;
+
+        public bool WrapArround { get; set; } = true;
     }
 }

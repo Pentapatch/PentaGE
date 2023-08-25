@@ -8,55 +8,89 @@ namespace Utilities
         public void Run()
         {
             // Test the ConsoleIO library
-            ConsoleMenu menu = null!;
-            MenuCheck agreeToTerms = null!;
-            MenuOption confirm = null!;
+            //ConsoleMenu menu = null!;
+            //MenuCheck agreeToTerms = null!;
+            //MenuOption confirm = null!;
 
-            using (ConsoleMenu.Create(out menu,
+            //using (ConsoleMenu.Create(out menu,
+            //    settings =>
+            //    {
+            //        settings.Title = "Test Menu";
+            //        settings.Background = ConsoleColor.DarkBlue;
+            //        settings.Foreground = ConsoleColor.White;
+            //    })
+            //.AddMessage("Please agree to the terms and conditions:",
+            //    out var message,
+            //    settings =>
+            //    {
+            //        settings.Background = ConsoleColor.DarkGreen;
+            //        settings.Foreground = ConsoleColor.White;
+            //    })
+            //.AddCheckbox("I agree to the terms and conditions",
+            //    out agreeToTerms,
+            //    settings =>
+            //    {
+            //        settings.Selected = true;
+            //        settings.Checked = false;
+            //        settings.Foreground = ConsoleColor.Red;
+            //    },
+            //    action: () =>
+            //    {
+            //        message.Text = agreeToTerms.Checked
+            //            ? "Thank you for agreeing to the terms and conditions."
+            //            : "Please agree to the terms and conditions:";
+            //        confirm.Enabled = agreeToTerms.Checked;
+            //    })
+            //.AddOption("Confirm", out confirm, 
+            //    settings =>
+            //    {
+            //        settings.Enabled = false;
+            //    },
+            //    action: () =>
+            //    {
+            //        // Perform final action here
+            //    })
+            //.Enter(
+            //    action: () =>
+            //    {
+
+            //    })) { }
+
+            MenuCheck check = null!;
+            using (ConsoleMenu.Create(
                 settings =>
                 {
                     settings.Title = "Test Menu";
-                    settings.Background = ConsoleColor.DarkBlue;
-                    settings.Foreground = ConsoleColor.White;
                 })
-            .AddMessage("Please agree to the terms and conditions:",
-                out var message,
+                //.SetDisabledBackground(ConsoleColor.DarkRed)
+                .SetMessageForeground(ConsoleColor.Blue)
+                .AddMessage("Welcome to the simple test menu!",
                 settings =>
                 {
-                    settings.Background = ConsoleColor.DarkGreen;
-                    settings.Foreground = ConsoleColor.White;
+                    settings.Foreground = ConsoleColor.Gray;
                 })
-            .AddCheckbox("I agree to the terms and conditions",
-                out agreeToTerms,
+                .AddCheckbox("Set title",
+                out check,
+                action: () =>
+                {
+                    Console.Title = check.Checked ? "HELLO WORLD!" : "...";
+                })
+                .AddMessage("Section one:")
+                .AddOption("Option 1")
+                .AddOption("Option 2",
                 settings =>
                 {
                     settings.Selected = true;
-                    settings.Checked = false;
-                    settings.Foreground = ConsoleColor.Red;
-                },
-                action: () =>
-                {
-                    message.Text = agreeToTerms.Checked
-                        ? "Thank you for agreeing to the terms and conditions."
-                        : "Please agree to the terms and conditions:";
-                    confirm.Enabled = agreeToTerms.Checked;
                 })
-            .AddOption("Confirm", out confirm, 
+                .AddOption("Option 3",
                 settings =>
                 {
                     settings.Enabled = false;
-                },
-                action: () =>
-                {
-                    // Perform final action here
                 })
-            .Enter(
-                action: () =>
-                {
-
-                })) { }
-
-
+                .AddMessage("Section two:")
+                .AddOption("Option 4")
+                .AddOption("Option 5")
+                .Enter()) { }
 
             Console.WriteLine($"{Environment.UserName} @ {Environment.MachineName}");
 

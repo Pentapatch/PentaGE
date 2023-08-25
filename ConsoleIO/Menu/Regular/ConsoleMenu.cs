@@ -20,15 +20,12 @@
             // Early exit if there are no items
             if (_items.Count == 0) return this;
 
-            // Select the first item if none are selected
-            SelectFirstItem();
+            TrySelectFirstAvailableItem();
 
-            foreach (var item in _items)
+            while (true)
             {
-                WriteItem(item);
+                if (NavigateMenu()) break;
             }
-
-            Console.ReadKey(true);
 
             // Invoke the final action before exiting
             action?.Invoke();
@@ -36,10 +33,117 @@
             return this;
         }
 
-        private void SelectFirstItem()
+        private bool NavigateMenu()
+        {
+            while (true)
+            {
+                Console.Clear();
+                WriteItems();
+                switch (Console.ReadKey(true).Key)
+                {
+                    case ConsoleKey.UpArrow:
+                        TryAdvanceSelection(upwards: true);
+                        return false;
+                    case ConsoleKey.DownArrow:
+                        TryAdvanceSelection(upwards: false);
+                        return false;
+                    case ConsoleKey.Enter:
+                        if (TriggerItem())
+                            return true;
+                        else
+                            break;
+                }
+            }
+        }
+
+        private bool TriggerItem()
+        {
+            if (SelectedItem is MenuCheck check)
+            {
+                check.Checked = !check.Checked;
+                SelectedItem.Action?.Invoke();
+                return false;
+            }
+
+            SelectedItem.Action?.Invoke();
+
+            return true;
+        }
+
+        private void TryAdvanceSelection(bool upwards)
+        {
+            if (upwards)
+                TrySelectPreviousItem();
+            else
+                TrySelectNextItem();
+        }
+
+        private void TrySelectNextItem()
+        {
+            if (SelectedItem is null) return;
+
+            for (int i = _items.IndexOf(SelectedItem) + 1; i < _items.Count; i++)
+            {
+                var item = _items[i];
+
+                if (item is MenuMessage) continue;
+                if (item.Enabled)
+                {
+                    item.Select();
+                    return;
+                }
+            }
+
+            if (!WrapArround) return;
+
+            for (int i = 0; i < _items.IndexOf(SelectedItem); i++)
+            {
+                var item = _items[i];
+
+                if (item is MenuMessage) continue;
+                if (item.Enabled)
+                {
+                    item.Select();
+                    return;
+                }
+            }
+        }
+
+        private void TrySelectPreviousItem()
+        {
+            if (SelectedItem is null) return;
+
+            for (int i = _items.IndexOf(SelectedItem) - 1; i >= 0; i--)
+            {
+                var item = _items[i];
+
+                if (item is MenuMessage) continue;
+                if (item.Enabled)
+                {
+                    item.Select();
+                    return;
+                }
+            }
+
+            if (!WrapArround) return;
+
+            for (int i = _items.Count - 1; i > _items.IndexOf(SelectedItem); i++)
+            {
+                var item = _items[i];
+
+                if (item is MenuMessage) continue;
+                if (item.Enabled)
+                {
+                    item.Select();
+                    return;
+                }
+            }
+        }
+
+        private void TrySelectFirstAvailableItem()
         {
             if (SelectedItem is not null) return;
-         
+
             foreach (var item in _items)
             {
                 if (item is MenuMessage) continue;
@@ -51,20 +155,39 @@
             }
         }
 
+        private void WriteItems() =>
+            _items.ForEach(WriteItem);
+
         private void WriteItem(MenuItem item)
         {
             // Set up colors
-            Console.ForegroundColor = item.Selected 
-                ? SelectedForegroundColor ?? item.Foreground ?? Foreground 
+            Console.ForegroundColor = item.Selected
+                ? SelectedForegroundColor ?? item.Foreground ?? Foreground
+                : !item.Enabled
+                ? DisabledForegroundColor ?? item.Foreground ?? Foreground
                 : item.Foreground ?? Foreground;
-            Console.BackgroundColor = item.Selected 
-                ? SelectedBackgroundColor ?? item.Background ?? Background 
+            Console.BackgroundColor = item.Selected
+                ? SelectedBackgroundColor ?? item.Background ?? Background
+                : !item.Enabled
+                ? DisabledBackgroundColor ?? item.Background ?? Background
                 : item.Background ?? Background;
+
+            // Set up message colors
+            // TODO: Refactor this so that the block above is not executed
+            if (item is MenuMessage && item.Foreground is null && MessageForeground is not null)
+                Console.ForegroundColor = MessageForeground.Value;
+            if (item is MenuMessage && item.Background is null && MessageBackground is not null)
+                Console.BackgroundColor = MessageBackground.Value;
 
             // Set up text
             string text = SelectorChar is char selectorChar && item.Selected
                 ? $"{selectorChar} {item.Text}"
                 : item.Text;
+
+            if (item is MenuCheck check)
+            {
+                text = $"[{(check.Checked ? "X" : " ")}] {text}";
+            }
 
             Console.WriteLine(text);
         }
