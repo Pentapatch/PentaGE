@@ -65,6 +65,12 @@
 
         public ConsoleColor Foreground { get; set; } = ConsoleColor.Gray;
 
+        public ConsoleColor? SelectedBackgroundColor { get; set; } = null;
+
+        public ConsoleColor? SelectedForegroundColor { get; set; } = null;
+
+        public char? SelectorChar { get; set; } = '>';
+
         public string Title { get; set; } = "ConsoleIO";
 
         public MenuBase() => StoreInitialSettings();
@@ -127,6 +133,24 @@
             return (T)this;
         }
 
+        public T SetSelectedForegroundColor(ConsoleColor? color)
+        {
+            SelectedForegroundColor = color;
+            return (T)this;
+        }
+
+        public T SetSelectedBackgroundColor(ConsoleColor? color)
+        {
+            SelectedBackgroundColor = color;
+            return (T)this;
+        }
+
+        public T SetSelectorChar(char? selectorChar)
+        {
+            SelectorChar = selectorChar;
+            return (T)this;
+        }
+
         #endregion
 
         public T Restore()
@@ -140,6 +164,10 @@
             SetBackground(options.Background);
             SetForeground(options.Foreground);
             SetTitle(options.Title);
+            SetSelectedBackgroundColor(options.SelectedBackcolor);
+            SetSelectedForegroundColor(options.SelectedForecolor);
+            SetSelectorChar(options.SelectorChar);
+            Console.Clear();
         }
 
         private void StoreInitialSettings()
@@ -147,7 +175,6 @@
             _initialBackground = Console.BackgroundColor;
             _initialForeground = Console.ForegroundColor;
             _initialTitle = Console.Title;
-            Console.Clear();
         }
 
         private void RestoreInitialSettings()

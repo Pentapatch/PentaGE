@@ -32,7 +32,7 @@
         protected virtual void ApplySettings(MenuItemSettings options)
         {
             Enabled = options.Enabled;
-            Selected = options.Selected;
+            if (options.Selected) Select();
             Shortcut = options.Shortcut;
             Foreground = options.Foreground;
             Background = options.Background;

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ConsoleIO
+﻿namespace ConsoleIO
 {
     public sealed class ConsoleMenu : MenuBase<ConsoleMenu>
     {
@@ -55,7 +53,20 @@ namespace ConsoleIO
 
         private void WriteItem(MenuItem item)
         {
-            Console.WriteLine(item.Text);
+            // Set up colors
+            Console.ForegroundColor = item.Selected 
+                ? SelectedForegroundColor ?? item.Foreground ?? Foreground 
+                : item.Foreground ?? Foreground;
+            Console.BackgroundColor = item.Selected 
+                ? SelectedBackgroundColor ?? item.Background ?? Background 
+                : item.Background ?? Background;
+
+            // Set up text
+            string text = SelectorChar is char selectorChar && item.Selected
+                ? $"{selectorChar} {item.Text}"
+                : item.Text;
+
+            Console.WriteLine(text);
         }
 
         // NOTE: All overloads of the .Add...() methods must

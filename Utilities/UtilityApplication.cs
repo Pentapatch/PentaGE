@@ -10,46 +10,53 @@ namespace Utilities
             // Test the ConsoleIO library
             ConsoleMenu menu = null!;
             MenuCheck agreeToTerms = null!;
+            MenuOption confirm = null!;
 
             using (ConsoleMenu.Create(out menu,
-            settings =>
-            {
-                settings.Title = "Test Menu";
-                settings.Background = ConsoleColor.DarkBlue;
-                settings.Foreground = ConsoleColor.White;
-            })
-            .AddMessage("Please agree to the terms and conditions:", 
-            out var message,
-            settings =>
-            {
-                settings.Background = ConsoleColor.DarkGreen;
-                settings.Foreground = ConsoleColor.White;
-            })
-            .AddCheckbox("I agree to the terms and conditions", 
-            out agreeToTerms,
-            settings =>
-            {
-                settings.Selected = true;
-                settings.Checked = false;
-                settings.Foreground = ConsoleColor.Red;
-            },
-            action: () =>
-            {
-                message.Text = agreeToTerms.Checked
-                    ? "Thank you for agreeing to the terms and conditions."
-                    : "Please agree to the terms and conditions:";
-            })
-            .AddOption("Confirm", settings =>
-            {
-                settings.Enabled = false;
-            },
-            action: () =>
-            {
-                // Perform final action here
-            })
-            .Enter()) { }
+                settings =>
+                {
+                    settings.Title = "Test Menu";
+                    settings.Background = ConsoleColor.DarkBlue;
+                    settings.Foreground = ConsoleColor.White;
+                })
+            .AddMessage("Please agree to the terms and conditions:",
+                out var message,
+                settings =>
+                {
+                    settings.Background = ConsoleColor.DarkGreen;
+                    settings.Foreground = ConsoleColor.White;
+                })
+            .AddCheckbox("I agree to the terms and conditions",
+                out agreeToTerms,
+                settings =>
+                {
+                    settings.Selected = true;
+                    settings.Checked = false;
+                    settings.Foreground = ConsoleColor.Red;
+                },
+                action: () =>
+                {
+                    message.Text = agreeToTerms.Checked
+                        ? "Thank you for agreeing to the terms and conditions."
+                        : "Please agree to the terms and conditions:";
+                    confirm.Enabled = agreeToTerms.Checked;
+                })
+            .AddOption("Confirm", out confirm, 
+                settings =>
+                {
+                    settings.Enabled = false;
+                },
+                action: () =>
+                {
+                    // Perform final action here
+                })
+            .Enter(
+                action: () =>
+                {
 
-            
+                })) { }
+
+
 
             Console.WriteLine($"{Environment.UserName} @ {Environment.MachineName}");
 
