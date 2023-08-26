@@ -25,7 +25,7 @@
             Action = action;
         }
 
-        public void Select() => _owner.Select(this);
+        public bool Select() => _owner.Select(this);
 
         public void Remove() => _owner.Remove(this);
 

@@ -39,7 +39,8 @@
             {
                 Console.Clear();
                 WriteItems();
-                switch (Console.ReadKey(true).Key)
+                var key = Console.ReadKey(true).Key;
+                switch (key)
                 {
                     case ConsoleKey.UpArrow:
                         TryAdvanceSelection(upwards: true);
@@ -52,12 +53,20 @@
                             return true;
                         else
                             break;
+                    default:
+                        if (TryTriggerShortcut(key))
+                            return true;
+                        else
+                            break;
                 }
             }
         }
 
         private bool TriggerItem()
         {
+            if (SelectedItem is null) return false;
+            if (!SelectedItem.Enabled) return false;
+
             if (SelectedItem is MenuCheck check)
             {
                 check.Checked = !check.Checked;
@@ -155,6 +164,20 @@
             }
         }
 
+        private bool TryTriggerShortcut(ConsoleKey shortcutKey)
+        {
+            foreach (var item in _items)
+            {
+                if (item.Shortcut == shortcutKey)
+                {
+                    if (item.Select()) return TriggerItem();
+                    break;
+                }
+            }
+
+            return false;
+        }
+
         private void WriteItems() =>
             _items.ForEach(WriteItem);
 
@@ -187,6 +210,11 @@
             if (item is MenuCheck check)
             {
                 text = $"[{(check.Checked ? "X" : " ")}] {text}";
+            }
+
+            if (item.Shortcut is ConsoleKey shortcut)
+            {
+                text = $"{text} ({shortcut})";
             }
 
             Console.WriteLine(text);
@@ -265,13 +293,15 @@
 
         #endregion
 
-        internal void Select(MenuItem item)
+        internal bool Select(MenuItem item)
         {
-            if (!item.Enabled) return;
+            if (!item.Enabled) return false;
 
             if (SelectedItem is not null) SelectedItem.Selected = false;
             item.Selected = true;
             SelectedItem = item;
+
+            return true;
         }
 
         internal void Remove(MenuItem item)

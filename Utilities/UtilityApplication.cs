@@ -57,23 +57,30 @@ namespace Utilities
             //    })) { }
 
             MenuCheck check = null!;
+            MenuOption option3 = null!;
             using (ConsoleMenu.Create(
                 settings =>
                 {
                     settings.Title = "Test Menu";
                 })
                 //.SetDisabledBackground(ConsoleColor.DarkRed)
+                .SetTitle("Dennis konsoll")
                 .SetMessageForeground(ConsoleColor.Blue)
                 .AddMessage("Welcome to the simple test menu!",
                 settings =>
                 {
                     settings.Foreground = ConsoleColor.Gray;
                 })
-                .AddCheckbox("Set title",
+                .AddCheckbox("Enable all",
                 out check,
+                settings =>
+                {
+                    settings.Shortcut = ConsoleKey.F5;
+                },
                 action: () =>
                 {
                     Console.Title = check.Checked ? "HELLO WORLD!" : "...";
+                    option3.Enabled = check.Checked;
                 })
                 .AddMessage("Section one:")
                 .AddOption("Option 1")
@@ -83,9 +90,11 @@ namespace Utilities
                     settings.Selected = true;
                 })
                 .AddOption("Option 3",
+                out option3,
                 settings =>
                 {
                     settings.Enabled = false;
+                    settings.Shortcut = ConsoleKey.F;
                 })
                 .AddMessage("Section two:")
                 .AddOption("Option 4")
