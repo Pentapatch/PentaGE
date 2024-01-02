@@ -76,7 +76,9 @@
 
             SelectedItem.Action?.Invoke();
 
-            return true;
+            if (SelectedItem is MenuOption option) return option.Returnable;
+
+            return false;
         }
 
         private void TryAdvanceSelection(bool upwards)

@@ -2,6 +2,8 @@
 {
     public sealed class MenuOption : MenuItem
     {
+        public bool Returnable { get; set; } = true;
+
         public MenuOption(ConsoleMenu owner, string text, Action<MenuOptionSettings>? settings, Action? action = null) : base(owner, text, action)
         {
             if (settings is null) return;
@@ -19,8 +21,7 @@
             // Apply derrived settings
             if (settings is MenuOptionSettings derrivedSettings)
             {
-                // TODO: Apply derrived settings or remove this
-                // code block if there is none to apply
+                Returnable = derrivedSettings.Returnable;
             }
         }
     }
